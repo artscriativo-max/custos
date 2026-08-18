@@ -39,6 +39,7 @@ jobs:
       - name: Sync Capacitor
         run: |
           cd controle-producao-custos
+          npx cap add android
           npx cap sync
 
       - name: Build Android App (APK)
