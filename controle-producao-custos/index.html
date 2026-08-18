@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agri Doce - Controle de Produção e Custos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Cabeçalho Principal -->
+        <header>
+            <div class="brand-section">
+                <span class="brand-logo-txt">Agri Doce</span>
+                <span class="brand-logo-sub">Controle de Produção & Custos</span>
+            </div>
+            <!-- Abas de Navegação -->
+            <nav class="nav-tabs" id="main-nav">
+                <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+                <button class="tab-btn" data-tab="insumos">Insumos (Estoque)</button>
+                <button class="tab-btn" data-tab="recheios">Recheios</button>
+                <button class="tab-btn" data-tab="receitas">Receitas & Custos</button>
+                <button class="tab-btn" data-tab="producao">Ordens de Produção</button>
+                <button class="tab-btn" data-tab="backup">Backup & Dados</button>
+            </nav>
+        </header>
+
+        <!-- ================= ABA DASHBOARD ================= -->
+        <main id="dashboard" class="tab-content active">
+            <div class="grid-dashboard">
+                <div class="card card-stat">
+                    <span class="stat-label">Valor Total em Estoque</span>
+                    <span class="stat-value" id="dash-val-estoque">R$ 0,00</span>
+                </div>
+                <div class="card card-stat">
+                    <span class="stat-label">Total Produzido (Lotes)</span>
+                    <span class="stat-value" id="dash-total-lotes">0</span>
+                </div>
+                <div class="card card-stat">
+                    <span class="stat-label">Receitas Cadastradas</span>
+                    <span class="stat-value" id="dash-total-receitas">0</span>
+                </div>
+                <div class="card card-stat">
+                    <span class="stat-label">Alertas de Estoque</span>
+                    <span class="stat-value" id="dash-alertas-estoque">0</span>
+                </div>
+            </div>
+
+            <div class="grid-two-cols">
+                <!-- Alertas de Insumos -->
+                <div class="card">
+                    <h3 class="card-title">Insumos com Estoque Baixo</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Insumo</th>
+                                    <th>Estoque Atual</th>
+                                    <th>Mínimo Ideal</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dash-estoque-baixo-list">
+                                <!-- Preenchido via JS -->
+                                <tr>
+                                    <td colspan="4" style="text-align: center; color: var(--color-text-secondary);">Nenhum insumo abaixo do limite mínimo.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Últimas Produções -->
+                <div class="card">
+                    <h3 class="card-title">Últimos Lotes Produzidos</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Receita/Produto</th>
+                                    <th>Qtd.</th>
+                                    <th>Custo Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dash-ultimas-producoes">
+                                <!-- Preenchido via JS -->
+                                <tr>
+                                    <td colspan="4" style="text-align: center; color: var(--color-text-secondary);">Nenhuma produção registrada ainda.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- ================= ABA INSUMOS ================= -->
+        <section id="insumos" class="tab-content">
+            <div class="grid-two-cols">
+                <!-- Cadastro/Edição de Insumo -->
+                <div class="card" id="card-insumo-form">
+                    <h3 class="card-title" id="insumo-form-title">Cadastrar Novo Insumo</h3>
+                    <form id="form-insumo">
+                        <input type="hidden" id="insumo-id">
+                        
+                        <div class="form-group">
+                            <label for="insumo-nome">Nome do Insumo</label>
+                            <input type="text" id="insumo-nome" required placeholder="Ex: Farinha de Trigo, Sal, Caldo de Galinha">
+                        </div>
+
+                        <div class="form-group row-group">
+                            <div>
+                                <label for="insumo-categoria">Categoria</label>
+                                <select id="insumo-categoria">
+                                    <option value="Ingrediente">Ingrediente</option>
+                                    <option value="Embalagem">Embalagem</option>
+                                    <option value="Outro">Outro</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="insumo-unidade">Unidade de Medida</label>
+                                <select id="insumo-unidade">
+                                    <option value="g">Grama (g)</option>
+                                    <option value="kg">Quilo (kg)</option>
+                                    <option value="ml">Mililitro (ml)</option>
+                                    <option value="L">Litro (L)</option>
+                                    <option value="un">Unidade (un)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row-group">
+                            <div>
+                                <label for="insumo-preco">Preço de Compra (R$)</label>
+                                <input type="number" id="insumo-preco" step="0.01" min="0" required placeholder="0.00">
+                            </div>
+                            <div>
+                                <label for="insumo-quantidade" id="label-insumo-quantidade">Qtd. na Embalagem</label>
+                                <input type="number" id="insumo-quantidade" step="0.001" min="0.001" required placeholder="Ex: 1000g ou 1L ou 1un">
+                            </div>
+                        </div>
+
+                        <div class="form-group row-group">
+                            <div>
+                                <label for="insumo-estoque-atual" id="label-insumo-estoque-atual">Estoque Inicial</label>
+                                <input type="number" id="insumo-estoque-atual" step="0.001" min="0" value="0">
+                            </div>
+                            <div>
+                                <label for="insumo-estoque-minimo" id="label-insumo-estoque-minimo">Estoque Mínimo Ideal</label>
+                                <input type="number" id="insumo-estoque-minimo" step="0.001" min="0" value="0">
+                            </div>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary" id="btn-save-insumo">Salvar Insumo</button>
+                            <button type="button" class="btn btn-secondary" id="btn-cancel-insumo" style="display:none;">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Lista de Insumos -->
+                <div class="card">
+                    <h3 class="card-title">Lista de Insumos Cadastrados</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Custo Unit. (R$)</th>
+                                    <th>Estoque Atual</th>
+                                    <th>Estoque Mín.</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="insumos-table-body">
+                                <!-- Preenchido via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= ABA RECHEIOS ================= -->
+        <section id="recheios" class="tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="font-family: var(--font-title); font-weight: 700; font-size: 1.5rem; text-transform: uppercase;">Custos de Produção - Recheios</h2>
+                <button class="btn btn-primary" id="btn-abrir-recheio-modal">+ Novo Recheio</button>
+            </div>
+
+            <!-- Tabela de Recheios -->
+            <div class="card">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome do Recheio</th>
+                                <th>Custo Ingredientes</th>
+                                <th>Tempo / Mão de Obra + Fixos</th>
+                                <th>Custo Total</th>
+                                <th>Rendimento</th>
+                                <th>Custo Unit. (R$)</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recheios-table-body">
+                            <!-- Preenchido via JS -->
+                            <tr>
+                                <td colspan="7" style="text-align: center; color: var(--color-text-secondary);">Nenhum recheio cadastrado ainda.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= ABA RECEITAS ================= -->
+        <section id="receitas" class="tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="font-family: var(--font-title); font-weight: 700; font-size: 1.5rem; text-transform: uppercase;">Fichas Técnicas & Custos</h2>
+                <button class="btn btn-primary" id="btn-abrir-receita-modal">+ Nova Receita</button>
+            </div>
+
+            <!-- Tabela de Receitas -->
+            <div class="card">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome do Produto / Receita</th>
+                                <th>Custo Ingredientes</th>
+                                <th>Mão de Obra + Fixos</th>
+                                <th>Custo Total</th>
+                                <th>Preço Sugerido (Venda)</th>
+                                <th>Lucro Estimado</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="receitas-table-body">
+                            <!-- Preenchido via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= ABA PRODUÇÃO ================= -->
+        <section id="producao" class="tab-content">
+            <div class="grid-two-cols">
+                <!-- Formulário de Nova Ordem de Produção -->
+                <div class="card">
+                    <h3 class="card-title">Registrar Novo Lote de Produção</h3>
+                    <form id="form-producao">
+                        <div class="form-group">
+                            <label for="prod-receita-select">Escolher Receita/Ficha Técnica</label>
+                            <select id="prod-receita-select" required>
+                                <option value="">Selecione uma receita...</option>
+                                <!-- Preenchido via JS -->
+                            </select>
+                        </div>
+
+                        <div class="form-group row-group">
+                            <div>
+                                <label for="prod-quantidade">Qtd. a Produzir (Lotes)</label>
+                                <input type="number" id="prod-quantidade" min="1" value="1" required>
+                                <small style="color: var(--color-text-secondary); font-size: 0.8rem; display: block; margin-top: 4px;">
+                                    *Isso consumirá os insumos do estoque com base na ficha técnica.
+                                </small>
+                            </div>
+                            <div>
+                                <label for="prod-data">Data de Produção</label>
+                                <input type="date" id="prod-data" required>
+                            </div>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">Registrar Produção</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Histórico de Ordens de Produção -->
+                <div class="card">
+                    <h3 class="card-title">Histórico de Produção</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Produto / Receita</th>
+                                    <th>Lotes</th>
+                                    <th>Custo Total</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="producao-table-body">
+                                <!-- Preenchido via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= ABA BACKUP & DADOS ================= -->
+        <section id="backup" class="tab-content">
+            <div class="grid-two-cols">
+                <div class="card">
+                    <h3 class="card-title">Backup e Exportação</h3>
+                    <p style="margin-bottom: 1rem; color: var(--color-text-secondary);">
+                        Faça o backup de suas fichas técnicas, insumos e histórico de produção. Copie o código abaixo ou baixe o arquivo para segurança.
+                    </p>
+                    <textarea id="backup-json-output" rows="10" readonly style="font-family: monospace; font-size: 0.85rem; margin-bottom: 1rem; resize: none;"></textarea>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" id="btn-copiar-backup">Copiar para Área de Transferência</button>
+                        <button class="btn btn-secondary" id="btn-download-backup">Baixar Arquivo .json</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">Importação e Restauração</h3>
+                    <p style="margin-bottom: 1rem; color: var(--color-text-secondary);">
+                        Para restaurar dados salvos anteriormente, cole o conteúdo JSON do backup no campo abaixo e clique em Importar.
+                    </p>
+                    <textarea id="backup-json-input" rows="10" placeholder='Cole o código JSON do backup aqui...' style="font-family: monospace; font-size: 0.85rem; margin-bottom: 1rem; resize: none;"></textarea>
+                    <div class="btn-group">
+                        <button class="btn btn-danger" id="btn-importar-backup">Importar e Sobrescrever Dados</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ================= MODAL DE FICHA TÉCNICA (RECEITA) ================= -->
+    <div class="modal" id="receita-modal">
+        <div class="modal-content">
+            <button class="close-btn" id="btn-fechar-receita-modal">&times;</button>
+            <h2 class="card-title" id="receita-modal-title" style="font-size: 1.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--color-text-primary);">Nova Ficha Técnica (Receita)</h2>
+            
+            <form id="form-receita">
+                <input type="hidden" id="receita-id">
+                
+                <div class="form-group">
+                    <label for="receita-nome">Nome da Receita</label>
+                    <input type="text" id="receita-nome" required placeholder="Ex: Massa de Salgados (Risoles)">
+                </div>
+
+                <!-- Lista de Ingredientes Dinâmica -->
+                <div class="form-group" style="border: 1px solid var(--color-border); padding: 1rem; border-radius: var(--border-radius);">
+                    <label style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                        <span>Ingredientes & Proporções</span>
+                        <button type="button" class="btn btn-secondary btn-sm" id="btn-add-ingrediente-row">+ Adicionar Linha</button>
+                    </label>
+                    
+                    <div class="recipe-ingredients-list" id="recipe-ingredients-container">
+                        <!-- Linhas de ingredientes serão injetadas dinamicamente via JS -->
+                    </div>
+                </div>
+
+                <!-- Custos Adicionais e Margem -->
+                <div class="form-group row-group">
+                    <div>
+                        <label for="receita-tempo-preparo">Tempo de Preparo (minutos)</label>
+                        <input type="number" id="receita-tempo-preparo" min="0" value="0" placeholder="Ex: 60">
+                    </div>
+                    <div>
+                        <label for="receita-custo-hora">Custo da Hora de Trabalho (R$/h)</label>
+                        <input type="number" id="receita-custo-hora" step="0.01" min="0" value="20.00">
+                    </div>
+                </div>
+
+                <div class="form-group row-group">
+                    <div>
+                        <label for="receita-custos-fixos">Custos Fixos / Indiretos (%)</label>
+                        <input type="number" id="receita-custos-fixos" step="0.1" min="0" value="0" placeholder="Ex: 10%">
+                    </div>
+                    <div>
+                        <label for="receita-margem">Margem de Lucro Desejada (%)</label>
+                        <input type="number" id="receita-margem" step="1" min="0" value="100" placeholder="Ex: 100%">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="receita-rendimento">Rendimento Estimado da Receita</label>
+                    <input type="text" id="receita-rendimento" placeholder="Ex: 91 pães, 3kg de massa, 50 risoles">
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary" id="btn-save-receita">Salvar Receita</button>
+                    <button type="button" class="btn btn-secondary" id="btn-cancel-receita-modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= MODAL DE RECHEIO ================= -->
+    <div class="modal" id="recheio-modal">
+        <div class="modal-content">
+            <button class="close-btn" id="btn-fechar-recheio-modal">&times;</button>
+            <h2 class="card-title" id="recheio-modal-title" style="font-size: 1.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--color-text-primary);">Novo Custo de Recheio</h2>
+            
+            <form id="form-recheio">
+                <input type="hidden" id="recheio-id">
+                
+                <div class="form-group">
+                    <label for="recheio-nome">Nome do Recheio</label>
+                    <input type="text" id="recheio-nome" required placeholder="Ex: Recheio de Frango para Risoles">
+                </div>
+
+                <!-- Lista de Ingredientes Dinâmica -->
+                <div class="form-group" style="border: 1px solid var(--color-border); padding: 1rem; border-radius: var(--border-radius);">
+                    <label style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                        <span>Ingredientes do Recheio</span>
+                        <button type="button" class="btn btn-secondary btn-sm" id="btn-add-recheio-ingrediente-row">+ Adicionar Linha</button>
+                    </label>
+                    
+                    <div class="recipe-ingredients-list" id="recheio-ingredients-container">
+                        <!-- Linhas de ingredientes injetadas dinamicamente -->
+                    </div>
+                </div>
+
+                <div class="form-group row-group">
+                    <div>
+                        <label for="recheio-tempo-preparo">Tempo de Preparo (minutos)</label>
+                        <input type="number" id="recheio-tempo-preparo" min="0" value="0" placeholder="Ex: 45">
+                    </div>
+                    <div>
+                        <label for="recheio-custo-hora">Custo da Hora de Trabalho (R$/h)</label>
+                        <input type="number" id="recheio-custo-hora" step="0.01" min="0" value="20.00">
+                    </div>
+                </div>
+
+                <div class="form-group row-group">
+                    <div>
+                        <label for="recheio-custos-fixos">Custos Fixos / Indiretos (%)</label>
+                        <input type="number" id="recheio-custos-fixos" step="0.1" min="0" value="0" placeholder="Ex: 10%">
+                    </div>
+                    <div class="form-group row-group" style="margin: 0; padding: 0; gap: 0.5rem;">
+                        <div>
+                            <label for="recheio-rendimento-qtd">Rendimento (Qtd.)</label>
+                            <input type="number" id="recheio-rendimento-qtd" step="0.001" min="0.001" value="1.0" required>
+                        </div>
+                        <div>
+                            <label for="recheio-rendimento-un">Unidade</label>
+                            <select id="recheio-rendimento-un">
+                                <option value="kg">kg</option>
+                                <option value="g">g</option>
+                                <option value="L">L</option>
+                                <option value="ml">ml</option>
+                                <option value="un">un</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary" id="btn-save-recheio">Salvar Recheio</button>
+                    <button type="button" class="btn btn-secondary" id="btn-cancel-recheio-modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= MODAL DE VISUALIZAÇÃO DE DETALHES DE CUSTOS ================= -->
+    <div class="modal" id="detalhes-custo-modal">
+        <div class="modal-content" style="max-width: 550px;">
+            <button class="close-btn" id="btn-fechar-detalhes-modal">&times;</button>
+            <h2 class="card-title" id="detalhes-titulo" style="font-size: 1.4rem; border-bottom: 2px solid var(--color-text-primary); margin-bottom: 1rem;">Detalhamento da Ficha Técnica</h2>
+            
+            <div id="detalhes-conteudo">
+                <!-- Preenchido via JS -->
+            </div>
+            
+            <div class="btn-group" style="margin-top: 1.5rem;">
+                <button class="btn btn-primary" id="btn-imprimir-ficha">Imprimir Ficha Técnica</button>
+                <button class="btn btn-secondary" id="btn-fechar-detalhes-btn">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast de Notificações -->
+    <div class="toast" id="toast">
+        <span id="toast-message">Mensagem</span>
+    </div>
+
+    <!-- Script de Lógica Principal -->
+    <script src="app.js"></script>
+</body>
+</html>

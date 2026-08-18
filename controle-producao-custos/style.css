@@ -1,0 +1,562 @@
+/* Importando fontes modernas do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+/* Variáveis do Design System - Inspirado no estilo minimalista/editorial da Pentagram */
+:root {
+    --font-title: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    
+    /* Paleta de Cores Premium */
+    --color-bg-primary: #fcfcfb;
+    --color-bg-card: #ffffff;
+    --color-text-primary: #111111;
+    --color-text-secondary: #555552;
+    --color-border: #e2e2df;
+    --color-border-dark: #111111;
+    
+    /* Cores de Destaque */
+    --color-accent: #153e2b; /* Verde Floresta */
+    --color-accent-hover: #1f583e;
+    --color-accent-light: #e8eee9;
+    --color-danger: #b33939; /* Vermelho Terracota */
+    --color-danger-light: #fbebeb;
+    --color-warning: #d17a00;
+    --color-warning-light: #fef6eb;
+    
+    /* Espaçamento e Layout */
+    --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --border-radius: 4px; /* Cantos retos/levemente arredondados para um ar editorial */
+}
+
+/* Reset e Configurações Globais */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Container Principal */
+.app-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Cabeçalho Editorial */
+header {
+    border-bottom: 2px solid var(--color-text-primary);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.brand-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.brand-logo-txt {
+    font-family: var(--font-title);
+    font-weight: 800;
+    font-size: 2.2rem;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    line-height: 1;
+    color: var(--color-text-primary);
+}
+
+.brand-logo-sub {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--color-text-secondary);
+    margin-top: 0.25rem;
+    font-weight: 500;
+}
+
+/* Navegação por Abas (Tabs) */
+nav.nav-tabs {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 2rem;
+    overflow-x: auto;
+    scrollbar-width: none; /* Ocultar scrollbar no Firefox */
+}
+
+nav.nav-tabs::-webkit-scrollbar {
+    display: none; /* Ocultar scrollbar no Chrome/Safari */
+}
+
+.tab-btn {
+    font-family: var(--font-title);
+    font-weight: 600;
+    font-size: 1rem;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 0.75rem 1.25rem;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: var(--transition-smooth);
+}
+
+.tab-btn:hover {
+    color: var(--color-text-primary);
+    border-bottom-color: var(--color-border);
+}
+
+.tab-btn.active {
+    color: var(--color-text-primary);
+    border-bottom-color: var(--color-text-primary);
+}
+
+/* Seções de Conteúdo */
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+    flex-grow: 1;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Grid Layouts */
+.grid-dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.grid-two-cols {
+    display: grid;
+    grid-template-columns: 1.2fr 1.8fr;
+    gap: 2rem;
+}
+
+@media (max-width: 1024px) {
+    .grid-two-cols {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Cards e Seções de Layout */
+.card {
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    padding: 1.75rem;
+    transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+}
+
+.card:hover {
+    border-color: var(--color-border-dark);
+}
+
+.card-title {
+    font-family: var(--font-title);
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 0.5rem;
+    color: var(--color-text-primary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-stat {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    font-family: var(--font-title);
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    line-height: 1.1;
+}
+
+.stat-value.value-success {
+    color: var(--color-accent);
+}
+
+.stat-value.value-danger {
+    color: var(--color-danger);
+}
+
+/* Formulários e Inputs */
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group.row-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    color: var(--color-text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-card);
+    transition: var(--transition-smooth);
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--color-text-primary);
+}
+
+/* Botões */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    font-family: var(--font-title);
+    font-weight: 600;
+    font-size: 0.95rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--color-border-dark);
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    background-color: var(--color-text-primary);
+    color: var(--color-bg-card);
+}
+
+.btn-primary:hover {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--color-text-primary);
+}
+
+.btn-secondary:hover {
+    background-color: var(--color-border);
+}
+
+.btn-danger {
+    background-color: transparent;
+    color: var(--color-danger);
+    border-color: var(--color-danger);
+}
+
+.btn-danger:hover {
+    background-color: var(--color-danger-light);
+}
+
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+}
+
+.btn-group {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+/* Tabelas Premium */
+.table-container {
+    overflow-x: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    background-color: var(--color-bg-card);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+th {
+    font-family: var(--font-title);
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem;
+    border-bottom: 2px solid var(--color-text-primary);
+    background-color: var(--color-bg-primary);
+}
+
+td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover td {
+    background-color: #fafaf9;
+}
+
+/* Badges e Alertas */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: var(--border-radius);
+}
+
+.badge-success {
+    background-color: var(--color-accent-light);
+    color: var(--color-accent);
+}
+
+.badge-danger {
+    background-color: var(--color-danger-light);
+    color: var(--color-danger);
+}
+
+.badge-warning {
+    background-color: var(--color-warning-light);
+    color: var(--color-warning);
+}
+
+/* Modais */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(17, 17, 17, 0.4);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-text-primary);
+    border-radius: var(--border-radius);
+    max-width: 650px;
+    width: 100%;
+    padding: 2rem;
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1.25rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+
+/* Listas de Itens da Receita Dinâmicas */
+.recipe-ingredients-list {
+    margin: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.ingredient-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.ingredient-item-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    background-color: var(--color-bg-primary);
+    font-size: 0.9rem;
+}
+
+/* Notificação popup sutil */
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background-color: var(--color-text-primary);
+    color: var(--color-bg-card);
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    font-family: var(--font-title);
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+}
+
+.toast.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.toast-success {
+    border-left: 4px solid var(--color-accent);
+}
+
+/* Estilo para lista de sugestões de busca rápida */
+.search-results {
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-card);
+    border-radius: var(--border-radius);
+    max-height: 200px;
+    overflow-y: auto;
+    position: absolute;
+    width: 100%;
+    z-index: 10;
+}
+
+.search-item {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+}
+
+.search-item:hover {
+    background: var(--color-bg-primary);
+}
+
+/* Estilos de detalhes de ficha técnica/visualização */
+.cost-breakdown {
+    background-color: var(--color-accent-light);
+    border: 1px solid var(--color-accent);
+    padding: 1.25rem;
+    border-radius: var(--border-radius);
+    margin-top: 1rem;
+}
+
+.cost-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.cost-row:last-child {
+    margin-bottom: 0;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--color-accent);
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.progress-bar-container {
+    background-color: var(--color-border);
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.progress-bar {
+    background-color: var(--color-accent);
+    height: 100%;
+    width: 0%;
+    transition: width 0.5s ease;
+}
+
+.progress-bar.low {
+    background-color: var(--color-danger);
+}
+
+@keyframes flash-highlight {
+    0% { border-color: var(--color-text-primary); box-shadow: 0 0 0 3px var(--color-accent-light); }
+    50% { border-color: var(--color-accent); box-shadow: 0 0 0 5px var(--color-accent-light); }
+    100% { border-color: var(--color-border); box-shadow: none; }
+}
+
+.flash-focus {
+    animation: flash-highlight 1.5s ease;
+}
