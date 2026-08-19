@@ -1840,11 +1840,16 @@ function salvarEntradaManual() {
 // Processa o link e busca a nota fiscal
 async function processarLinkNfe() {
     const input = document.getElementById('nfe-link-input');
-    const url = input.value.trim();
+    let url = input.value.trim();
     
     if (!url) {
         alert("Por favor, cole um link de nota fiscal (NFC-e) ou de QR Code válido!");
         return;
+    }
+    
+    // Força HTTPS para evitar restrições de Cleartext do Android OS em links HTTP comuns
+    if (url.startsWith('http://')) {
+        url = url.replace('http://', 'https://');
     }
     
     const loader = document.getElementById('nfe-loader');
