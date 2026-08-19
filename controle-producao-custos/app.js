@@ -1903,7 +1903,7 @@ function parseHtmlSefaz(htmlText) {
         const nomes = doc.querySelectorAll('.txtNome, .txtTit');
         const qtds = doc.querySelectorAll('.Rqtd');
         const uns = doc.querySelectorAll('.Un, .RUN, .Run');
-        const vals = doc.querySelectorAll('.RvalUnit');
+        const vals = doc.querySelectorAll('.RvalUnit, .RvlUnit');
         
         for (let i = 0; i < nomes.length; i++) {
             const nome = nomes[i].textContent.trim();
@@ -1928,7 +1928,7 @@ function parseHtmlSefaz(htmlText) {
             if (nomeEl) {
                 const qtdEl = row.querySelector('.Rqtd');
                 const unEl = row.querySelector('.Un, .RUN, .Run');
-                const valEl = row.querySelector('.RvalUnit');
+                const valEl = row.querySelector('.RvalUnit, .RvlUnit');
                 
                 // Limpeza do texto das classes da SEFAZ
                 let qtdText = qtdEl ? qtdEl.textContent.trim() : '1';
