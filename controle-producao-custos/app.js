@@ -1696,6 +1696,23 @@ document.getElementById('btn-importar-backup').addEventListener('click', () => {
     }
 });
 
+document.getElementById('btn-zerar-banco').addEventListener('click', () => {
+    const confirm1 = confirm("Tem certeza absoluta de que deseja zerar todos os dados cadastrados?");
+    if (confirm1) {
+        const confirm2 = confirm("Aviso: Isso apagará permanentemente todos os insumos, receitas, recheios e históricos de produção cadastrados. Esta ação NÃO pode ser desfeita. Prosseguir?");
+        if (confirm2) {
+            state = {
+                insumos: [],
+                recheios: [],
+                receitas: [],
+                producoes: []
+            };
+            salvarEstado();
+            mostrarToast("Todos os dados foram excluídos. O banco está totalmente limpo!");
+        }
+    }
+});
+
 function atualizarRotulosUnidadeInsumo() {
     const selectUnidade = document.getElementById('insumo-unidade');
     if (!selectUnidade) return;
