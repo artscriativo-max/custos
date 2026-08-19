@@ -525,7 +525,7 @@ function renderInsumos() {
             <td class="${isBaixo ? 'badge-danger' : ''}" style="font-weight:600;">
                 ${ins.estoqueAtual} ${ins.unidade}
             </td>
-            <td>${ins.estoqueMinimo || 0} ${ins.unidade}</td>
+            <td class="hide-mobile">${ins.estoqueMinimo || 0} ${ins.unidade}</td>
             <td>
                 <div class="btn-group" style="margin: 0;">
                     <button class="btn btn-secondary btn-sm edit-ins-btn" data-id="${ins.id}">Editar</button>
@@ -569,8 +569,8 @@ function renderRecheios() {
                 <strong>${rec.nome}</strong><br>
                 <small style="color: var(--color-text-secondary);">${rec.ingredientes.length} ingrediente(s)</small>
             </td>
-            <td>${formatarMoeda(analise.custoIngredientes)}</td>
-            <td>${rec.tempoPreparo} min / ${formatarMoeda(analise.maoObra)} + ${rec.custosFixos}%</td>
+            <td class="hide-mobile">${formatarMoeda(analise.custoIngredientes)}</td>
+            <td class="hide-mobile">${rec.tempoPreparo} min / ${formatarMoeda(analise.maoObra)} + ${rec.custosFixos}%</td>
             <td style="font-weight: 700;">${formatarMoeda(analise.custoTotal)}</td>
             <td>${analise.rendimentoExibicao}</td>
             <td style="color: var(--color-accent); font-weight: 700;">
@@ -622,8 +622,8 @@ function renderReceitas() {
                 <strong>${rec.nome}</strong><br>
                 <small style="color: var(--color-text-secondary);">Rendimento: ${rec.rendimento}</small>
             </td>
-            <td>${formatarMoeda(analise.custoIngredientes)}</td>
-            <td>${rec.tempoPreparo} min / ${formatarMoeda(analise.maoObra)} + ${rec.custosFixos}%</td>
+            <td class="hide-mobile">${formatarMoeda(analise.custoIngredientes)}</td>
+            <td class="hide-mobile">${rec.tempoPreparo} min / ${formatarMoeda(analise.maoObra)} + ${rec.custosFixos}%</td>
             <td style="font-weight: 700;">${formatarMoeda(analise.custoTotal)}</td>
             <td style="color: var(--color-accent); font-weight: 700;">${formatarMoeda(analise.precoSugerido)}</td>
             <td>${formatarMoeda(analise.lucroEstimado)}</td>

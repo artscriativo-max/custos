@@ -560,3 +560,103 @@ tr:hover td {
 .flash-focus {
     animation: flash-highlight 1.5s ease;
 }
+
+/* ==========================================================================
+   Responsividade Mobile-First Premium
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .app-container {
+        padding: 1rem; /* Reduz margens externas inúteis no celular */
+    }
+
+    header {
+        align-items: center;
+        text-align: center;
+        flex-direction: column;
+        gap: 1rem;
+        padding-bottom: 1rem;
+    }
+
+    .brand-logo-txt {
+        font-size: 1.8rem;
+    }
+
+    .tab-btn {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    .grid-dashboard {
+        grid-template-columns: 1fr; /* Força 1 coluna nos indicadores do dashboard */
+        gap: 1rem;
+    }
+
+    .modal-content {
+        padding: 1.25rem; /* Mais espaço para o conteúdo no modal */
+        margin: 0.5rem;
+    }
+
+    /* Linhas de ingrediente dinâmicas nos modais */
+    .ingredient-row {
+        grid-template-columns: 1.5fr 1fr auto;
+        gap: 0.5rem;
+        border-bottom: 1px solid var(--color-border);
+        padding-bottom: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Empilha o input de rendimento ou outros row-groups em colunas únicas */
+    .form-group.row-group {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .btn-group {
+        flex-direction: column; /* Empilha botões "Salvar" e "Cancelar" */
+        gap: 0.5rem;
+    }
+
+    .btn {
+        width: 100%; /* Botões ocupam largura total no celular para fácil clique */
+    }
+
+    th, td {
+        padding: 0.75rem 0.5rem; /* Compacta as células de tabela */
+        font-size: 0.85rem;
+    }
+    
+    /* Oculta colunas não essenciais em tabelas no celular para evitar estouro */
+    .hide-mobile {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .brand-logo-txt {
+        font-size: 1.6rem;
+    }
+
+    /* Ajuste para telas muito pequenas: empilha totalmente a linha do ingrediente do modal */
+    .ingredient-row {
+        grid-template-columns: 1fr;
+        gap: 0.4rem;
+        border: 1px solid var(--color-border);
+        padding: 0.75rem;
+        border-radius: var(--border-radius);
+        background-color: var(--color-bg-primary);
+    }
+
+    .ingredient-row select, 
+    .ingredient-row input {
+        font-size: 0.9rem;
+        padding: 0.5rem;
+    }
+
+    .ingredient-row button {
+        align-self: flex-end;
+        width: auto;
+        padding: 0.4rem 1rem;
+    }
+}
+
