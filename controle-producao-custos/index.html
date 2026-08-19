@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agri Doce - Controle de Produção e Custos</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Biblioteca de leitura de QR Code via câmera -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body>
     <div class="app-container">
@@ -499,10 +501,21 @@
                 <p style="margin-bottom: 1rem; color: var(--color-text-secondary); font-size: 0.85rem; line-height: 1.4;">
                     Aponte seu **leitor de código de barras USB** para o QR Code do cupom fiscal de papel ou **cole o link da nota** no campo abaixo:
                 </p>
-                <div class="form-group" style="position: relative; display: flex; gap: 0.5rem;">
+                <div class="form-group" style="position: relative; display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
                     <input type="text" id="nfe-link-input" placeholder="Cole o link da SEFAZ ou use o leitor de QR Code aqui..." style="flex-grow: 1;">
                     <button type="button" class="btn btn-primary" id="btn-processar-nfe" style="padding: 0.5rem 1rem; font-size: 0.8rem; width: auto;">Importar</button>
                 </div>
+                
+                <div style="margin-bottom: 1rem; text-align: center; display: flex; justify-content: center; gap: 0.5rem;">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-iniciar-scanner-nfe" style="width: auto; text-transform: none; font-size: 0.75rem; padding: 0.4rem 0.8rem; display: inline-flex; align-items: center; gap: 0.3rem; letter-spacing: 0;">📷 Escanear com a Câmera</button>
+                    <button type="button" class="btn btn-danger btn-sm" id="btn-parar-scanner-nfe" style="width: auto; text-transform: none; font-size: 0.75rem; padding: 0.4rem 0.8rem; display: none; align-items: center; gap: 0.3rem; letter-spacing: 0;">🛑 Parar Câmera</button>
+                </div>
+
+                <!-- Container do visor da câmera -->
+                <div id="nfe-reader-container" style="display: none; width: 100%; max-width: 320px; margin: 0 auto 1rem auto; border: 2px solid var(--color-accent); border-radius: var(--border-radius); overflow: hidden; background-color: #000000; box-sizing: border-box;">
+                    <div id="nfe-reader" style="width: 100%;"></div>
+                </div>
+
                 <div id="nfe-loader" style="display: none; text-align: center; margin: 1.5rem 0;">
                     <div style="display: inline-block; width: 30px; height: 30px; border: 3px solid rgba(0,0,0,0.1); border-radius: 50%; border-top-color: var(--color-accent); animation: spin 1s ease-in-out infinite;"></div>
                     <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--color-text-secondary);">Buscando produtos na Receita Estadual...</p>

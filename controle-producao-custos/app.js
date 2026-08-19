@@ -1733,6 +1733,9 @@ function abrirNfeModal() {
 }
 
 function fecharNfeModal() {
+    if (typeof pararScannerCamera === 'function') {
+        pararScannerCamera();
+    }
     document.getElementById('nfe-modal').classList.remove('active');
 }
 
@@ -2072,6 +2075,66 @@ function salvarEntradaNotaFiscal() {
     }
 }
 
+// --- CONTROLE DE SCANNER DE CÂMERA (QR CODE) ---
+let html5QrcodeScanner = null;
+
+function iniciarScannerCamera() {
+    const readerContainer = document.getElementById('nfe-reader-container');
+    const btnIniciar = document.getElementById('btn-iniciar-scanner-nfe');
+    const btnParar = document.getElementById('btn-parar-scanner-nfe');
+    
+    readerContainer.style.display = 'block';
+    btnIniciar.style.display = 'none';
+    btnParar.style.display = 'inline-flex';
+    
+    if (typeof Html5Qrcode !== 'undefined') {
+        html5QrcodeScanner = new Html5Qrcode("nfe-reader");
+        
+        const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+            document.getElementById('nfe-link-input').value = decodedText;
+            pararScannerCamera();
+            mostrarToast("QR Code escaneado!");
+            processarLinkNfe();
+        };
+        
+        const config = { fps: 10, qrbox: { width: 220, height: 220 } };
+        
+        html5QrcodeScanner.start(
+            { facingMode: "environment" },
+            config,
+            qrCodeSuccessCallback,
+            (errorMessage) => {
+                // Silencia erros de frame de busca
+            }
+        ).catch(err => {
+            console.error("Erro ao iniciar câmera:", err);
+            alert("Não foi possível acessar a câmera do dispositivo. Verifique as permissões!");
+            pararScannerCamera();
+        });
+    } else {
+        alert("Erro: O leitor de câmera não pôde ser carregado. Verifique sua conexão com a internet!");
+        pararScannerCamera();
+    }
+}
+
+function pararScannerCamera() {
+    const readerContainer = document.getElementById('nfe-reader-container');
+    const btnIniciar = document.getElementById('btn-iniciar-scanner-nfe');
+    const btnParar = document.getElementById('btn-parar-scanner-nfe');
+    
+    if (html5QrcodeScanner && html5QrcodeScanner.isScanning) {
+        html5QrcodeScanner.stop().then(() => {
+            html5QrcodeScanner = null;
+        }).catch(err => console.error("Erro ao parar scanner:", err));
+    } else {
+        html5QrcodeScanner = null;
+    }
+    
+    readerContainer.style.display = 'none';
+    btnIniciar.style.display = 'inline-flex';
+    btnParar.style.display = 'none';
+}
+
 // --- INICIALIZAR APLICAÇÃO ---
 window.addEventListener('DOMContentLoaded', () => {
     carregarEstado();
@@ -2093,4 +2156,8 @@ window.addEventListener('DOMContentLoaded', () => {
             salvarEntradaNotaFiscal();
         }
     });
+    
+    // Listeners do Scanner de Câmera
+    document.getElementById('btn-iniciar-scanner-nfe').addEventListener('click', iniciarScannerCamera);
+    document.getElementById('btn-parar-scanner-nfe').addEventListener('click', pararScannerCamera);
 });
