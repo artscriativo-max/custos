@@ -1710,9 +1710,387 @@ function atualizarRotulosUnidadeInsumo() {
     if (lblMinimo) lblMinimo.textContent = `Estoque Mínimo Ideal (em ${unidade})`;
 }
 
+// ==========================================================================
+// IMPORTAÇÃO DE NOTAS FISCAIS (NFC-e / QR CODE) & ENTRADA RÁPIDA
+// ==========================================================================
+
+let nfeItensLidos = []; // Guarda os itens extraídos da nota fiscal
+
+function abrirNfeModal() {
+    document.getElementById('nfe-link-input').value = '';
+    document.getElementById('nfe-loader').style.display = 'none';
+    document.getElementById('nfe-panel-conferencia').style.display = 'none';
+    document.getElementById('btn-salvar-entrada-nfe').style.display = 'none';
+    
+    // Resetar aba para Leitor
+    alternarNfeTab('leitor');
+    
+    // Renderizar tabela de entrada manual
+    renderNfeEntradaManual();
+    
+    // Abrir modal
+    document.getElementById('nfe-modal').classList.add('active');
+}
+
+function fecharNfeModal() {
+    document.getElementById('nfe-modal').classList.remove('active');
+}
+
+function alternarNfeTab(tab) {
+    const tabLeitor = document.getElementById('btn-nfe-tab-leitor');
+    const tabManual = document.getElementById('btn-nfe-tab-manual');
+    const panelLeitor = document.getElementById('nfe-panel-leitor');
+    const panelManual = document.getElementById('nfe-panel-manual');
+    
+    if (tab === 'leitor') {
+        tabLeitor.classList.replace('btn-secondary', 'btn-primary');
+        tabManual.classList.replace('btn-primary', 'btn-secondary');
+        panelLeitor.style.display = 'block';
+        panelManual.style.display = 'none';
+        document.getElementById('btn-salvar-entrada-nfe').style.display = 'none';
+    } else {
+        tabLeitor.classList.replace('btn-primary', 'btn-secondary');
+        tabManual.classList.replace('btn-secondary', 'btn-primary');
+        panelLeitor.style.display = 'none';
+        panelManual.style.display = 'block';
+        document.getElementById('nfe-panel-conferencia').style.display = 'none';
+        document.getElementById('btn-salvar-entrada-nfe').style.display = 'block';
+    }
+}
+
+// Planilha de Entrada Rápida Manual
+function renderNfeEntradaManual() {
+    const tbody = document.getElementById('nfe-manual-table-body');
+    tbody.innerHTML = '';
+    
+    if (state.insumos.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="3" style="text-align: center; color: var(--color-text-secondary);">Nenhum insumo cadastrado para dar entrada.</td>
+            </tr>
+        `;
+        return;
+    }
+    
+    state.insumos.forEach(ins => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>
+                <strong>${ins.nome}</strong><br>
+                <small style="color: var(--color-text-secondary);">Estoque: ${ins.estoqueAtual} ${ins.unidade}</small>
+            </td>
+            <td>
+                <input type="number" class="nfe-input-table nfe-manual-qtd" data-id="${ins.id}" placeholder="0" step="0.001" min="0">
+            </td>
+            <td>
+                <input type="number" class="nfe-input-table nfe-manual-valor" data-id="${ins.id}" placeholder="0.00" step="0.01" min="0">
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Salva entrada manual
+function salvarEntradaManual() {
+    let entradasRealizadas = 0;
+    
+    state.insumos.forEach(ins => {
+        const rowQtd = document.querySelector(`.nfe-manual-qtd[data-id="${ins.id}"]`);
+        const rowValor = document.querySelector(`.nfe-manual-valor[data-id="${ins.id}"]`);
+        
+        if (rowQtd && rowValor) {
+            const qtdAdicional = parseFloat(rowQtd.value);
+            const valorTotal = parseFloat(rowValor.value);
+            
+            if (qtdAdicional > 0 && valorTotal > 0) {
+                const estoqueAtualVal = ins.estoqueAtual || 0;
+                const custoUnitAtual = calcularCustoUnitarioInsumo(ins);
+                
+                // Média Ponderada: recalcula o custo unitário com base no que já existia e na nova compra
+                const novaQtdTotal = estoqueAtualVal + qtdAdicional;
+                const valorAtualEstoque = estoqueAtualVal * custoUnitAtual;
+                const novoCustoUnit = (valorAtualEstoque + valorTotal) / novaQtdTotal;
+                
+                // Atualiza insumo
+                ins.estoqueAtual = parseFloat(novaQtdTotal.toFixed(3));
+                
+                // O preço do insumo no cadastro é o preço da embalagem.
+                // Como atualizamos o custo unitário, precisamos reajustar o preço da embalagem de cadastro de forma proporcional!
+                ins.preco = parseFloat((novoCustoUnit * ins.quantidade).toFixed(2));
+                
+                entradasRealizadas++;
+            }
+        }
+    });
+    
+    if (entradasRealizadas > 0) {
+        salvarEstado();
+        renderInsumos();
+        renderDashboard();
+        fecharNfeModal();
+        mostrarToast(`${entradasRealizadas} insumos atualizados com sucesso!`);
+    } else {
+        alert("Preencha a quantidade e o preço de pelo menos um insumo!");
+    }
+}
+
+// Processa o link e busca a nota fiscal
+async function processarLinkNfe() {
+    const input = document.getElementById('nfe-link-input');
+    const url = input.value.trim();
+    
+    if (!url) {
+        alert("Por favor, cole um link de nota fiscal (NFC-e) ou de QR Code válido!");
+        return;
+    }
+    
+    const loader = document.getElementById('nfe-loader');
+    const panelConferencia = document.getElementById('nfe-panel-conferencia');
+    const btnSalvar = document.getElementById('btn-salvar-entrada-nfe');
+    
+    loader.style.display = 'block';
+    panelConferencia.style.display = 'none';
+    btnSalvar.style.display = 'none';
+    
+    try {
+        let htmlText = '';
+        
+        // Verifica se roda no Capacitor ou browser comum
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Http) {
+            // Requisição nativa no celular (ignora CORS)
+            const response = await window.Capacitor.Plugins.Http.get({ url: url });
+            htmlText = response.data;
+        } else {
+            // Requisição comum no navegador
+            const response = await fetch(url);
+            htmlText = await response.text();
+        }
+        
+        if (!htmlText) throw new Error("Retorno vazio");
+        
+        nfeItensLidos = parseHtmlSefaz(htmlText);
+        
+        if (nfeItensLidos.length === 0) {
+            alert("Não conseguimos extrair nenhum produto desta nota de forma automática. Por favor, utilize a Entrada Rápida Manual.");
+            loader.style.display = 'none';
+            return;
+        }
+        
+        renderNfeConferencia();
+        loader.style.display = 'none';
+        panelConferencia.style.display = 'block';
+        btnSalvar.style.display = 'block';
+        
+    } catch (error) {
+        console.error("Erro na leitura automática da nota:", error);
+        alert("Erro ao ler dados da SEFAZ de forma automática (possivelmente devido a bloqueio do servidor do governo ou problemas de conexão).\n\nAbaixe o Cupom Fiscal e faça o lançamento rápido na aba 'Entrada Rápida Manual'!");
+        loader.style.display = 'none';
+        alternarNfeTab('manual');
+    }
+}
+
+// Parser do HTML do cupom fiscal da SEFAZ
+function parseHtmlSefaz(htmlText) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlText, 'text/html');
+    let itens = [];
+    
+    // Tenta obter as linhas da tabela de resultados
+    const rows = doc.querySelectorAll('table[id^="tabResult"] tr, #tabResult tr, .table tr');
+    
+    if (rows.length === 0) {
+        // Tenta buscar por classes diretas
+        const nomes = doc.querySelectorAll('.txtNome');
+        const qtds = doc.querySelectorAll('.Rqtd');
+        const uns = doc.querySelectorAll('.Un');
+        const vals = doc.querySelectorAll('.RvalUnit');
+        
+        for (let i = 0; i < nomes.length; i++) {
+            const nome = nomes[i].textContent.trim();
+            const qtd = qtds[i] ? parseFloat(qtds[i].textContent.trim().replace('Qtd. total de itens:', '').replace('Qtde.:', '').replace(',', '.').trim()) : 1;
+            const un = uns[i] ? uns[i].textContent.trim().replace('UN:', '').replace('Unidade:', '').trim().toLowerCase() : 'un';
+            const val = vals[i] ? parseFloat(vals[i].textContent.trim().replace('Vl. Unit.:', '').replace('Valor Unitário:', '').replace(',', '.').trim()) : 0;
+            
+            if (nome) {
+                itens.push({ nome, quantidade: qtd, unidade: un, precoUnitario: val });
+            }
+        }
+    } else {
+        rows.forEach(row => {
+            const nomeEl = row.querySelector('.txtNome');
+            if (nomeEl) {
+                const qtdEl = row.querySelector('.Rqtd');
+                const unEl = row.querySelector('.Un');
+                const valEl = row.querySelector('.RvalUnit');
+                
+                // Limpeza do texto das classes da SEFAZ
+                let qtdText = qtdEl ? qtdEl.textContent.trim() : '1';
+                let unText = unEl ? unEl.textContent.trim() : 'un';
+                let valText = valEl ? valEl.textContent.trim() : '0';
+                
+                // Extração dos números
+                const qtdMatch = qtdText.match(/\d+([.,]\d+)?/);
+                const valMatch = valText.match(/\d+([.,]\d+)?/);
+                
+                const quantidade = qtdMatch ? parseFloat(qtdMatch[0].replace(',', '.')) : 1;
+                const precoUnitario = valMatch ? parseFloat(valMatch[0].replace(',', '.')) : 0;
+                
+                const unidade = unText.replace('UN:', '').replace('Un:', '').trim().toLowerCase();
+                
+                itens.push({
+                    nome: nomeEl.textContent.trim().replace(/\s+/g, ' '),
+                    quantidade,
+                    unidade,
+                    precoUnitario
+                });
+            }
+        });
+    }
+    
+    return itens;
+}
+
+// Algoritmo de mapeamento inteligente de insumos
+function sugerirInsumoEquivalente(nomeNota) {
+    nomeNota = nomeNota.toLowerCase();
+    let melhorInsumo = '';
+    let scoreMaximo = 0;
+    
+    state.insumos.forEach(ins => {
+        const insNome = ins.nome.toLowerCase();
+        
+        // Divide em palavras
+        const palavrasInsumo = insNome.split(' ').filter(p => p.length > 2);
+        let score = 0;
+        
+        palavrasInsumo.forEach(p => {
+            if (nomeNota.includes(p)) {
+                score += 2; // Palavra exata bateu
+            }
+        });
+        
+        // Bônus se houver casamento de início de nome
+        if (nomeNota.startsWith(insNome) || insNome.startsWith(nomeNota)) {
+            score += 5;
+        }
+        
+        if (score > scoreMaximo) {
+            scoreMaximo = score;
+            melhorInsumo = ins.id;
+        }
+    });
+    
+    return melhorInsumo;
+}
+
+// Renderiza tabela de conferência dos produtos importados
+function renderNfeConferencia() {
+    const tbody = document.getElementById('nfe-conferencia-table-body');
+    tbody.innerHTML = '';
+    
+    nfeItensLidos.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        const sugeridoId = sugerirInsumoEquivalente(item.nome);
+        
+        // Monta o select de insumos
+        let selectHtml = `<select class="nfe-mapeamento" data-index="${index}">`;
+        selectHtml += `<option value="">-- Ignorar ou Cadastrar Depois --</option>`;
+        state.insumos.forEach(ins => {
+            selectHtml += `<option value="${ins.id}" ${ins.id === sugeridoId ? 'selected' : ''}>${ins.nome} (${ins.unidade})</option>`;
+        });
+        selectHtml += `</select>`;
+        
+        tr.innerHTML = `
+            <td>
+                <strong style="font-size: 0.85rem; display: block; word-break: break-all;">${item.nome}</strong>
+                <small style="color: var(--color-text-secondary); text-transform: uppercase;">Unidade na Nota: ${item.unidade}</small>
+            </td>
+            <td>${item.quantidade}</td>
+            <td>${formatarMoeda(item.precoUnitario)}</td>
+            <td>${selectHtml}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Salva entrada automática de XML importado
+function salvarEntradaNotaFiscal() {
+    let atualizados = 0;
+    const selects = document.querySelectorAll('.nfe-mapeamento');
+    
+    selects.forEach(select => {
+        const index = parseInt(select.dataset.index);
+        const insumoId = select.value;
+        
+        if (insumoId && index >= 0 && index < nfeItensLidos.length) {
+            const itemNota = nfeItensLidos[index];
+            const ins = state.insumos.find(i => i.id === insumoId);
+            
+            if (ins) {
+                let qtdComprada = itemNota.quantidade;
+                let precoPagoUnit = itemNota.precoUnitario;
+                
+                // Conversão inteligente de unidades:
+                // Se a nota está em KG e o insumo está em g, multiplicamos a quantidade por 1000 e dividimos o preço unit por 1000
+                if (itemNota.unidade === 'kg' && ins.unidade === 'g') {
+                    qtdComprada = qtdComprada * 1000;
+                    precoPagoUnit = precoPagoUnit / 1000;
+                } else if (itemNota.unidade === 'l' && ins.unidade === 'ml') {
+                    qtdComprada = qtdComprada * 1000;
+                    precoPagoUnit = precoPagoUnit / 1000;
+                }
+                
+                const estoqueAtualVal = ins.estoqueAtual || 0;
+                const custoUnitAtual = calcularCustoUnitarioInsumo(ins);
+                
+                // Cálculo de preço médio ponderado
+                const novaQtdTotal = estoqueAtualVal + qtdComprada;
+                const valorAtualEstoque = estoqueAtualVal * custoUnitAtual;
+                const valorPagoTotal = qtdComprada * precoPagoUnit;
+                
+                const novoCustoUnit = (valorAtualEstoque + valorPagoTotal) / novaQtdTotal;
+                
+                // Atualiza o estoque
+                ins.estoqueAtual = parseFloat(novaQtdTotal.toFixed(3));
+                
+                // Atualiza o preço da embalagem de cadastro proporcionalmente ao novo custo unitário
+                ins.preco = parseFloat((novoCustoUnit * ins.quantidade).toFixed(2));
+                
+                atualizados++;
+            }
+        }
+    });
+    
+    if (atualizados > 0) {
+        salvarEstado();
+        renderInsumos();
+        renderDashboard();
+        fecharNfeModal();
+        mostrarToast(`Estoque atualizado: ${atualizados} itens importados com sucesso!`);
+    } else {
+        alert("Por favor, mapeie pelo menos um item da nota a um insumo do estoque!");
+    }
+}
+
 // --- INICIALIZAR APLICAÇÃO ---
 window.addEventListener('DOMContentLoaded', () => {
     carregarEstado();
     atualizarRotulosUnidadeInsumo();
     document.getElementById('insumo-unidade').addEventListener('change', atualizarRotulosUnidadeInsumo);
+    
+    // Configurar listeners de Nota Fiscal
+    document.getElementById('btn-abrir-nfe-modal').addEventListener('click', abrirNfeModal);
+    document.getElementById('btn-fechar-nfe-modal').addEventListener('click', fecharNfeModal);
+    document.getElementById('btn-cancelar-nfe').addEventListener('click', fecharNfeModal);
+    document.getElementById('btn-nfe-tab-leitor').addEventListener('click', () => alternarNfeTab('leitor'));
+    document.getElementById('btn-nfe-tab-manual').addEventListener('click', () => alternarNfeTab('manual'));
+    document.getElementById('btn-processar-nfe').addEventListener('click', processarLinkNfe);
+    document.getElementById('btn-salvar-entrada-nfe').addEventListener('click', () => {
+        const isManual = document.getElementById('nfe-panel-manual').style.display === 'block';
+        if (isManual) {
+            salvarEntradaManual();
+        } else {
+            salvarEntradaNotaFiscal();
+        }
+    });
 });

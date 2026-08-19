@@ -715,3 +715,24 @@ tr:hover td {
     }
 }
 
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Inputs da planilha rápida de estoque */
+.nfe-input-table {
+    padding: 0.4rem;
+    font-size: 0.85rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-bg-card);
+    width: 100%;
+}
+
+.nfe-input-table:focus {
+    border-color: var(--color-accent);
+    outline: none;
+}
+
+
