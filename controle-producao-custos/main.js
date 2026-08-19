@@ -8,7 +8,8 @@ function createWindow() {
         title: "Agri Doce - Controle de Produção & Custos",
         webPreferences: {
             nodeIntegration: false,
-            contextIsolation: true
+            contextIsolation: true,
+            webSecurity: false
         }
     });
 

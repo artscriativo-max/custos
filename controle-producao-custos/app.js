@@ -1856,20 +1856,12 @@ async function processarLinkNfe() {
     btnSalvar.style.display = 'none';
     
     try {
-        let htmlText = '';
+        // Como o CapacitorHttp está habilitado, no celular o fetch padrão é interceptado e ignora o CORS.
+        // No Electron, o webSecurity está desativado, o que também contorna o CORS.
+        const response = await fetch(url);
+        const htmlText = await response.text();
         
-        // Verifica se roda no Capacitor ou browser comum
-        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Http) {
-            // Requisição nativa no celular (ignora CORS)
-            const response = await window.Capacitor.Plugins.Http.get({ url: url });
-            htmlText = response.data;
-        } else {
-            // Requisição comum no navegador
-            const response = await fetch(url);
-            htmlText = await response.text();
-        }
-        
-        if (!htmlText) throw new Error("Retorno vazio");
+        if (!htmlText) throw new Error("Não foi possível carregar os dados da página");
         
         nfeItensLidos = parseHtmlSefaz(htmlText);
         
