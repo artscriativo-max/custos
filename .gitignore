@@ -5,12 +5,10 @@
 !controle-producao-custos/
 !controle-producao-custos/**
 
-# Ignorar dependências, builds e pastas nativas locais do aplicativo
+# Ignorar dependências, builds e pastas locais do aplicativo
 controle-producao-custos/node_modules/
 controle-producao-custos/www/
 controle-producao-custos/dist/
-controle-producao-custos/android/
-controle-producao-custos/ios/
 controle-producao-custos/.gradle/
 controle-producao-custos/package-lock.json
 

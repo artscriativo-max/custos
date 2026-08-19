@@ -39,10 +39,7 @@ jobs:
       - name: Sync Capacitor
         run: |
           cd controle-producao-custos
-          npx cap add android
           npx cap sync
-          # Injeta a permissão de câmera no AndroidManifest gerado dinamicamente antes da compilação do Gradle
-          sed -i 's|<uses-permission android:name="android.permission.INTERNET" />|<uses-permission android:name="android.permission.CAMERA" />\n    <uses-permission android:name="android.permission.INTERNET" />|g' android/app/src/main/AndroidManifest.xml
 
       - name: Build Android App (APK)
         run: |

@@ -1,8 +1,6 @@
 node_modules/
 www/
 dist/
-android/
-ios/
 .gradle/
 capacitor.config.json.bak
 package-lock.json
