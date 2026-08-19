@@ -1975,7 +1975,6 @@ function sugerirInsumoEquivalente(nomeNota) {
                 score += 2; // Palavra exata bateu
             }
         });
-        
         // Bônus se houver casamento de início de nome
         if (nomeNota.startsWith(insNome) || insNome.startsWith(nomeNota)) {
             score += 5;
@@ -1990,6 +1989,21 @@ function sugerirInsumoEquivalente(nomeNota) {
     return melhorInsumo;
 }
 
+// Helper para deixar o nome do insumo mais bonito e amigável
+function formatarNomeInsumo(nomeRaw) {
+    if (!nomeRaw) return '';
+    return nomeRaw
+        .toLowerCase()
+        .split(' ')
+        .map(word => {
+            if (word.length <= 2) return word.toLowerCase();
+            return word.charAt(0).toUpperCase() + word.slice(1);
+        })
+        .join(' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
 // Renderiza tabela de conferência dos produtos importados
 function renderNfeConferencia() {
     const tbody = document.getElementById('nfe-conferencia-table-body');
@@ -2002,6 +2016,7 @@ function renderNfeConferencia() {
         // Monta o select de insumos
         let selectHtml = `<select class="nfe-mapeamento" data-index="${index}">`;
         selectHtml += `<option value="">-- Ignorar ou Cadastrar Depois --</option>`;
+        selectHtml += `<option value="NOVO_INSUMO" style="color: #4f46e5; font-weight: bold;">[+] Cadastrar como Novo Insumo</option>`;
         state.insumos.forEach(ins => {
             selectHtml += `<option value="${ins.id}" ${ins.id === sugeridoId ? 'selected' : ''}>${ins.nome} (${ins.unidade})</option>`;
         });
@@ -2023,47 +2038,79 @@ function renderNfeConferencia() {
 // Salva entrada automática de XML importado
 function salvarEntradaNotaFiscal() {
     let atualizados = 0;
+    let novosCadastrados = 0;
     const selects = document.querySelectorAll('.nfe-mapeamento');
     
     selects.forEach(select => {
         const index = parseInt(select.dataset.index);
-        const insumoId = select.value;
+        let insumoId = select.value;
         
-        if (insumoId && index >= 0 && index < nfeItensLidos.length) {
+        if (index >= 0 && index < nfeItensLidos.length) {
             const itemNota = nfeItensLidos[index];
-            const ins = state.insumos.find(i => i.id === insumoId);
             
-            if (ins) {
-                let qtdComprada = itemNota.quantidade;
-                let precoPagoUnit = itemNota.precoUnitario;
+            // Se o usuário escolheu cadastrar este item como um novo insumo
+            if (insumoId === 'NOVO_INSUMO') {
+                const novoInsumoId = 'ins_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+                const nomeFormatado = formatarNomeInsumo(itemNota.nome);
+                const unidadePadrao = itemNota.unidade || 'un';
                 
-                // Conversão inteligente de unidades:
-                // Se a nota está em KG e o insumo está em g, multiplicamos a quantidade por 1000 e dividimos o preço unit por 1000
-                if (itemNota.unidade === 'kg' && ins.unidade === 'g') {
-                    qtdComprada = qtdComprada * 1000;
-                    precoPagoUnit = precoPagoUnit / 1000;
-                } else if (itemNota.unidade === 'l' && ins.unidade === 'ml') {
-                    qtdComprada = qtdComprada * 1000;
-                    precoPagoUnit = precoPagoUnit / 1000;
+                const novoInsumo = {
+                    id: novoInsumoId,
+                    nome: nomeFormatado,
+                    categoria: "Ingrediente",
+                    unidade: unidadePadrao,
+                    preco: parseFloat(itemNota.precoUnitario.toFixed(2)),
+                    quantidade: 1.0, // Embalagem padrão de 1 unidade
+                    estoqueAtual: parseFloat(itemNota.quantidade.toFixed(3)),
+                    estoqueMinimo: 0.0
+                };
+                
+                state.insumos.push(novoInsumo);
+                insumoId = novoInsumoId; // Mapeia para o recém criado para fins de salvamento e contagem
+                novosCadastrados++;
+            }
+            
+            if (insumoId) {
+                const ins = state.insumos.find(i => i.id === insumoId);
+                
+                if (ins) {
+                    const foiCriadoAgora = (select.value === 'NOVO_INSUMO');
+                    
+                    // Se o insumo já existia, somamos ao estoque atual e atualizamos o preço usando média ponderada.
+                    // Se foi cadastrado agora, o estoque inicial já foi definido como a quantidade da nota fiscal,
+                    // então pulamos para evitar duplicar o valor.
+                    if (!foiCriadoAgora) {
+                        let qtdComprada = itemNota.quantidade;
+                        let precoPagoUnit = itemNota.precoUnitario;
+                        
+                        // Conversão inteligente de unidades:
+                        if (itemNota.unidade === 'kg' && ins.unidade === 'g') {
+                            qtdComprada = qtdComprada * 1000;
+                            precoPagoUnit = precoPagoUnit / 1000;
+                        } else if (itemNota.unidade === 'l' && ins.unidade === 'ml') {
+                            qtdComprada = qtdComprada * 1000;
+                            precoPagoUnit = precoPagoUnit / 1000;
+                        }
+                        
+                        const estoqueAtualVal = ins.estoqueAtual || 0;
+                        const custoUnitAtual = calcularCustoUnitarioInsumo(ins);
+                        
+                        // Cálculo de preço médio ponderado
+                        const novaQtdTotal = estoqueAtualVal + qtdComprada;
+                        const valorAtualEstoque = estoqueAtualVal * custoUnitAtual;
+                        const valorPagoTotal = qtdComprada * precoPagoUnit;
+                        
+                        const novoCustoUnit = (valorAtualEstoque + valorPagoTotal) / novaQtdTotal;
+                        
+                        // Atualiza o estoque
+                        ins.estoqueAtual = parseFloat(novaQtdTotal.toFixed(3));
+                        
+                        // Atualiza o preço da embalagem de cadastro proporcionalmente ao novo custo unitário
+                        ins.preco = parseFloat((novoCustoUnit * ins.quantidade).toFixed(2));
+                    }
+                    
+                    atualizados++;
                 }
-                
-                const estoqueAtualVal = ins.estoqueAtual || 0;
-                const custoUnitAtual = calcularCustoUnitarioInsumo(ins);
-                
-                // Cálculo de preço médio ponderado
-                const novaQtdTotal = estoqueAtualVal + qtdComprada;
-                const valorAtualEstoque = estoqueAtualVal * custoUnitAtual;
-                const valorPagoTotal = qtdComprada * precoPagoUnit;
-                
-                const novoCustoUnit = (valorAtualEstoque + valorPagoTotal) / novaQtdTotal;
-                
-                // Atualiza o estoque
-                ins.estoqueAtual = parseFloat(novaQtdTotal.toFixed(3));
-                
-                // Atualiza o preço da embalagem de cadastro proporcionalmente ao novo custo unitário
-                ins.preco = parseFloat((novoCustoUnit * ins.quantidade).toFixed(2));
-                
-                atualizados++;
             }
         }
     });
@@ -2073,12 +2120,15 @@ function salvarEntradaNotaFiscal() {
         renderInsumos();
         renderDashboard();
         fecharNfeModal();
-        mostrarToast(`Estoque atualizado: ${atualizados} itens importados com sucesso!`);
+        
+        let msg = `Estoque atualizado: ${atualizados} itens importados com sucesso!`;
+        if (novosCadastrados > 0) {
+            msg += ` (Cadastramos ${novosCadastrados} novos insumos automaticamente!)`;
+        }
+        mostrarToast(msg);
     } else {
         alert("Por favor, mapeie pelo menos um item da nota a um insumo do estoque!");
     }
-}
-
 // --- CONTROLE DE SCANNER DE CÂMERA (QR CODE) ---
 let html5QrcodeScanner = null;
 
