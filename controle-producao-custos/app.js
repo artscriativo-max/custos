@@ -2129,6 +2129,7 @@ function salvarEntradaNotaFiscal() {
     } else {
         alert("Por favor, mapeie pelo menos um item da nota a um insumo do estoque!");
     }
+}
 // --- CONTROLE DE SCANNER DE CÂMERA (QR CODE) ---
 let html5QrcodeScanner = null;
 
