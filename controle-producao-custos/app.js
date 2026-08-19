@@ -2078,11 +2078,30 @@ function salvarEntradaNotaFiscal() {
 // --- CONTROLE DE SCANNER DE CÂMERA (QR CODE) ---
 let html5QrcodeScanner = null;
 
-function iniciarScannerCamera() {
+async function iniciarScannerCamera() {
     const readerContainer = document.getElementById('nfe-reader-container');
     const btnIniciar = document.getElementById('btn-iniciar-scanner-nfe');
     const btnParar = document.getElementById('btn-parar-scanner-nfe');
     
+    // Se estiver rodando no celular via Capacitor, força a permissão de câmera nativa do Android
+    if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+        try {
+            const CameraPlugin = window.Capacitor.Plugins.Camera;
+            if (CameraPlugin) {
+                const check = await CameraPlugin.checkPermissions();
+                if (check.camera !== 'granted') {
+                    const req = await CameraPlugin.requestPermissions({ permissions: ['camera'] });
+                    if (req.camera !== 'granted') {
+                        alert("Permissão de câmera negada! Por favor, habilite o acesso à câmera nas configurações do seu celular.");
+                        return;
+                    }
+                }
+            }
+        } catch (err) {
+            console.error("Erro ao solicitar permissão de câmera do Capacitor:", err);
+        }
+    }
+
     readerContainer.style.display = 'block';
     btnIniciar.style.display = 'none';
     btnParar.style.display = 'inline-flex';
