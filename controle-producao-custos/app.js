@@ -1899,17 +1899,24 @@ function parseHtmlSefaz(htmlText) {
     const rows = doc.querySelectorAll('table[id^="tabResult"] tr, #tabResult tr, .table tr');
     
     if (rows.length === 0) {
-        // Tenta buscar por classes diretas
-        const nomes = doc.querySelectorAll('.txtNome');
+        // Tenta buscar por classes diretas caso não haja estrutura de tabela padrão
+        const nomes = doc.querySelectorAll('.txtNome, .txtTit');
         const qtds = doc.querySelectorAll('.Rqtd');
-        const uns = doc.querySelectorAll('.Un');
+        const uns = doc.querySelectorAll('.Un, .RUN, .Run');
         const vals = doc.querySelectorAll('.RvalUnit');
         
         for (let i = 0; i < nomes.length; i++) {
             const nome = nomes[i].textContent.trim();
-            const qtd = qtds[i] ? parseFloat(qtds[i].textContent.trim().replace('Qtd. total de itens:', '').replace('Qtde.:', '').replace(',', '.').trim()) : 1;
-            const un = uns[i] ? uns[i].textContent.trim().replace('UN:', '').replace('Unidade:', '').trim().toLowerCase() : 'un';
-            const val = vals[i] ? parseFloat(vals[i].textContent.trim().replace('Vl. Unit.:', '').replace('Valor Unitário:', '').replace(',', '.').trim()) : 0;
+            const qtdText = qtds[i] ? qtds[i].textContent.trim() : '1';
+            const unText = uns[i] ? uns[i].textContent.trim() : 'un';
+            const valText = vals[i] ? vals[i].textContent.trim() : '0';
+            
+            const qtdMatch = qtdText.match(/\d+([.,]\d+)?/);
+            const valMatch = valText.match(/\d+([.,]\d+)?/);
+            
+            const qtd = qtdMatch ? parseFloat(qtdMatch[0].replace(',', '.')) : 1;
+            const val = valMatch ? parseFloat(valMatch[0].replace(',', '.')) : 0;
+            const un = unText.replace(/UN:/gi, '').replace(/Unidade:/gi, '').replace(/Un:/gi, '').trim().toLowerCase() || 'un';
             
             if (nome) {
                 itens.push({ nome, quantidade: qtd, unidade: un, precoUnitario: val });
@@ -1917,10 +1924,10 @@ function parseHtmlSefaz(htmlText) {
         }
     } else {
         rows.forEach(row => {
-            const nomeEl = row.querySelector('.txtNome');
+            const nomeEl = row.querySelector('.txtNome, .txtTit');
             if (nomeEl) {
                 const qtdEl = row.querySelector('.Rqtd');
-                const unEl = row.querySelector('.Un');
+                const unEl = row.querySelector('.Un, .RUN, .Run');
                 const valEl = row.querySelector('.RvalUnit');
                 
                 // Limpeza do texto das classes da SEFAZ
@@ -1935,7 +1942,7 @@ function parseHtmlSefaz(htmlText) {
                 const quantidade = qtdMatch ? parseFloat(qtdMatch[0].replace(',', '.')) : 1;
                 const precoUnitario = valMatch ? parseFloat(valMatch[0].replace(',', '.')) : 0;
                 
-                const unidade = unText.replace('UN:', '').replace('Un:', '').trim().toLowerCase();
+                const unidade = unText.replace(/UN:/gi, '').replace(/Un:/gi, '').replace(/Unidade:/gi, '').trim().toLowerCase() || 'un';
                 
                 itens.push({
                     nome: nomeEl.textContent.trim().replace(/\s+/g, ' '),
