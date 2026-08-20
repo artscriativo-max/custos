@@ -2232,6 +2232,7 @@ function pararScannerCamera() {
 const AIRTABLE_BASE_ID = 'appaXO5PD4aYPmeh6'; // Cole a ID da Base aqui (ex: 'appXXXXXXXXXX')
 const AIRTABLE_TABLE_NAME = 'tbluJ1T2arN0TpIte'; // Nome da Tabela no Airtable
 const AIRTABLE_API_KEY = 'patPOi' + 'gusNeIcF5OP.' + 'ffd2cb57a849201730b82fc654d1c7df28fa0b2fc26ca9142dc5a221e555016e'; // Cole o Token do Airtable aqui (ex: 'patXXXXXXXXXX')
+const LINK_ASSINATURA = 'https://wa.me/5551999999999'; // Cole aqui o link da sua página de vendas, checkout ou WhatsApp!
 
 function checarLicencaAtiva() {
     // Se as chaves estiverem vazias, roda no Modo Livre (sem restrições)
@@ -2261,7 +2262,7 @@ function checarLicencaAtiva() {
 }
 
 async function validarLicencaOnline(email, callback) {
-    const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}?filterByFormula=AND({Email}='${email}')`;
+    const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}?filterByFormula=AND({📧 Email}='${email}')`;
     
     try {
         const response = await fetch(url, {
@@ -2279,7 +2280,7 @@ async function validarLicencaOnline(email, callback) {
         
         if (data.records && data.records.length > 0) {
             const record = data.records[0].fields;
-            const status = record.Status; // Deve ser "Ativo", "Inativo" ou "Atrasado"
+            const status = record["🚦 Status"]; // Deve ser "Ativo", "Inativo" ou "Atrasado"
             
             if (status === 'Ativo') {
                 localStorage.setItem('nod_licenca_email', email);
@@ -2329,6 +2330,13 @@ function fecharModalLicenca() {
 window.addEventListener('DOMContentLoaded', () => {
     carregarEstado();
     checarLicencaAtiva();
+    
+    // Configura o botão de Adquirir Licença se houver link ativo
+    const btnComprar = document.getElementById('btn-comprar-licenca');
+    if (btnComprar && typeof LINK_ASSINATURA !== 'undefined' && LINK_ASSINATURA && LINK_ASSINATURA !== '#') {
+        btnComprar.href = LINK_ASSINATURA;
+        btnComprar.style.display = 'block';
+    }
     
     // Configura o botão de ativação de licença no modal
     document.getElementById('btn-ativar-licenca').addEventListener('click', () => {
