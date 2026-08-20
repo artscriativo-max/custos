@@ -491,16 +491,19 @@ function renderInsumos() {
     const tableBody = document.getElementById('insumos-table-body');
     tableBody.innerHTML = '';
 
-    if (state.insumos.length === 0) {
+    const query = document.getElementById('search-insumos') ? document.getElementById('search-insumos').value.toLowerCase().trim() : '';
+    const insumosFiltrados = state.insumos.filter(ins => ins.nome.toLowerCase().includes(query));
+
+    if (insumosFiltrados.length === 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="5" style="text-align: center; color: var(--color-text-secondary);">Nenhum insumo cadastrado.</td>
+                <td colspan="5" style="text-align: center; color: var(--color-text-secondary);">${state.insumos.length === 0 ? 'Nenhum insumo cadastrado.' : 'Nenhum insumo corresponde à busca.'}</td>
             </tr>
         `;
         return;
     }
 
-    state.insumos.forEach(ins => {
+    insumosFiltrados.forEach(ins => {
         const custoUnit = calcularCustoUnitarioInsumo(ins);
         
         // Formatar exibição do custo unitário amigável
@@ -551,16 +554,19 @@ function renderRecheios() {
     if (!tableBody) return;
     tableBody.innerHTML = '';
 
-    if (!state.recheios || state.recheios.length === 0) {
+    const query = document.getElementById('search-recheios') ? document.getElementById('search-recheios').value.toLowerCase().trim() : '';
+    const recheiosFiltrados = (state.recheios || []).filter(rec => rec.nome.toLowerCase().includes(query));
+
+    if (recheiosFiltrados.length === 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="7" style="text-align: center; color: var(--color-text-secondary);">Nenhum recheio cadastrado.</td>
+                <td colspan="7" style="text-align: center; color: var(--color-text-secondary);">${(!state.recheios || state.recheios.length === 0) ? 'Nenhum recheio cadastrado.' : 'Nenhum recheio corresponde à busca.'}</td>
             </tr>
         `;
         return;
     }
 
-    state.recheios.forEach(rec => {
+    recheiosFiltrados.forEach(rec => {
         const analise = calcularFichaTecnicaRecheio(rec);
 
         const tr = document.createElement('tr');
@@ -604,16 +610,19 @@ function renderReceitas() {
     const tableBody = document.getElementById('receitas-table-body');
     tableBody.innerHTML = '';
 
-    if (state.receitas.length === 0) {
+    const query = document.getElementById('search-receitas') ? document.getElementById('search-receitas').value.toLowerCase().trim() : '';
+    const receitasFiltradas = state.receitas.filter(rec => rec.nome.toLowerCase().includes(query));
+
+    if (receitasFiltradas.length === 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="7" style="text-align: center; color: var(--color-text-secondary);">Nenhuma receita cadastrada.</td>
+                <td colspan="7" style="text-align: center; color: var(--color-text-secondary);">${state.receitas.length === 0 ? 'Nenhuma receita cadastrada.' : 'Nenhuma receita corresponde à busca.'}</td>
             </tr>
         `;
         return;
     }
 
-    state.receitas.forEach(rec => {
+    receitasFiltradas.forEach(rec => {
         const analise = calcularFichaTecnica(rec);
 
         const tr = document.createElement('tr');
@@ -2365,6 +2374,17 @@ window.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // Listeners para as barras de busca
+    if (document.getElementById('search-insumos')) {
+        document.getElementById('search-insumos').addEventListener('input', renderInsumos);
+    }
+    if (document.getElementById('search-recheios')) {
+        document.getElementById('search-recheios').addEventListener('input', renderRecheios);
+    }
+    if (document.getElementById('search-receitas')) {
+        document.getElementById('search-receitas').addEventListener('input', renderReceitas);
+    }
 
     atualizarRotulosUnidadeInsumo();
     document.getElementById('insumo-unidade').addEventListener('change', atualizarRotulosUnidadeInsumo);

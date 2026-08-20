@@ -324,9 +324,12 @@ input:focus, select:focus, textarea:focus {
 /* Tabelas Premium */
 .table-container {
     overflow-x: auto;
+    max-height: 480px;
+    overflow-y: auto;
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius);
     background-color: var(--color-bg-card);
+    position: relative;
 }
 
 table {
@@ -343,7 +346,11 @@ th {
     letter-spacing: 0.05em;
     padding: 1rem;
     border-bottom: 2px solid var(--color-text-primary);
-    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-card);
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 td {
