@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Agri Doce Custos</string>
-    <string name="title_activity_main">Agri Doce Custos</string>
-    <string name="package_name">com.agridece.custocontrole</string>
-    <string name="custom_url_scheme">com.agridece.custocontrole</string>
+    <string name="app_name">NOD</string>
+    <string name="title_activity_main">NOD</string>
+    <string name="package_name">com.nod.app</string>
+    <string name="custom_url_scheme">com.nod.app</string>
 </resources>

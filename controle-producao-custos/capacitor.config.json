@@ -1,6 +1,6 @@
 {
-  "appId": "com.agridece.custocontrole",
-  "appName": "Agri Doce Custos",
+  "appId": "com.nod.app",
+  "appName": "NOD",
   "webDir": "www",
   "server": {
     "androidScheme": "https"
