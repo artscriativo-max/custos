@@ -2243,7 +2243,6 @@ function checarLicencaAtiva() {
 
     const emailSalvo = localStorage.getItem('nod_licenca_email');
     const statusSalvo = localStorage.getItem('nod_licenca_status');
-    const ultimaValidacao = localStorage.getItem('nod_licenca_ultima_validacao');
 
     // Se não há e-mail salvo ou o status não é ativo, exibe o modal de bloqueio
     if (!emailSalvo || statusSalvo !== 'ativo') {
@@ -2251,14 +2250,8 @@ function checarLicencaAtiva() {
         return;
     }
 
-    // Se está ativo, verifica a carência offline (7 dias)
-    const agora = Date.now();
-    const seteDiasMs = 7 * 24 * 60 * 60 * 1000;
-    
-    if (ultimaValidacao && (agora - parseInt(ultimaValidacao)) > seteDiasMs) {
-        // Tenta revalidar em segundo plano de forma silenciosa
-        revalidarLicencaSilenciosa(emailSalvo);
-    }
+    // Tenta sempre revalidar a licença em segundo plano de forma silenciosa para pegar bloqueios imediatos
+    revalidarLicencaSilenciosa(emailSalvo);
 }
 
 async function validarLicencaOnline(email, callback) {
@@ -2288,17 +2281,27 @@ async function validarLicencaOnline(email, callback) {
                 localStorage.setItem('nod_licenca_ultima_validacao', Date.now().toString());
                 callback({ sucesso: true, status: 'ativo' });
             } else {
+                localStorage.setItem('nod_licenca_status', 'inativo'); // Salva localmente como inativo para bloquear nas próximas inicializações
                 callback({ sucesso: false, status: status, erro: "Esta assinatura está inativa ou vencida." });
             }
         } else {
+            localStorage.setItem('nod_licenca_status', 'inativo'); // Salva localmente como inativo para bloquear nas próximas inicializações
             callback({ sucesso: false, status: 'inexistente', erro: "E-mail de licença não encontrado em nossa base." });
         }
     } catch (err) {
         console.error("Erro ao validar licença:", err);
-        // Se falhar a requisição mas houver dados locais válidos, deixa passar (tolerância offline)
+        // Se falhar a requisição mas houver dados locais válidos e estiver dentro do prazo offline (7 dias), deixa passar
         const statusSalvo = localStorage.getItem('nod_licenca_status');
+        const ultimaValidacao = localStorage.getItem('nod_licenca_ultima_validacao');
+        
         if (statusSalvo === 'ativo') {
-            callback({ sucesso: true, status: 'ativo', offline: true });
+            const agora = Date.now();
+            const seteDiasMs = 7 * 24 * 60 * 60 * 1000;
+            if (ultimaValidacao && (agora - parseInt(ultimaValidacao)) < seteDiasMs) {
+                callback({ sucesso: true, status: 'ativo', offline: true });
+            } else {
+                callback({ sucesso: false, status: 'erro', erro: "Carência offline expirada. Conecte-se à internet para revalidar sua licença." });
+            }
         } else {
             callback({ sucesso: false, status: 'erro', erro: "Sem conexão com a internet para validar a licença." });
         }
@@ -2308,9 +2311,8 @@ async function validarLicencaOnline(email, callback) {
 async function revalidarLicencaSilenciosa(email) {
     validarLicencaOnline(email, (res) => {
         if (!res.sucesso) {
-            // Se falhou e não foi por erro de rede offline, bloqueia
+            // Se falhou por status vencido/inexistente (não erro de internet offline), bloqueia imediatamente
             if (res.status !== 'erro') {
-                localStorage.setItem('nod_licenca_status', 'inativo');
                 exibirModalLicencaBloqueada(res.erro || "Sua licença expirou.");
             }
         }
