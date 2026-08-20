@@ -585,6 +585,33 @@
         </div>
     </div>
 
+    <!-- Modal de Bloqueio de Licença NOD -->
+    <div id="licenca-bloqueio-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000000; z-index: 99999; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; color: #ffffff; font-family: sans-serif;">
+        <div style="max-width: 420px; width: 100%; text-align: center; background: #0d0d0d; padding: 3rem 2rem; border-radius: 12px; border: 1px solid #333333; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);">
+            
+            <!-- Logotipo do NOD -->
+            <div style="margin-bottom: 2rem;">
+                <span style="font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 2.8rem; color: #ef4444; text-shadow: 0 0 15px rgba(239, 68, 68, 0.6); letter-spacing: 0.1em; text-transform: uppercase;">NOD</span>
+                <span style="display: block; font-size: 0.85rem; color: #888888; text-transform: uppercase; letter-spacing: 0.15em; margin-top: 0.5rem;">Sistemas de Gestão</span>
+            </div>
+            
+            <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; color: #ffffff;">Ativação do Sistema</h3>
+            
+            <p id="licenca-erro-msg" style="font-size: 0.9rem; color: #aaaaaa; margin-bottom: 2rem; line-height: 1.5;"></p>
+            
+            <div style="text-align: left; margin-bottom: 1.5rem;">
+                <label for="licenca-email-input" style="display: block; font-size: 0.8rem; text-transform: uppercase; color: #888888; margin-bottom: 0.5rem; font-weight: 600; letter-spacing: 0.05em;">E-mail da Assinatura</label>
+                <input type="email" id="licenca-email-input" placeholder="seu-email@dominio.com" style="width: 100%; background: #1a1a1a; border: 1px solid #333333; border-radius: 6px; padding: 0.85rem 1rem; color: #ffffff; font-size: 0.95rem; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#ef4444'" onblur="this.style.borderColor='#333333'">
+            </div>
+            
+            <button id="btn-ativar-licenca" style="width: 100%; background: #ef4444; color: #ffffff; border: none; border-radius: 6px; padding: 1rem; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);">Ativar Licença de Uso</button>
+            
+            <div style="margin-top: 2rem; border-top: 1px solid #222222; padding-top: 1.5rem; font-size: 0.8rem; color: #666666;">
+                Dúvidas ou suporte? Entre em contato pelo e-mail do seu administrador.
+            </div>
+        </div>
+    </div>
+
     <!-- Toast de Notificações -->
     <div class="toast" id="toast">
         <span id="toast-message">Mensagem</span>

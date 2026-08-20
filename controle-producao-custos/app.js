@@ -2226,9 +2226,136 @@ function pararScannerCamera() {
     btnParar.style.display = 'none';
 }
 
+// --- CONFIGURAÇÃO DA VALIDAÇÃO DE LICENÇA (AIRTABLE) ---
+// Deixe essas chaves vazias para rodar em "Modo Livre" (sem validação).
+// Quando preenchidas, o aplicativo exigirá ativação de licença online.
+const AIRTABLE_BASE_ID = ''; // Cole a ID da Base aqui (ex: 'appXXXXXXXXXX')
+const AIRTABLE_TABLE_NAME = 'Clientes'; // Nome da Tabela no Airtable
+const AIRTABLE_API_KEY = ''; // Cole o Token do Airtable aqui (ex: 'patXXXXXXXXXX')
+
+function checarLicencaAtiva() {
+    // Se as chaves estiverem vazias, roda no Modo Livre (sem restrições)
+    if (!AIRTABLE_BASE_ID || !AIRTABLE_API_KEY) {
+        console.log("NOD rodando em Modo Livre (sem restrições de licença).");
+        return;
+    }
+
+    const emailSalvo = localStorage.getItem('nod_licenca_email');
+    const statusSalvo = localStorage.getItem('nod_licenca_status');
+    const ultimaValidacao = localStorage.getItem('nod_licenca_ultima_validacao');
+
+    // Se não há e-mail salvo ou o status não é ativo, exibe o modal de bloqueio
+    if (!emailSalvo || statusSalvo !== 'ativo') {
+        exibirModalLicencaBloqueada("Por favor, insira o seu e-mail cadastrado para ativar o sistema.");
+        return;
+    }
+
+    // Se está ativo, verifica a carência offline (7 dias)
+    const agora = Date.now();
+    const seteDiasMs = 7 * 24 * 60 * 60 * 1000;
+    
+    if (ultimaValidacao && (agora - parseInt(ultimaValidacao)) > seteDiasMs) {
+        // Tenta revalidar em segundo plano de forma silenciosa
+        revalidarLicencaSilenciosa(emailSalvo);
+    }
+}
+
+async function validarLicencaOnline(email, callback) {
+    const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}?filterByFormula=AND({Email}='${email}')`;
+    
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${AIRTABLE_API_KEY}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error("Erro na resposta da API");
+        }
+        
+        const data = await response.json();
+        
+        if (data.records && data.records.length > 0) {
+            const record = data.records[0].fields;
+            const status = record.Status; // Deve ser "Ativo", "Inativo" ou "Atrasado"
+            
+            if (status === 'Ativo') {
+                localStorage.setItem('nod_licenca_email', email);
+                localStorage.setItem('nod_licenca_status', 'ativo');
+                localStorage.setItem('nod_licenca_ultima_validacao', Date.now().toString());
+                callback({ sucesso: true, status: 'ativo' });
+            } else {
+                callback({ sucesso: false, status: status, erro: "Esta assinatura está inativa ou vencida." });
+            }
+        } else {
+            callback({ sucesso: false, status: 'inexistente', erro: "E-mail de licença não encontrado em nossa base." });
+        }
+    } catch (err) {
+        console.error("Erro ao validar licença:", err);
+        // Se falhar a requisição mas houver dados locais válidos, deixa passar (tolerância offline)
+        const statusSalvo = localStorage.getItem('nod_licenca_status');
+        if (statusSalvo === 'ativo') {
+            callback({ sucesso: true, status: 'ativo', offline: true });
+        } else {
+            callback({ sucesso: false, status: 'erro', erro: "Sem conexão com a internet para validar a licença." });
+        }
+    }
+}
+
+async function revalidarLicencaSilenciosa(email) {
+    validarLicencaOnline(email, (res) => {
+        if (!res.sucesso) {
+            // Se falhou e não foi por erro de rede offline, bloqueia
+            if (res.status !== 'erro') {
+                localStorage.setItem('nod_licenca_status', 'inativo');
+                exibirModalLicencaBloqueada(res.erro || "Sua licença expirou.");
+            }
+        }
+    });
+}
+
+function exibirModalLicencaBloqueada(mensagem) {
+    document.getElementById('licenca-bloqueio-modal').style.display = 'flex';
+    document.getElementById('licenca-erro-msg').textContent = mensagem;
+}
+
+function fecharModalLicenca() {
+    document.getElementById('licenca-bloqueio-modal').style.display = 'none';
+}
+
 // --- INICIALIZAR APLICAÇÃO ---
 window.addEventListener('DOMContentLoaded', () => {
     carregarEstado();
+    checarLicencaAtiva();
+    
+    // Configura o botão de ativação de licença no modal
+    document.getElementById('btn-ativar-licenca').addEventListener('click', () => {
+        const email = document.getElementById('licenca-email-input').value.trim();
+        if (!email) {
+            alert("Por favor, digite o seu e-mail.");
+            return;
+        }
+        
+        const btn = document.getElementById('btn-ativar-licenca');
+        const originalText = btn.textContent;
+        btn.textContent = "Validando...";
+        btn.disabled = true;
+        
+        validarLicencaOnline(email, (res) => {
+            btn.textContent = originalText;
+            btn.disabled = false;
+            
+            if (res.sucesso) {
+                fecharModalLicenca();
+                mostrarToast("Licença ativada com sucesso! Obrigado por usar o NOD.");
+            } else {
+                exibirModalLicencaBloqueada(res.erro);
+            }
+        });
+    });
+
     atualizarRotulosUnidadeInsumo();
     document.getElementById('insumo-unidade').addEventListener('change', atualizarRotulosUnidadeInsumo);
     
