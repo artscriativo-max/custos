@@ -3198,6 +3198,16 @@ function fazerDownloadFallback(htmlContent, filename) {
     }
 }
 
+function extrairNumeroRendimento(rendimentoStr) {
+    if (!rendimentoStr) return 1;
+    // Captura o primeiro número inteiro ou decimal que aparece na descrição de rendimento
+    const match = rendimentoStr.match(/(\d+)/);
+    if (match) {
+        return parseInt(match[1]) || 1;
+    }
+    return 1;
+}
+
 function processarOlaClickTicket() {
     try {
         const text = document.getElementById('olaclick-ticket-input').value.trim();
@@ -3213,7 +3223,6 @@ function processarOlaClickTicket() {
         const regex = /^\s*X?\s*(\d+)\s+(.*?)(?:\s+-\s+Unidade)?\s*(?:R\$\s*[\d,.]+|\s*$)/i;
         
         linhas.forEach(linha => {
-            const l = parseInt(linha.trim()); // check if start with number
             const lineStr = linha.trim();
             if (!lineStr) return;
             
@@ -3244,7 +3253,7 @@ function processarOlaClickTicket() {
         const insumosFaltandoGeral = [];
         const itensParaLancar = [];
         
-        // 1. Validar se as receitas existem e simular estoque de forma recursiva
+        // 1. Validar se as receitas existem e simular estoque proporcional de forma recursiva
         itensEncontrados.forEach(item => {
             const receita = state.receitas.find(r => r.nome.trim().toLowerCase() === item.nomeOriginal.toLowerCase());
             
@@ -3253,9 +3262,14 @@ function processarOlaClickTicket() {
                 return;
             }
             
+            // Extrai a quantidade produzida por 1 receita (lote) cadastrada
+            const rendimentoUnidades = extrairNumeroRendimento(receita.rendimento);
+            // Calcula a fração (ex: 20 pedidos / 100 rendimento = 0.2 lote)
+            const fracao = item.quantidade / rendimentoUnidades;
+            
             const errosEstoqueItem = [];
             receita.ingredientes.forEach(ing => {
-                verificarEstoqueIngredienteRecursivo(ing.insumoId, ing.quantidade, ing.unidade, item.quantidade, errosEstoqueItem);
+                verificarEstoqueIngredienteRecursivo(ing.insumoId, ing.quantidade, ing.unidade, fracao, errosEstoqueItem);
             });
             
             if (errosEstoqueItem.length > 0) {
@@ -3265,7 +3279,9 @@ function processarOlaClickTicket() {
             } else {
                 itensParaLancar.push({
                     receita: receita,
-                    quantidade: item.quantidade
+                    quantidadeUnidades: item.quantidade,
+                    fracao: fracao,
+                    rendimentoBase: rendimentoUnidades
                 });
             }
         });
@@ -3287,16 +3303,16 @@ function processarOlaClickTicket() {
         
         itensParaLancar.forEach(item => {
             item.receita.ingredientes.forEach(ing => {
-                abaterEstoqueIngredienteRecursivo(ing.insumoId, ing.quantidade, ing.unidade, item.quantidade);
+                abaterEstoqueIngredienteRecursivo(ing.insumoId, ing.quantidade, ing.unidade, item.fracao);
             });
             
             const analise = calcularFichaTecnica(item.receita);
-            const custoTotal = analise.custoTotal * item.quantidade;
+            const custoTotal = analise.custoTotal * item.fracao;
             
             const novaProd = {
                 id: 'p' + Date.now() + Math.floor(Math.random() * 1000),
                 receitaId: item.receita.id,
-                quantidade: item.quantidade,
+                quantidade: parseFloat(item.fracao.toFixed(3)), // Lança a fração exata (ex: 0.200 lote)
                 data: dataAtual,
                 custoTotal: custoTotal,
                 status: "Concluído",
@@ -3304,7 +3320,7 @@ function processarOlaClickTicket() {
             };
             
             state.producoes.push(novaProd);
-            logSucesso.push(`${item.quantidade}x ${item.receita.nome}`);
+            logSucesso.push(`${item.quantidadeUnidades} un de ${item.receita.nome} (Equivale a ${item.fracao.toFixed(2)} lote(s))`);
         });
         
         // Salvar e atualizar interface
