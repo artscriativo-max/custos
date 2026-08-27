@@ -3156,18 +3156,43 @@ function baixarPDF() {
             </html>
         `;
         
-        const blob = new Blob([htmlCompleto], { type: 'text/html;charset=utf-8' });
+        const nomeArquivo = titulo.toLowerCase().replace(/[^a-z0-9]/g, "_") + ".html";
+        const file = new File([htmlCompleto], nomeArquivo, { type: "text/html" });
+        
+        // Tenta compartilhar como arquivo real para abrir a gaveta de impressão do Android
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            navigator.share({
+                files: [file],
+                title: titulo,
+                text: 'Imprimir ou Salvar PDF'
+            }).catch(err => {
+                fazerDownloadFallback(htmlCompleto, nomeArquivo);
+            });
+        } else {
+            fazerDownloadFallback(htmlCompleto, nomeArquivo);
+        }
+        
+    } catch (err) {
+        console.error("Erro ao gerar arquivo:", err);
+        alert("Não foi possível processar o compartilhamento do arquivo de impressão neste aparelho. Copiando texto formatado...");
+        copiarTexto(gerarTextoFormatado());
+    }
+}
+
+function fazerDownloadFallback(htmlContent, filename) {
+    try {
+        const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = titulo.toLowerCase().replace(/[^a-z0-9]/g, "_") + ".html";
+        a.download = filename;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        
-    } catch (err) {
-        console.error("Erro ao baixar:", err);
-        alert("Ocorreu um erro ao baixar o arquivo. Use o WhatsApp como alternativa.");
+    } catch (e) {
+        // Fallback final: copiar texto formatado para área de transferência
+        alert("Sua WebView impede downloads de arquivos locais. Copiando dados formatados para sua Área de Transferência...");
+        copiarTexto(gerarTextoFormatado());
     }
 }
