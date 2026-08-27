@@ -150,7 +150,10 @@ let state = {
     insumos: [],
     recheios: [],
     receitas: [],
-    producoes: []
+    producoes: [],
+    operadores: [],
+    operadorAtivo: "Administrador",
+    senhaAdmin: "1234"
 };
 
 // --- FUNÇÕES DE CONVERSÃO DE UNIDADES E CÁLCULO ---
@@ -351,8 +354,28 @@ function carregarEstado() {
     if (dadosSalvos) {
         try {
             state = JSON.parse(dadosSalvos);
-            // Retrocompatibilidade se recheios estiver indefinido
+            // Retrocompatibilidade
             if (!state.recheios) state.recheios = [];
+            if (!state.operadores) state.operadores = [];
+            if (!state.operadorAtivo) state.operadorAtivo = "Administrador";
+            if (!state.senhaAdmin) state.senhaAdmin = "1234";
+            
+            // Migração de operadores simples (strings) para objetos
+            if (state.operadores) {
+                state.operadores = state.operadores.map(op => {
+                    if (typeof op === 'string') {
+                        return {
+                            nome: op,
+                            senha: "123",
+                            permissoes: {
+                                gerenciarReceitas: true,
+                                gerenciarInsumos: true
+                            }
+                        };
+                    }
+                    return op;
+                });
+            }
         } catch (e) {
             console.error("Erro ao ler dados do localStorage. Restaurando padrões.");
             restaurarPadroes();
@@ -369,6 +392,9 @@ function restaurarPadroes() {
     state.recheios = [...DADOS_PADRAO_RECHEIOS];
     state.receitas = [...DADOS_PADRAO_RECEITAS];
     state.producoes = [...DADOS_PADRAO_PRODUCAO];
+    state.operadores = [];
+    state.operadorAtivo = "Administrador";
+    state.senhaAdmin = "1234";
     salvarEstado();
 }
 
@@ -410,6 +436,118 @@ function atualizarUI() {
     renderReceitas();
     renderProducoes();
     atualizarDropdownReceitas();
+    aplicarPermissoesOperador();
+}
+
+function aplicarPermissoesOperador() {
+    const isMasterAdmin = state.operadorAtivo === "Administrador";
+    
+    // Buscar o operador ativo
+    const operadorObj = (state.operadores || []).find(op => op.nome === state.operadorAtivo);
+    
+    const podeGerenciarReceitas = isMasterAdmin || (operadorObj && operadorObj.permissoes && operadorObj.permissoes.gerenciarReceitas);
+    const podeGerenciarInsumos = isMasterAdmin || (operadorObj && operadorObj.permissoes && operadorObj.permissoes.gerenciarInsumos);
+    
+    // Atualizar texto do operador ativo no cabeçalho
+    const lblOperador = document.getElementById('nome-operador-ativo');
+    if (lblOperador) {
+        lblOperador.textContent = state.operadorAtivo;
+    }
+    
+    // Controlar abas do menu: Recheios e Receitas dependem de podeGerenciarReceitas
+    document.querySelectorAll('.tab-btn[data-tab="recheios"], .tab-btn[data-tab="receitas"]').forEach(btn => {
+        if (podeGerenciarReceitas) {
+            btn.classList.remove('only-admin-hidden');
+        } else {
+            btn.classList.add('only-admin-hidden');
+        }
+    });
+    
+    // Aba Backup & Dados é restrita apenas ao Administrador master
+    document.querySelectorAll('.tab-btn[data-tab="backup"]').forEach(btn => {
+        if (isMasterAdmin) {
+            btn.classList.remove('only-admin-hidden');
+        } else {
+            btn.classList.add('only-admin-hidden');
+        }
+    });
+    
+    // Se o operador ativo estiver em uma aba administrativa e não tiver acesso, redirecionar para a aba Dashboard
+    const activeTabBtn = document.querySelector('.tab-btn.active');
+    if (activeTabBtn) {
+        const tabName = activeTabBtn.dataset.tab;
+        if ((tabName === 'backup' && !isMasterAdmin) || 
+            ((tabName === 'recheios' || tabName === 'receitas') && !podeGerenciarReceitas)) {
+            const dashBtn = document.querySelector('.tab-btn[data-tab="dashboard"]');
+            if (dashBtn) dashBtn.click();
+        }
+    }
+    
+    // Controlar visibilidade de dados administrativos no Dashboard
+    const cardEstoque = document.getElementById('dash-val-estoque');
+    if (cardEstoque) {
+        const cardParent = cardEstoque.closest('.card-stat');
+        if (cardParent) {
+            cardParent.style.display = isMasterAdmin ? 'flex' : 'none'; // Valor total em estoque só Admin master
+        }
+    }
+    
+    const cardReceitas = document.getElementById('dash-total-receitas');
+    if (cardReceitas) {
+        const cardParent = cardReceitas.closest('.card-stat');
+        if (cardParent) {
+            cardParent.style.display = podeGerenciarReceitas ? 'flex' : 'none'; // Depende de gerenciar receitas
+        }
+    }
+    
+    // Controlar o formulário de cadastro/edição de insumos
+    const formInsumoCard = document.getElementById('card-insumo-form');
+    if (formInsumoCard) {
+        formInsumoCard.style.display = podeGerenciarInsumos ? 'block' : 'none';
+    }
+    
+    // Ocultar coluna de preço na tabela de insumos
+    const insumosTable = document.getElementById('insumos-table-body');
+    const tableHeaderCusto = document.querySelector('#insumos table thead th:nth-child(2)');
+    if (tableHeaderCusto) {
+        if (podeGerenciarInsumos) {
+            tableHeaderCusto.classList.remove('hide-column');
+        } else {
+            tableHeaderCusto.classList.add('hide-column');
+        }
+    }
+    
+    if (insumosTable) {
+        const rows = insumosTable.querySelectorAll('tr');
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            if (cells.length >= 2) {
+                const tdPreco = cells[1];
+                if (podeGerenciarInsumos) {
+                    tdPreco.classList.remove('hide-column');
+                } else {
+                    tdPreco.classList.add('hide-column');
+                }
+            }
+            const tdAcoes = cells[cells.length - 1];
+            if (tdAcoes) {
+                const editBtn = tdAcoes.querySelector('.edit-ins-btn');
+                const deleteBtn = tdAcoes.querySelector('.delete-ins-btn');
+                if (editBtn) editBtn.style.display = podeGerenciarInsumos ? 'inline-block' : 'none';
+                if (deleteBtn) deleteBtn.style.display = isMasterAdmin ? 'inline-block' : 'none';
+            }
+        });
+    }
+
+    // Ocultar os botões de exclusão de recheios e receitas para operadores comuns
+    document.querySelectorAll('.delete-rech-btn, .delete-rec-btn').forEach(btn => {
+        btn.style.display = isMasterAdmin ? 'inline-block' : 'none';
+    });
+
+    // Ocultar os botões de Desfazer no histórico de ordens de produção
+    document.querySelectorAll('.delete-prod-btn').forEach(btn => {
+        btn.style.display = isMasterAdmin ? 'inline-block' : 'none';
+    });
 }
 
 // 1. Renderizar Dashboard
@@ -492,7 +630,7 @@ function renderInsumos() {
     tableBody.innerHTML = '';
 
     const query = document.getElementById('search-insumos') ? document.getElementById('search-insumos').value.toLowerCase().trim() : '';
-    const insumosFiltrados = state.insumos.filter(ins => ins.nome.toLowerCase().includes(query));
+    const insumosFiltrados = state.insumos.filter(ins => ins.nome.toLowerCase().includes(query)).sort((a, b) => a.nome.localeCompare(b.nome));
 
     if (insumosFiltrados.length === 0) {
         tableBody.innerHTML = `
@@ -555,7 +693,7 @@ function renderRecheios() {
     tableBody.innerHTML = '';
 
     const query = document.getElementById('search-recheios') ? document.getElementById('search-recheios').value.toLowerCase().trim() : '';
-    const recheiosFiltrados = (state.recheios || []).filter(rec => rec.nome.toLowerCase().includes(query));
+    const recheiosFiltrados = (state.recheios || []).filter(rec => rec.nome.toLowerCase().includes(query)).sort((a, b) => a.nome.localeCompare(b.nome));
 
     if (recheiosFiltrados.length === 0) {
         tableBody.innerHTML = `
@@ -611,7 +749,7 @@ function renderReceitas() {
     tableBody.innerHTML = '';
 
     const query = document.getElementById('search-receitas') ? document.getElementById('search-receitas').value.toLowerCase().trim() : '';
-    const receitasFiltradas = state.receitas.filter(rec => rec.nome.toLowerCase().includes(query));
+    const receitasFiltradas = state.receitas.filter(rec => rec.nome.toLowerCase().includes(query)).sort((a, b) => a.nome.localeCompare(b.nome));
 
     if (receitasFiltradas.length === 0) {
         tableBody.innerHTML = `
@@ -667,7 +805,7 @@ function renderProducoes() {
     if (state.producoes.length === 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="5" style="text-align: center; color: var(--color-text-secondary);">Nenhuma produção registrada.</td>
+                <td colspan="6" style="text-align: center; color: var(--color-text-secondary);">Nenhuma produção registrada.</td>
             </tr>
         `;
         return;
@@ -683,9 +821,12 @@ function renderProducoes() {
             <td><strong>${receita ? receita.nome : 'Excluída'}</strong></td>
             <td>${prod.quantidade} lote(s)</td>
             <td>${formatarMoeda(prod.custoTotal)}</td>
+            <td>${prod.operador || 'Administrador'}</td>
             <td>
-                <span class="badge badge-success">${prod.status || 'Concluído'}</span>
-                <button class="btn btn-danger btn-sm delete-prod-btn" data-id="${prod.id}" style="padding: 2px 6px; font-size: 0.7rem; margin-left: 8px;">Desfazer</button>
+                <div style="display: flex; gap: 4px; align-items: center; justify-content: flex-start; flex-wrap: wrap;">
+                    <button class="btn btn-primary btn-sm print-prod-btn" data-id="${prod.id}" style="padding: 2px 6px; font-size: 0.7rem; width: auto; text-transform: none; letter-spacing: 0;">Imprimir</button>
+                    <button class="btn btn-danger btn-sm delete-prod-btn" data-id="${prod.id}" style="padding: 2px 6px; font-size: 0.7rem; width: auto; text-transform: none; letter-spacing: 0;">Desfazer</button>
+                </div>
             </td>
         `;
         tableBody.appendChild(tr);
@@ -694,13 +835,18 @@ function renderProducoes() {
     document.querySelectorAll('.delete-prod-btn').forEach(btn => {
         btn.addEventListener('click', (e) => desfazerProducao(e.currentTarget.dataset.id));
     });
+
+    document.querySelectorAll('.print-prod-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => imprimirOrdemProducao(e.currentTarget.dataset.id));
+    });
 }
 
 function atualizarDropdownReceitas() {
     const select = document.getElementById('prod-receita-select');
     select.innerHTML = '<option value="">Selecione uma receita...</option>';
     
-    state.receitas.forEach(rec => {
+    const receitasOrdenadas = [...state.receitas].sort((a, b) => a.nome.localeCompare(b.nome));
+    receitasOrdenadas.forEach(rec => {
         const opt = document.createElement('option');
         opt.value = rec.id;
         opt.textContent = rec.nome;
@@ -797,6 +943,11 @@ document.getElementById('btn-cancel-insumo').addEventListener('click', () => {
 });
 
 function deletarInsumo(id) {
+    if (state.operadorAtivo !== "Administrador") {
+        alert("Ação restrita! Apenas o Administrador pode excluir insumos.");
+        return;
+    }
+
     // Verificar se o insumo está em uso nas receitas
     const emUso = state.receitas.some(rec => rec.ingredientes.some(ing => ing.insumoId === id));
     if (emUso) {
@@ -831,7 +982,8 @@ function criarLinhaIngrediente(dados = null) {
     const select = document.createElement('select');
     select.required = true;
     select.innerHTML = '<option value="">Escolha o ingrediente...</option>';
-    state.insumos.forEach(ins => {
+    const insumosOrdenados = [...state.insumos].sort((a, b) => a.nome.localeCompare(b.nome));
+    insumosOrdenados.forEach(ins => {
         const opt = document.createElement('option');
         opt.value = ins.id;
         opt.textContent = `${ins.nome} (${ins.unidade})`;
@@ -888,7 +1040,8 @@ function criarLinhaIngredienteReceita(dados = null) {
     // Insumos
     const optGroupInsumos = document.createElement('optgroup');
     optGroupInsumos.label = "Insumos Básicos";
-    state.insumos.forEach(ins => {
+    const insumosOrdenados = [...state.insumos].sort((a, b) => a.nome.localeCompare(b.nome));
+    insumosOrdenados.forEach(ins => {
         const opt = document.createElement('option');
         opt.value = ins.id;
         opt.textContent = `${ins.nome} (${ins.unidade})`;
@@ -900,7 +1053,8 @@ function criarLinhaIngredienteReceita(dados = null) {
     if (state.recheios && state.recheios.length > 0) {
         const optGroupRecheios = document.createElement('optgroup');
         optGroupRecheios.label = "Recheios (Sub-receitas)";
-        state.recheios.forEach(rech => {
+        const recheiosOrdenados = [...state.recheios].sort((a, b) => a.nome.localeCompare(b.nome));
+        recheiosOrdenados.forEach(rech => {
             const opt = document.createElement('option');
             opt.value = rech.id;
             opt.textContent = `[Recheio] ${rech.nome} (${rech.rendimentoUnidade})`;
@@ -913,7 +1067,8 @@ function criarLinhaIngredienteReceita(dados = null) {
     if (state.receitas && state.receitas.length > 0) {
         const optGroupReceitas = document.createElement('optgroup');
         optGroupReceitas.label = "Receitas (Massas Base)";
-        state.receitas.forEach(rec => {
+        const receitasOrdenadas = [...state.receitas].sort((a, b) => a.nome.localeCompare(b.nome));
+        receitasOrdenadas.forEach(rec => {
             const idReceitaAtual = document.getElementById('receita-id').value;
             if (rec.id !== idReceitaAtual) {
                 const opt = document.createElement('option');
@@ -1048,6 +1203,11 @@ formReceita.addEventListener('submit', (e) => {
 });
 
 function deletarReceita(id) {
+    if (state.operadorAtivo !== "Administrador") {
+        alert("Ação restrita! Apenas o Administrador pode excluir receitas.");
+        return;
+    }
+
     // Verificar se a receita está em uso como sub-receita em outra receita
     const emUso = state.receitas.some(r => r.ingredientes.some(ing => ing.insumoId === id));
     if (emUso) {
@@ -1157,6 +1317,11 @@ formRecheio.addEventListener('submit', (e) => {
 });
 
 function deletarRecheio(id) {
+    if (state.operadorAtivo !== "Administrador") {
+        alert("Ação restrita! Apenas o Administrador pode excluir recheios.");
+        return;
+    }
+
     // Verificar se o recheio está em uso em alguma receita final
     const emUso = state.receitas.some(rec => rec.ingredientes.some(ing => ing.insumoId === id));
     if (emUso) {
@@ -1436,6 +1601,135 @@ function verFichaTecnica(id) {
     };
 }
 
+function imprimirOrdemProducao(id) {
+    const prod = state.producoes.find(p => p.id === id);
+    if (!prod) {
+        alert("Ordem de produção não encontrada!");
+        return;
+    }
+
+    const receita = state.receitas.find(r => r.id === prod.receitaId);
+    const dataFmt = prod.data ? prod.data.split('-').reverse().join('/') : '';
+    
+    // Função auxiliar para multiplicar rendimento caso seja formato como "100 salgados"
+    function formatarRendimentoTotal(rendimentoOriginal, qtdLotes) {
+        if (!rendimentoOriginal) return `${qtdLotes} lote(s)`;
+        const match = rendimentoOriginal.trim().match(/^(\d+(?:\.\d+)?)\s*(.*)$/);
+        if (match) {
+            const numero = parseFloat(match[1]);
+            const texto = match[2];
+            const total = numero * qtdLotes;
+            return `${total.toFixed(0)} ${texto}`;
+        }
+        return `${qtdLotes} lote(s) (${rendimentoOriginal} cada)`;
+    }
+
+    const rendimentoTotal = receita ? formatarRendimentoTotal(receita.rendimento, prod.quantidade) : `${prod.quantidade} lote(s)`;
+
+    // Gerar lista de ingredientes diretos multiplicados
+    let ingredientesHtml = '';
+    if (receita && receita.ingredientes) {
+        receita.ingredientes.forEach(ing => {
+            let nomeIngrediente = "Ingrediente Desconhecido";
+            
+            // Tentar descobrir o nome baseado no id
+            if (ing.insumoId.startsWith('rec_')) {
+                const recheio = state.recheios.find(r => r.id === ing.insumoId);
+                if (recheio) nomeIngrediente = `[Recheio] ${recheio.nome}`;
+            } else if (ing.insumoId.startsWith('r') && !ing.insumoId.startsWith('rec_') && ing.insumoId.length <= 5) {
+                const rBase = state.receitas.find(r => r.id === ing.insumoId);
+                if (rBase) nomeIngrediente = `[Massa Base] ${rBase.nome}`;
+            } else {
+                const insumo = state.insumos.find(i => i.id === ing.insumoId);
+                if (insumo) nomeIngrediente = insumo.nome;
+            }
+
+            const qtdUnit = ing.quantidade;
+            const qtdTotal = ing.quantidade * prod.quantidade;
+            
+            ingredientesHtml += `
+                <tr>
+                    <td><strong>${nomeIngrediente}</strong></td>
+                    <td>${qtdUnit} ${ing.unidade}</td>
+                    <td style="font-weight: bold; font-size: 1.1rem; color: #111;">${qtdTotal.toFixed(3).replace(/\.000$/, '').replace(/\.00$/, '')} ${ing.unidade}</td>
+                </tr>
+            `;
+        });
+    } else {
+        ingredientesHtml = `
+            <tr>
+                <td colspan="3" style="text-align: center;">Receita excluída do banco. Não é possível listar ingredientes.</td>
+            </tr>
+        `;
+    }
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Ordem de Produção - Lote #${prod.id}</title>
+            <style>
+                body { font-family: sans-serif; padding: 2rem; color: #111; max-width: 800px; margin: 0 auto; line-height: 1.4; }
+                .header { border-bottom: 2px solid #111; padding-bottom: 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-end; }
+                .header h2 { margin: 0; font-size: 1.8rem; }
+                .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; background-color: #f9f9f9; padding: 15px; border: 1px solid #ddd; border-radius: 4px; }
+                .meta-grid p { margin: 4px 0; }
+                table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+                th, td { border-bottom: 1px solid #ddd; padding: 10px 8px; text-align: left; }
+                th { background-color: #f5f5f5; }
+                .section-title { font-size: 1.2rem; font-weight: bold; border-bottom: 1px solid #111; padding-bottom: 0.3rem; margin-top: 1.5rem; text-transform: uppercase; }
+                .footer { margin-top: 3rem; text-align: center; font-size: 0.85rem; color: #666; border-top: 1px solid #ddd; padding-top: 1rem; }
+                @media print {
+                    body { padding: 1rem; }
+                    .meta-grid { background-color: #fff !important; border: 1px solid #111 !important; }
+                    th { background-color: #fff !important; border-bottom: 2px solid #111 !important; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <div>
+                    <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; color: #666; font-weight: bold;">Guia de Fabricação</span>
+                    <h2>${receita ? receita.nome : 'Receita Excluída'}</h2>
+                </div>
+                <span style="font-weight: bold; font-size: 1.2rem;">LOTE #${prod.id}</span>
+            </div>
+            
+            <div class="meta-grid">
+                <div>
+                    <p><strong>Data de Produção:</strong> ${dataFmt}</p>
+                    <p><strong>Operador Responsável:</strong> ${prod.operador || 'Administrador'}</p>
+                </div>
+                <div style="text-align: right;">
+                    <p><strong>Quantidade Lançada:</strong> ${prod.quantidade} lote(s)</p>
+                    <p><strong>Rendimento Estimado Total:</strong> ${rendimentoTotal}</p>
+                </div>
+            </div>
+            
+            <div class="section-title">Lista de Pesagem de Ingredientes (Multiplicados por ${prod.quantidade})</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ingrediente / Sub-receita</th>
+                        <th>Medida Unitária (por Lote)</th>
+                        <th>Quantidade Total a Pesar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${ingredientesHtml}
+                </tbody>
+            </table>
+            
+            <div class="footer">
+                Agri Doce Controle de Produção - Impresso em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}
+            </div>
+            <script>window.print();</script>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+}
+
 // 6. Registro de Ordens de Produção (com abate de estoque)
 const formProducao = document.getElementById('form-producao');
 // Definir data padrão no input para o dia atual
@@ -1625,7 +1919,8 @@ formProducao.addEventListener('submit', (e) => {
         quantidade,
         data,
         custoTotal,
-        status: "Concluído"
+        status: "Concluído",
+        operador: state.operadorAtivo || "Administrador"
     };
 
     state.producoes.push(novaProd);
@@ -1714,11 +2009,21 @@ document.getElementById('btn-zerar-banco').addEventListener('click', () => {
                 insumos: [],
                 recheios: [],
                 receitas: [],
-                producoes: []
+                producoes: [],
+                operadores: [],
+                operadorAtivo: "Administrador",
+                senhaAdmin: "1234"
             };
             salvarEstado();
             mostrarToast("Todos os dados foram excluídos. O banco está totalmente limpo!");
         }
+    }
+});
+
+document.getElementById('btn-restaurar-padroes').addEventListener('click', () => {
+    if (confirm("Deseja realmente carregar as receitas, recheios e insumos modelo originais? Isso substituirá seus dados atuais de produção e custos.")) {
+        restaurarPadroes();
+        mostrarToast("Dados padrão de fábrica restaurados!");
     }
 });
 
@@ -2408,4 +2713,323 @@ window.addEventListener('DOMContentLoaded', () => {
     // Listeners do Scanner de Câmera
     document.getElementById('btn-iniciar-scanner-nfe').addEventListener('click', iniciarScannerCamera);
     document.getElementById('btn-parar-scanner-nfe').addEventListener('click', pararScannerCamera);
+
+    // Listeners do Controle de Operadores
+    document.getElementById('btn-trocar-operador').addEventListener('click', abrirModalOperador);
+    document.getElementById('btn-fechar-operador-modal').addEventListener('click', fecharModalOperador);
+    document.getElementById('select-operador-perfil').addEventListener('change', controlarCamposModalOperador);
+    document.getElementById('btn-confirmar-operador').addEventListener('click', confirmarTrocaOperador);
+    document.getElementById('btn-gerenciar-operadores-modal').addEventListener('click', abrirModalGerenciarOperadores);
+    document.getElementById('btn-fechar-gerenciar-operadores-modal').addEventListener('click', fecharModalGerenciarOperadores);
+    document.getElementById('btn-fechar-gerenciar-operadores-btn').addEventListener('click', fecharModalGerenciarOperadores);
+    document.getElementById('btn-cadastrar-operador').addEventListener('click', cadastrarNovoOperador);
+    document.getElementById('btn-salvar-senha-admin').addEventListener('click', salvarNovaSenhaAdmin);
+    document.getElementById('btn-imprimir-compras').addEventListener('click', imprimirListaCompras);
 });
+
+// --- SISTEMA DE GESTÃO DE OPERADORES (MODAIS E FLUXO) ---
+
+function abrirModalOperador() {
+    const modal = document.getElementById('operador-modal');
+    modal.style.display = 'flex';
+    
+    // Atualizar dropdown de perfis
+    const select = document.getElementById('select-operador-perfil');
+    select.innerHTML = '<option value="Administrador">Administrador</option>';
+    
+    (state.operadores || []).forEach(op => {
+        const opt = document.createElement('option');
+        opt.value = op.nome;
+        opt.textContent = op.nome;
+        select.appendChild(opt);
+    });
+    
+    // Seleciona o operador ativo atual
+    select.value = state.operadorAtivo;
+    
+    // Trata visibilidade do input de senha e do botão de configurar
+    controlarCamposModalOperador();
+}
+
+function fecharModalOperador() {
+    document.getElementById('operador-modal').style.display = 'none';
+    document.getElementById('senha-operador-input').value = '';
+}
+
+function controlarCamposModalOperador() {
+    const select = document.getElementById('select-operador-perfil');
+    const senhaContainer = document.getElementById('senha-operador-container');
+    const btnGerenciar = document.getElementById('btn-gerenciar-operadores-modal');
+    
+    const isAtivoAdmin = state.operadorAtivo === "Administrador";
+    
+    // Sempre mostramos o campo de senha para confirmação
+    if (senhaContainer) {
+        senhaContainer.style.display = 'block';
+    }
+    
+    // Botão de gerenciar/configurar só é visível se o operador ATUAL logado for o Administrador
+    btnGerenciar.style.display = isAtivoAdmin ? 'inline-block' : 'none';
+}
+
+function confirmarTrocaOperador() {
+    const select = document.getElementById('select-operador-perfil');
+    const nomeSelecionado = select.value;
+    const senhaInput = document.getElementById('senha-operador-input').value;
+    
+    if (nomeSelecionado === "Administrador") {
+        if (senhaInput !== state.senhaAdmin) {
+            alert("Senha de Administrador incorreta! Tente novamente.");
+            return;
+        }
+    } else {
+        const op = (state.operadores || []).find(o => o.nome === nomeSelecionado);
+        if (!op) {
+            alert("Operador não encontrado!");
+            return;
+        }
+        if (senhaInput !== op.senha) {
+            alert(`Senha do operador "${nomeSelecionado}" incorreta! Tente novamente.`);
+            return;
+        }
+    }
+    
+    state.operadorAtivo = nomeSelecionado;
+    salvarEstado();
+    fecharModalOperador();
+    mostrarToast(`Operador alterado para: ${nomeSelecionado}`);
+}
+
+function abrirModalGerenciarOperadores() {
+    fecharModalOperador();
+    document.getElementById('gerenciar-operadores-modal').style.display = 'flex';
+    renderTabelaOperadores();
+}
+
+function fecharModalGerenciarOperadores() {
+    document.getElementById('gerenciar-operadores-modal').style.display = 'none';
+    abrirModalOperador(); // volta para o modal de identificação
+}
+
+function renderTabelaOperadores() {
+    const tableBody = document.getElementById('operadores-lista-table-body');
+    tableBody.innerHTML = '';
+    
+    if (!state.operadores || state.operadores.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="3" style="text-align: center; color: var(--color-text-secondary);">Nenhum operador cadastrado.</td>
+            </tr>
+        `;
+        return;
+    }
+    
+    state.operadores.forEach(op => {
+        const listPerms = [];
+        if (op.permissoes && op.permissoes.gerenciarReceitas) listPerms.push("Receitas");
+        if (op.permissoes && op.permissoes.gerenciarInsumos) listPerms.push("Insumos");
+        const permsStr = listPerms.length > 0 ? listPerms.join(", ") : "Nenhuma";
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${op.nome}</strong></td>
+            <td><span style="font-size: 0.85rem; color: var(--color-text-secondary);">${permsStr}</span></td>
+            <td style="text-align: center;">
+                <button class="btn btn-danger btn-sm btn-remover-op" data-nome="${op.nome}" style="padding: 2px 6px; font-size: 0.7rem;">Excluir</button>
+            </td>
+        `;
+        tableBody.appendChild(tr);
+    });
+    
+    document.querySelectorAll('.btn-remover-op').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            excluirOperador(e.currentTarget.dataset.nome);
+        });
+    });
+}
+
+function cadastrarNovoOperador() {
+    const inputNome = document.getElementById('novo-operador-nome');
+    const inputSenha = document.getElementById('novo-operador-senha');
+    const checkReceitas = document.getElementById('perm-receitas');
+    const checkInsumos = document.getElementById('perm-insumos');
+    
+    const nome = inputNome.value.trim();
+    const senha = inputSenha.value.trim();
+    
+    if (!nome) {
+        alert("Por favor, digite o nome do operador.");
+        return;
+    }
+    
+    if (!senha) {
+        alert("Por favor, defina uma senha de acesso.");
+        return;
+    }
+    
+    if (nome.toLowerCase() === "administrador") {
+        alert("O nome 'Administrador' é reservado do sistema.");
+        return;
+    }
+    
+    if (!state.operadores) state.operadores = [];
+    
+    if (state.operadores.some(op => op.nome === nome)) {
+        alert("Este operador já está cadastrado.");
+        return;
+    }
+    
+    const novoOp = {
+        nome: nome,
+        senha: senha,
+        permissoes: {
+            gerenciarReceitas: checkReceitas.checked,
+            gerenciarInsumos: checkInsumos.checked
+        }
+    };
+    
+    state.operadores.push(novoOp);
+    
+    // Limpar campos
+    inputNome.value = '';
+    inputSenha.value = '';
+    checkReceitas.checked = true;
+    checkInsumos.checked = true;
+    
+    salvarEstado();
+    renderTabelaOperadores();
+    mostrarToast(`Operador ${nome} adicionado com sucesso!`);
+}
+
+function excluirOperador(nome) {
+    if (confirm(`Tem certeza que deseja excluir o operador "${nome}"?`)) {
+        state.operadores = state.operadores.filter(op => op.nome !== nome);
+        
+        // Se o operador excluído for o ativo, volta para Administrador
+        if (state.operadorAtivo === nome) {
+            state.operadorAtivo = "Administrador";
+        }
+        
+        salvarEstado();
+        renderTabelaOperadores();
+        mostrarToast(`Operador ${nome} excluído.`);
+    }
+}
+
+function salvarNovaSenhaAdmin() {
+    const nova = document.getElementById('senha-admin-nova').value;
+    const confirmar = document.getElementById('senha-admin-confirmar').value;
+    
+    if (!nova) {
+        alert("Por favor, digite a nova senha.");
+        return;
+    }
+    
+    if (nova !== confirmar) {
+        alert("As senhas não coincidem!");
+        return;
+    }
+    
+    state.senhaAdmin = nova;
+    document.getElementById('senha-admin-nova').value = '';
+    document.getElementById('senha-admin-confirmar').value = '';
+    
+    salvarEstado();
+    mostrarToast("Senha do Administrador alterada com sucesso!");
+}
+
+function imprimirListaCompras() {
+    // Pegar a lista de insumos com estoque baixo
+    const insumosBaixos = [];
+    state.insumos.forEach(ins => {
+        const baseEstoque = converterParaBase(ins.estoqueAtual, ins.unidade);
+        const baseMinimo = converterParaBase(ins.estoqueMinimo || 0, ins.unidade);
+        
+        if (baseEstoque.qtd <= baseMinimo.qtd && baseMinimo.qtd > 0) {
+            const falta = ins.estoqueMinimo - ins.estoqueAtual;
+            insumosBaixos.push({
+                nome: ins.nome,
+                estoqueAtual: ins.estoqueAtual,
+                estoqueMinimo: ins.estoqueMinimo,
+                unidade: ins.unidade,
+                comprar: falta
+            });
+        }
+    });
+
+    // Ordenar alfabeticamente os insumos para a lista de compras
+    insumosBaixos.sort((a, b) => a.nome.localeCompare(b.nome));
+
+    let itensHtml = '';
+    if (insumosBaixos.length > 0) {
+        insumosBaixos.forEach(item => {
+            itensHtml += `
+                <tr>
+                    <td><strong>${item.nome}</strong></td>
+                    <td style="color: #ef4444; font-weight: 500;">${item.estoqueAtual} ${item.unidade}</td>
+                    <td>${item.estoqueMinimo} ${item.unidade}</td>
+                    <td style="font-weight: bold; font-size: 1.1rem; color: #10b981;">${item.comprar.toFixed(3).replace(/\.000$/, '').replace(/\.00$/, '')} ${item.unidade}</td>
+                </tr>
+            `;
+        });
+    } else {
+        itensHtml = `
+            <tr>
+                <td colspan="4" style="text-align: center; color: #666; padding: 20px;">Nenhum insumo está com estoque baixo no momento. Tudo abastecido!</td>
+            </tr>
+        `;
+    }
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Lista de Compras de Insumos - Agri Doce</title>
+            <style>
+                body { font-family: sans-serif; padding: 2rem; color: #111; max-width: 800px; margin: 0 auto; line-height: 1.4; }
+                .header { border-bottom: 2px solid #111; padding-bottom: 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-end; }
+                .header h2 { margin: 0; font-size: 1.8rem; }
+                table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+                th, td { border-bottom: 1px solid #ddd; padding: 10px 8px; text-align: left; }
+                th { background-color: #f5f5f5; }
+                .footer { margin-top: 3rem; text-align: center; font-size: 0.85rem; color: #666; border-top: 1px solid #ddd; padding-top: 1rem; }
+                @media print {
+                    body { padding: 1rem; }
+                    th { background-color: #fff !important; border-bottom: 2px solid #111 !important; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <div>
+                    <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; color: #666; font-weight: bold;">Relatório de Reposição</span>
+                    <h2>Lista de Compras (Estoque Baixo)</h2>
+                </div>
+                <span style="font-weight: bold; font-size: 1.2rem;">Total: ${insumosBaixos.length} item(ns)</span>
+            </div>
+            
+            <p>Os itens abaixo estão com o estoque atual abaixo do limite mínimo ideal configurado na ficha cadastral.</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Insumo</th>
+                        <th>Estoque Atual</th>
+                        <th>Mínimo Ideal</th>
+                        <th>Sugerido para Comprar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${itensHtml}
+                </tbody>
+            </table>
+            
+            <div class="footer">
+                Agri Doce Controle de Produção - Relatório emitido em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}
+            </div>
+            <script>window.print();</script>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+}

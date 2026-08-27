@@ -742,4 +742,33 @@ tr:hover td {
     outline: none;
 }
 
+/* ================= CONTROLE DE ACESSO POR OPERADOR ================= */
+.only-admin-hidden {
+    display: none !important;
+}
+
+.operador-status {
+    border: 1px solid var(--color-border);
+    background-color: var(--color-bg-secondary);
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--border-radius);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.operador-status:hover {
+    border-color: var(--color-text-secondary);
+}
+
+.operador-status strong {
+    color: #ef4444; /* Vermelho NOD accent */
+}
+
+/* Ocultação de colunas específicas de tabelas */
+.hide-column {
+    display: none !important;
+}
+
 

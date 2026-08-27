@@ -12,19 +12,26 @@
 <body>
     <div class="app-container">
         <!-- Cabeçalho Principal -->
-        <header>
-            <div class="brand-section">
-                <span class="brand-logo-txt" style="font-family: 'Orbitron', sans-serif; color: #ef4444; text-shadow: 0 0 8px rgba(239, 68, 68, 0.4); letter-spacing: 0.1em;">NOD</span>
-                <span class="brand-logo-sub">Controle de Produção & Custos</span>
+        <header style="display: flex; flex-direction: column; align-items: stretch; gap: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 1rem;">
+                <div class="brand-section">
+                    <span class="brand-logo-txt" style="font-family: 'Orbitron', sans-serif; color: #ef4444; text-shadow: 0 0 8px rgba(239, 68, 68, 0.4); letter-spacing: 0.1em;">NOD</span>
+                    <span class="brand-logo-sub">Controle de Produção & Custos</span>
+                </div>
+                <!-- Seletor de Operador Ativo -->
+                <div class="operador-status" id="operador-status-container" style="display: flex; align-items: center; gap: 0.5rem; background: var(--color-bg-secondary); padding: 0.4rem 0.8rem; border-radius: 6px; border: 1px solid var(--color-border);">
+                    <span id="operador-atual-txt" style="font-family: var(--font-body); font-size: 0.85rem; font-weight: 500; color: var(--color-text-primary);">👤 Operador: <strong id="nome-operador-ativo">Administrador</strong></span>
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-trocar-operador" style="width: auto; padding: 2px 8px; font-size: 0.75rem; text-transform: none; letter-spacing: 0; margin-left: 5px;">Trocar</button>
+                </div>
             </div>
             <!-- Abas de Navegação -->
-            <nav class="nav-tabs" id="main-nav">
+            <nav class="nav-tabs" id="main-nav" style="width: 100%; border-top: 1px solid var(--color-border); padding-top: 0.75rem; margin-top: 0.5rem;">
                 <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
                 <button class="tab-btn" data-tab="insumos">Insumos (Estoque)</button>
-                <button class="tab-btn" data-tab="recheios">Recheios</button>
-                <button class="tab-btn" data-tab="receitas">Receitas & Custos</button>
+                <button class="tab-btn only-admin" data-tab="recheios">Recheios</button>
+                <button class="tab-btn only-admin" data-tab="receitas">Receitas & Custos</button>
                 <button class="tab-btn" data-tab="producao">Ordens de Produção</button>
-                <button class="tab-btn" data-tab="backup">Backup & Dados</button>
+                <button class="tab-btn only-admin" data-tab="backup">Backup & Dados</button>
             </nav>
         </header>
 
@@ -52,7 +59,10 @@
             <div class="grid-two-cols">
                 <!-- Alertas de Insumos -->
                 <div class="card">
-                    <h3 class="card-title">Insumos com Estoque Baixo</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 8px;">
+                        <h3 class="card-title" style="margin: 0;">Insumos com Estoque Baixo</h3>
+                        <button class="btn btn-primary btn-sm" id="btn-imprimir-compras" style="padding: 4px 10px; font-size: 0.8rem; width: auto; text-transform: none; letter-spacing: 0;">🖨️ Imprimir Lista de Compras</button>
+                    </div>
                     <div class="table-container">
                         <table>
                             <thead>
@@ -309,7 +319,8 @@
                                     <th>Produto / Receita</th>
                                     <th>Lotes</th>
                                     <th>Custo Total</th>
-                                    <th>Status</th>
+                                    <th>Operador</th>
+                                    <th>Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="producao-table-body">
@@ -349,12 +360,13 @@
             </div>
 
             <div class="card" style="margin-top: 1.5rem; border: 1px solid #ef4444; background: rgba(239, 68, 68, 0.02);">
-                <h3 class="card-title" style="color: #ef4444;">Zerar Banco de Dados</h3>
+                <h3 class="card-title" style="color: #ef4444;">Redefinir Sistema</h3>
                 <p style="margin-bottom: 1.5rem; color: var(--color-text-secondary);">
-                    Atenção: Isso excluirá permanentemente todos os insumos, receitas, recheios e históricos de produção cadastrados. O aplicativo será reconfigurado para um estado totalmente limpo para uso de um novo cliente.
+                    Escolha uma das opções abaixo para redefinir o banco de dados local do aplicativo. 
                 </p>
                 <div class="btn-group">
-                    <button class="btn btn-danger" id="btn-zerar-banco" style="background-color: #ef4444; border-color: #ef4444;">Zerar Todos os Dados (Começar do Zero)</button>
+                    <button class="btn btn-primary" id="btn-restaurar-padroes" style="width: auto;">Restaurar Dados de Fábrica (Modelos)</button>
+                    <button class="btn btn-danger" id="btn-zerar-banco" style="background-color: #ef4444; border-color: #ef4444; width: auto;">Zerar Todos os Dados (Limpar Tudo)</button>
                 </div>
             </div>
         </section>
@@ -593,6 +605,110 @@
             <div class="btn-group" style="margin-top: 1.5rem; justify-content: flex-end;">
                 <button type="button" class="btn btn-secondary" id="btn-cancelar-nfe">Cancelar</button>
                 <button type="button" class="btn btn-primary" id="btn-salvar-entrada-nfe" style="display: none;">Confirmar Entrada</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL DE TROCA DE OPERADOR ================= -->
+    <div class="modal" id="operador-modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <button class="close-btn" id="btn-fechar-operador-modal">&times;</button>
+            <h2 class="card-title" style="font-size: 1.4rem; border-bottom: 2px solid var(--color-text-primary); margin-bottom: 1.5rem;">Identificação do Operador</h2>
+            
+            <div class="form-group">
+                <label for="select-operador-perfil">Selecione seu Perfil</label>
+                <select id="select-operador-perfil" style="width: 100%; padding: 0.75rem; border-radius: 6px; border: 1px solid var(--color-border); background: var(--color-bg-secondary); color: var(--color-text-primary);">
+                    <option value="Administrador">Administrador</option>
+                    <!-- Injetado via JS -->
+                </select>
+            </div>
+            
+            <!-- Campo de Senha -->
+            <div class="form-group" id="senha-operador-container">
+                <label for="senha-operador-input">Senha de Acesso</label>
+                <input type="password" id="senha-operador-input" placeholder="Digite a senha..." style="width: 100%;">
+            </div>
+            
+            <div class="btn-group" style="margin-top: 1.5rem; justify-content: flex-end; gap: 0.5rem;">
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-gerenciar-operadores-modal" style="width: auto; text-transform: none; letter-spacing: 0; display: none;">⚙️ Configurar</button>
+                <button type="button" class="btn btn-primary" id="btn-confirmar-operador" style="width: auto;">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL DE GERENCIAMENTO DE OPERADORES ================= -->
+    <div class="modal" id="gerenciar-operadores-modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <button class="close-btn" id="btn-fechar-gerenciar-operadores-modal">&times;</button>
+            <h2 class="card-title" style="font-size: 1.4rem; border-bottom: 2px solid var(--color-text-primary); margin-bottom: 1.5rem;">Gerenciar Operadores e Senha</h2>
+            
+            <!-- Seção de alterar senha do admin -->
+            <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--color-border);">
+                <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--color-text-primary);">Alterar Senha do Administrador</h3>
+                <div class="form-group row-group">
+                    <div>
+                        <label for="senha-admin-nova">Nova Senha</label>
+                        <input type="password" id="senha-admin-nova" placeholder="Nova senha" style="width: 100%;">
+                    </div>
+                    <div>
+                        <label for="senha-admin-confirmar">Confirmar Nova Senha</label>
+                        <input type="password" id="senha-admin-confirmar" placeholder="Confirme a senha" style="width: 100%;">
+                    </div>
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-salvar-senha-admin" style="width: auto; text-transform: none; letter-spacing: 0;">Salvar Nova Senha</button>
+            </div>
+            
+            <!-- Seção de cadastrar novo operador -->
+            <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--color-border);">
+                <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--color-text-primary);">Cadastrar Novo Operador</h3>
+                
+                <div class="form-group row-group" style="margin-bottom: 0.75rem;">
+                    <div>
+                        <label for="novo-operador-nome">Nome do Operador</label>
+                        <input type="text" id="novo-operador-nome" placeholder="Nome..." style="width: 100%;">
+                    </div>
+                    <div>
+                        <label for="novo-operador-senha">Senha de Acesso</label>
+                        <input type="password" id="novo-operador-senha" placeholder="Senha..." style="width: 100%;">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label style="font-weight: 600; margin-bottom: 0.5rem; display: block; font-size: 0.85rem;">Permissões Concedidas</label>
+                    <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                        <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; font-weight: normal; cursor: pointer; color: var(--color-text-primary);">
+                            <input type="checkbox" id="perm-receitas" checked> Gerenciar Receitas & Recheios
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; font-weight: normal; cursor: pointer; color: var(--color-text-primary);">
+                            <input type="checkbox" id="perm-insumos" checked> Gerenciar Insumos (Cadastro/Custos)
+                        </label>
+                    </div>
+                </div>
+                
+                <button type="button" class="btn btn-primary btn-sm" id="btn-cadastrar-operador" style="width: auto; text-transform: none; letter-spacing: 0;">Cadastrar Operador</button>
+            </div>
+
+            <!-- Lista de operadores cadastrados -->
+            <div>
+                <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--color-text-primary);">Operadores Cadastrados</h3>
+                <div class="table-container" style="max-height: 180px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome do Operador</th>
+                                <th>Permissões</th>
+                                <th style="width: 80px; text-align: center;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="operadores-lista-table-body">
+                            <!-- Preenchido via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="btn-group" style="margin-top: 1.5rem; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" id="btn-fechar-gerenciar-operadores-btn">Fechar</button>
             </div>
         </div>
     </div>
