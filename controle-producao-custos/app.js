@@ -3117,8 +3117,19 @@ function copiarTexto(texto) {
 
 function baixarPDF() {
     try {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+        let jsPDFConstructor;
+        if (window.jspdf && window.jspdf.jsPDF) {
+            jsPDFConstructor = window.jspdf.jsPDF;
+        } else if (window.jsPDF) {
+            jsPDFConstructor = window.jsPDF;
+        }
+        
+        if (!jsPDFConstructor) {
+            alert("A biblioteca PDF não foi carregada no dispositivo ainda. Verifique se o arquivo jspdf.umd.min.js foi copiado.");
+            return;
+        }
+        
+        const doc = new jsPDFConstructor();
         
         const body = document.getElementById('print-preview-body');
         const header = body.querySelector('.header');
