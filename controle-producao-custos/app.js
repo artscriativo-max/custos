@@ -334,7 +334,7 @@ function calcularFichaTecnica(receita) {
 }
 
 function ingredienteEReceitaBase(id) {
-    return id.startsWith('r') && !id.startsWith('rec_') && id.length <= 4;
+    return id.startsWith('r') && !id.startsWith('rec_');
 }
 
 // --- PERSISTÊNCIA DE DADOS ---
@@ -978,17 +978,54 @@ function criarLinhaIngrediente(dados = null) {
     const row = document.createElement('div');
     row.className = 'ingredient-row';
 
-    // Dropdown de insumos
+    // Dropdown de insumos, recheios e receitas base
     const select = document.createElement('select');
     select.required = true;
     select.innerHTML = '<option value="">Escolha o ingrediente...</option>';
+
+    // 1. Grupo de Insumos Brutos
+    const grpInsumos = document.createElement('optgroup');
+    grpInsumos.label = 'Insumos / Ingredientes Brutos';
     const insumosOrdenados = [...state.insumos].sort((a, b) => a.nome.localeCompare(b.nome));
     insumosOrdenados.forEach(ins => {
         const opt = document.createElement('option');
         opt.value = ins.id;
         opt.textContent = `${ins.nome} (${ins.unidade})`;
-        select.appendChild(opt);
+        grpInsumos.appendChild(opt);
     });
+    select.appendChild(grpInsumos);
+
+    // 2. Grupo de Recheios / Sub-receitas
+    if (state.recheios && state.recheios.length > 0) {
+        const grpRecheios = document.createElement('optgroup');
+        grpRecheios.label = 'Recheios / Sub-receitas';
+        const recheiosOrdenados = [...state.recheios].sort((a, b) => a.nome.localeCompare(b.nome));
+        recheiosOrdenados.forEach(rech => {
+            const opt = document.createElement('option');
+            opt.value = rech.id;
+            opt.textContent = `RECHEIO: ${rech.nome} (${rech.rendimentoUnidade})`;
+            grpRecheios.appendChild(opt);
+        });
+        select.appendChild(grpRecheios);
+    }
+
+    // 3. Grupo de Receitas Base (Massas / Outros)
+    if (state.receitas && state.receitas.length > 0) {
+        const grpReceitas = document.createElement('optgroup');
+        grpReceitas.label = 'Receitas Base / Massas';
+        const receitasOrdenadas = [...state.receitas].sort((a, b) => a.nome.localeCompare(b.nome));
+        receitasOrdenadas.forEach(rec => {
+            // Evita listar a própria receita que está sendo editada
+            const idEdicao = document.getElementById('receita-id') ? document.getElementById('receita-id').value : null;
+            if (rec.id !== idEdicao) {
+                const opt = document.createElement('option');
+                opt.value = rec.id;
+                opt.textContent = `MASSA: ${rec.nome}`;
+                grpReceitas.appendChild(opt);
+            }
+        });
+        select.appendChild(grpReceitas);
+    }
 
     const inputQtd = document.createElement('input');
     inputQtd.type = 'number';
