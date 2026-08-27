@@ -771,4 +771,111 @@ tr:hover td {
     display: none !important;
 }
 
+/* ================= REGRAS DE IMPRESSÃO UNIFICADAS ================= */
+@media print {
+    /* Esconde tudo na página */
+    body > * {
+        display: none !important;
+    }
+    /* Exibe apenas o modal de visualização e seus descendentes */
+    #print-preview-modal {
+        display: block !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        background: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        z-index: 99999 !important;
+    }
+    #print-preview-modal .modal-content {
+        max-width: 100% !important;
+        width: 100% !important;
+        height: auto !important;
+        max-height: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: white !important;
+        box-shadow: none !important;
+    }
+    #print-preview-modal .modal-header,
+    #print-preview-modal .modal-footer {
+        display: none !important;
+    }
+    #print-preview-body {
+        overflow: visible !important;
+        max-height: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        color: #111 !important;
+    }
+    #print-preview-body th {
+        background-color: #f5f5f5 !important;
+        color: #111 !important;
+    }
+}
+
+/* Estilos de elementos dentro do visualizador de relatórios */
+#print-preview-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    font-size: 0.95rem;
+}
+#print-preview-body th, #print-preview-body td {
+    border-bottom: 1px solid var(--color-border);
+    padding: 10px 8px;
+    text-align: left;
+}
+#print-preview-body th {
+    background-color: var(--color-bg-secondary);
+    font-family: var(--font-title);
+    font-weight: bold;
+}
+#print-preview-body .header {
+    border-bottom: 2px solid var(--color-text-main);
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+#print-preview-body .header h2 {
+    margin: 0;
+    font-size: 1.6rem;
+}
+#print-preview-body .meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    background-color: var(--color-bg-secondary);
+    padding: 15px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+}
+#print-preview-body .meta-grid p {
+    margin: 4px 0;
+}
+#print-preview-body .section-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-bottom: 1px solid var(--color-text-main);
+    padding-bottom: 0.3rem;
+    margin-top: 1.5rem;
+    text-transform: uppercase;
+}
+#print-preview-body .footer {
+    margin-top: 3rem;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    border-top: 1px solid var(--color-border);
+    padding-top: 1rem;
+}
+
 

@@ -741,6 +741,23 @@
         </div>
     </div>
 
+    <!-- MODAL DE VISUALIZAÇÃO/IMPRESSÃO DE RELATÓRIOS -->
+    <div class="modal" id="print-preview-modal">
+        <div class="modal-content" style="max-width: 800px; width: 95%; max-height: 90vh; display: flex; flex-direction: column; background-color: var(--color-bg-card); color: var(--color-text-main);">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-border); padding-bottom: 0.8rem; margin-bottom: 1rem;">
+                <h3 id="print-preview-title" style="margin: 0; font-family: var(--font-title); font-size: 1.25rem;">Visualizar Documento</h3>
+                <span class="close-modal" id="btn-fechar-print-preview" style="cursor: pointer; font-size: 1.5rem;">&times;</span>
+            </div>
+            <div id="print-preview-body" style="overflow-y: auto; flex: 1; padding-right: 5px;">
+                <!-- O HTML da impressão será injetado aqui -->
+            </div>
+            <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--color-border); padding-top: 0.8rem; margin-top: 1rem; flex-wrap: wrap;">
+                <button class="btn btn-secondary" id="btn-cancelar-print-preview" style="width: auto;">Fechar</button>
+                <button class="btn btn-primary" id="btn-executar-print" style="width: auto; background-color: var(--color-accent); border-color: var(--color-accent);">🖨️ Imprimir / PDF</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast de Notificações -->
     <div class="toast" id="toast">
         <span id="toast-message">Mensagem</span>

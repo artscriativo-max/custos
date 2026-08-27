@@ -1399,85 +1399,52 @@ function verFichaTecnicaRecheio(id) {
 
     // Imprimir
     document.getElementById('btn-imprimir-ficha').onclick = () => {
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write(`
-            <html>
-            <head>
-                <title>Ficha Técnica (Recheio) - ${recheio.nome}</title>
-                <style>
-                    body { font-family: sans-serif; padding: 2rem; color: #111; }
-                    h2 { border-bottom: 2px solid #111; padding-bottom: 0.5rem; margin-bottom: 1rem; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-                    th, td { border-bottom: 1px solid #ddd; padding: 8px; text-align: left; }
-                    th { background-color: #f5f5f5; }
-                    .resumo { margin-top: 1.5rem; background-color: #f9f9f9; padding: 15px; border: 1px solid #ddd; }
-                    .row { display: flex; justify-content: space-between; margin-bottom: 8px; }
-                    .row.total { font-weight: bold; border-top: 1px solid #111; padding-top: 8px; }
-                    @media print {
-                        .no-print { display: none !important; }
-                    }
-                    .btn-close-print {
-                        display: block; width: 100%; padding: 12px; background-color: #ef4444; color: white;
-                        border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer;
-                        margin-bottom: 1.5rem; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                    }
-                    .btn-close-print:hover { background-color: #dc2626; }
-                </style>
-            </head>
-            <body>
-                <div class="no-print">
-                    <button class="btn-close-print" onclick="window.close()">← Voltar para o Aplicativo</button>
+        const html = `
+            <div class="header">
+                <div>
+                    <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-secondary); font-weight: bold;">Ficha Técnica</span>
+                    <h2>Recheio: ${recheio.nome}</h2>
                 </div>
-                <h2>Ficha Técnica Recheio: ${recheio.nome}</h2>
-                <p><strong>Rendimento:</strong> ${analise.rendimentoExibicao}</p>
-                
-                <h3>Ingredientes</h3>
-                <table>
-                    <thead>
+            </div>
+            <p><strong>Rendimento:</strong> ${analise.rendimentoExibicao}</p>
+            
+            <h3 class="section-title">Ingredientes</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ingrediente</th>
+                        <th>Quantidade</th>
+                        <th>Custo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${analise.listagemIngredientes.map(i => `
                         <tr>
-                            <th>Ingrediente</th>
-                            <th>Quantidade</th>
-                            <th>Custo</th>
+                            <td>${i.nome}</td>
+                            <td>${i.quantidade} ${i.unidade}</td>
+                            <td>${formatarMoeda(i.custoCalculado)}</td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        ${analise.listagemIngredientes.map(i => `
-                            <tr>
-                                <td>${i.nome}</td>
-                                <td>${i.quantidade} ${i.unidade}</td>
-                                <td>${formatarMoeda(i.custoCalculado)}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-                
-                <div class="resumo">
-                    <div class="row">
-                        <span>Ingredientes:</span>
-                        <span>${formatarMoeda(analise.custoIngredientes)}</span>
-                    </div>
-                    <div class="row">
-                        <span>Mão de Obra (${analise.tempo} min):</span>
-                        <span>${formatarMoeda(analise.maoObra)}</span>
-                    </div>
-                    <div class="row">
-                        <span>Custos Indiretos (${analise.custosFixosPercentual}%):</span>
-                        <span>${formatarMoeda((analise.custoIngredientes + analise.maoObra) * (analise.custosFixosPercentual/100))}</span>
-                    </div>
-                    <div class="row total">
-                        <span>CUSTO DE PRODUÇÃO TOTAL LOTE:</span>
-                        <span>${formatarMoeda(analise.custoTotal)}</span>
-                    </div>
-                    <div class="row" style="font-weight: bold;">
-                        <span>Custo Unitário por ${recheio.rendimentoUnidade}:</span>
-                        <span>${formatarMoeda(analise.custoUnitarioBase * (recheio.rendimentoUnidade === 'kg' || recheio.rendimentoUnidade === 'L' ? 1000 : 1))}</span>
-                    </div>
+                    `).join('')}
+                </tbody>
+            </table>
+            
+            <div class="meta-grid" style="margin-top: 1.5rem;">
+                <div>
+                    <p>Ingredientes: ${formatarMoeda(analise.custoIngredientes)}</p>
+                    <p>Mão de Obra (${analise.tempo} min): ${formatarMoeda(analise.maoObra)}</p>
+                    <p>Custos Indiretos (${analise.custosFixosPercentual}%): ${formatarMoeda((analise.custoIngredientes + analise.maoObra) * (analise.custosFixosPercentual/100))}</p>
                 </div>
-                <script>window.print();</script>
-            </body>
-            </html>
-        `);
-        printWindow.document.close();
+                <div style="text-align: right; justify-content: flex-end; display: flex; flex-direction: column;">
+                    <p style="font-weight: bold; font-size: 1.1rem;">Custo Lote: ${formatarMoeda(analise.custoTotal)}</p>
+                    <p style="font-weight: bold;">Custo Unitário / ${recheio.rendimentoUnidade}: ${formatarMoeda(analise.custoUnitarioBase * (recheio.rendimentoUnidade === 'kg' || recheio.rendimentoUnidade === 'L' ? 1000 : 1))}</p>
+                </div>
+            </div>
+            
+            <div class="footer">
+                Agri Doce Controle de Produção - Relatório emitido em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}
+            </div>
+        `;
+        abrirPrintPreview(`Ficha Técnica - ${recheio.nome}`, html);
     };
 }
 
@@ -1543,85 +1510,52 @@ function verFichaTecnica(id) {
 
     // Imprimir Ficha
     document.getElementById('btn-imprimir-ficha').onclick = () => {
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write(`
-            <html>
-            <head>
-                <title>Ficha Técnica - ${receita.nome}</title>
-                <style>
-                    body { font-family: sans-serif; padding: 2rem; color: #111; }
-                    h2 { border-bottom: 2px solid #111; padding-bottom: 0.5rem; margin-bottom: 1rem; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-                    th, td { border-bottom: 1px solid #ddd; padding: 8px; text-align: left; }
-                    th { background-color: #f5f5f5; }
-                    .resumo { margin-top: 1.5rem; background-color: #f9f9f9; padding: 15px; border: 1px solid #ddd; }
-                    .row { display: flex; justify-content: space-between; margin-bottom: 8px; }
-                    .row.total { font-weight: bold; border-top: 1px solid #111; padding-top: 8px; }
-                    @media print {
-                        .no-print { display: none !important; }
-                    }
-                    .btn-close-print {
-                        display: block; width: 100%; padding: 12px; background-color: #ef4444; color: white;
-                        border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer;
-                        margin-bottom: 1.5rem; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                    }
-                    .btn-close-print:hover { background-color: #dc2626; }
-                </style>
-            </head>
-            <body>
-                <div class="no-print">
-                    <button class="btn-close-print" onclick="window.close()">← Voltar para o Aplicativo</button>
+        const html = `
+            <div class="header">
+                <div>
+                    <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-secondary); font-weight: bold;">Ficha Técnica</span>
+                    <h2>Receita: ${receita.nome}</h2>
                 </div>
-                <h2>Ficha Técnica: ${receita.nome}</h2>
-                <p><strong>Rendimento:</strong> ${analise.rendimento}</p>
-                
-                <h3>Ingredientes</h3>
-                <table>
-                    <thead>
+            </div>
+            <p><strong>Rendimento:</strong> ${analise.rendimento}</p>
+            
+            <h3 class="section-title">Ingredientes</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ingrediente</th>
+                        <th>Quantidade Usada</th>
+                        <th>Custo Proporcional</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${analise.listagemIngredientes.map(i => `
                         <tr>
-                            <th>Ingrediente</th>
-                            <th>Quantidade Usada</th>
-                            <th>Custo Proporcional</th>
+                            <td>${i.nome}</td>
+                            <td>${i.quantidade} ${i.unidade}</td>
+                            <td>${formatarMoeda(i.custoCalculado)}</td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        ${analise.listagemIngredientes.map(i => `
-                            <tr>
-                                <td>${i.nome}</td>
-                                <td>${i.quantidade} ${i.unidade}</td>
-                                <td>${formatarMoeda(i.custoCalculado)}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-                
-                <div class="resumo">
-                    <div class="row">
-                        <span>Custo dos Ingredientes:</span>
-                        <span>${formatarMoeda(analise.custoIngredientes)}</span>
-                    </div>
-                    <div class="row">
-                        <span>Custo da Mão de Obra (${analise.tempo} min):</span>
-                        <span>${formatarMoeda(analise.maoObra)}</span>
-                    </div>
-                    <div class="row">
-                        <span>Custos Indiretos / Fixos (${analise.custosFixosPercentual}%):</span>
-                        <span>${formatarMoeda((analise.custoIngredientes + analise.maoObra) * (analise.custosFixosPercentual/100))}</span>
-                    </div>
-                    <div class="row total">
-                        <span>CUSTO DE PRODUÇÃO TOTAL:</span>
-                        <span>${formatarMoeda(analise.custoTotal)}</span>
-                    </div>
-                    <div class="row">
-                        <span>Preço de Venda Sugerido (Lucro ${analise.margemLucroPercentual}%):</span>
-                        <span>${formatarMoeda(analise.precoSugerido)}</span>
-                    </div>
+                    `).join('')}
+                </tbody>
+            </table>
+            
+            <div class="meta-grid" style="margin-top: 1.5rem;">
+                <div>
+                    <p>Custo dos Ingredientes: ${formatarMoeda(analise.custoIngredientes)}</p>
+                    <p>Mão de Obra (${analise.tempo} min): ${formatarMoeda(analise.maoObra)}</p>
+                    <p>Custos Indiretos / Fixos (${analise.custosFixosPercentual}%): ${formatarMoeda((analise.custoIngredientes + analise.maoObra) * (analise.custosFixosPercentual/100))}</p>
                 </div>
-                <script>window.print();</script>
-            </body>
-            </html>
-        `);
-        printWindow.document.close();
+                <div style="text-align: right; justify-content: flex-end; display: flex; flex-direction: column;">
+                    <p style="font-weight: bold; font-size: 1.1rem;">Custo Lote: ${formatarMoeda(analise.custoTotal)}</p>
+                    <p style="font-weight: bold; color: var(--color-accent);">Preço de Venda Sugerido: ${formatarMoeda(analise.precoSugerido)}</p>
+                </div>
+            </div>
+            
+            <div class="footer">
+                Agri Doce Controle de Produção - Relatório emitido em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}
+            </div>
+        `;
+        abrirPrintPreview(`Ficha Técnica - ${receita.nome}`, html);
     };
 }
 
@@ -1687,81 +1621,45 @@ function imprimirOrdemProducao(id) {
         `;
     }
 
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-        <html>
-        <head>
-            <title>Ordem de Produção - Lote #${prod.id}</title>
-            <style>
-                body { font-family: sans-serif; padding: 2rem; color: #111; max-width: 800px; margin: 0 auto; line-height: 1.4; }
-                .header { border-bottom: 2px solid #111; padding-bottom: 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-end; }
-                .header h2 { margin: 0; font-size: 1.8rem; }
-                .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; background-color: #f9f9f9; padding: 15px; border: 1px solid #ddd; border-radius: 4px; }
-                .meta-grid p { margin: 4px 0; }
-                table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-                th, td { border-bottom: 1px solid #ddd; padding: 10px 8px; text-align: left; }
-                th { background-color: #f5f5f5; }
-                .section-title { font-size: 1.2rem; font-weight: bold; border-bottom: 1px solid #111; padding-bottom: 0.3rem; margin-top: 1.5rem; text-transform: uppercase; }
-                .footer { margin-top: 3rem; text-align: center; font-size: 0.85rem; color: #666; border-top: 1px solid #ddd; padding-top: 1rem; }
-                @media print {
-                    body { padding: 1rem; }
-                    .meta-grid { background-color: #fff !important; border: 1px solid #111 !important; }
-                    th { background-color: #fff !important; border-bottom: 2px solid #111 !important; }
-                    .no-print { display: none !important; }
-                }
-                .btn-close-print {
-                    display: block; width: 100%; padding: 12px; background-color: #ef4444; color: white;
-                    border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer;
-                    margin-bottom: 1.5rem; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                }
-                .btn-close-print:hover { background-color: #dc2626; }
-            </style>
-        </head>
-        <body>
-            <div class="no-print">
-                <button class="btn-close-print" onclick="window.close()">← Voltar para o Aplicativo</button>
+    const html = `
+        <div class="header">
+            <div>
+                <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-secondary); font-weight: bold;">Guia de Fabricação</span>
+                <h2>${receita ? receita.nome : 'Receita Excluída'}</h2>
             </div>
-            <div class="header">
-                <div>
-                    <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; color: #666; font-weight: bold;">Guia de Fabricação</span>
-                    <h2>${receita ? receita.nome : 'Receita Excluída'}</h2>
-                </div>
-                <span style="font-weight: bold; font-size: 1.2rem;">LOTE #${prod.id}</span>
+            <span style="font-weight: bold; font-size: 1.2rem;">LOTE #${prod.id}</span>
+        </div>
+        
+        <div class="meta-grid">
+            <div>
+                <p><strong>Data de Produção:</strong> ${dataFmt}</p>
+                <p><strong>Operador Responsável:</strong> ${prod.operador || 'Administrador'}</p>
             </div>
-            
-            <div class="meta-grid">
-                <div>
-                    <p><strong>Data de Produção:</strong> ${dataFmt}</p>
-                    <p><strong>Operador Responsável:</strong> ${prod.operador || 'Administrador'}</p>
-                </div>
-                <div style="text-align: right;">
-                    <p><strong>Quantidade Lançada:</strong> ${prod.quantidade} lote(s)</p>
-                    <p><strong>Rendimento Estimado Total:</strong> ${rendimentoTotal}</p>
-                </div>
+            <div style="text-align: right;">
+                <p><strong>Quantidade Lançada:</strong> ${prod.quantidade} lote(s)</p>
+                <p><strong>Rendimento Estimado Total:</strong> ${rendimentoTotal}</p>
             </div>
-            
-            <div class="section-title">Lista de Pesagem de Ingredientes (Multiplicados por ${prod.quantidade})</div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Ingrediente / Sub-receita</th>
-                        <th>Medida Unitária (por Lote)</th>
-                        <th>Quantidade Total a Pesar</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${ingredientesHtml}
-                </tbody>
-            </table>
-            
-            <div class="footer">
-                Agri Doce Controle de Produção - Impresso em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}
-            </div>
-            <script>window.print();</script>
-        </body>
-        </html>
-    `);
-    printWindow.document.close();
+        </div>
+        
+        <div class="section-title">Lista de Pesagem de Ingredientes (Multiplicados por ${prod.quantidade})</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Ingrediente / Sub-receita</th>
+                    <th>Medida Unitária (por Lote)</th>
+                    <th>Quantidade Total a Pesar</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${ingredientesHtml}
+            </tbody>
+        </table>
+        
+        <div class="footer">
+            Agri Doce Controle de Produção - Impresso em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}
+        </div>
+    `;
+    abrirPrintPreview(`Ordem de Produção #${prod.id}`, html);
 }
 
 // 6. Registro de Ordens de Produção (com abate de estoque)
@@ -2759,6 +2657,12 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-cadastrar-operador').addEventListener('click', cadastrarNovoOperador);
     document.getElementById('btn-salvar-senha-admin').addEventListener('click', salvarNovaSenhaAdmin);
     document.getElementById('btn-imprimir-compras').addEventListener('click', imprimirListaCompras);
+    
+    document.getElementById('btn-fechar-print-preview').addEventListener('click', fecharPrintPreview);
+    document.getElementById('btn-cancelar-print-preview').addEventListener('click', fecharPrintPreview);
+    document.getElementById('btn-executar-print').addEventListener('click', () => {
+        window.print();
+    });
 });
 
 // --- SISTEMA DE GESTÃO DE OPERADORES (MODAIS E FLUXO) ---
@@ -3014,66 +2918,45 @@ function imprimirListaCompras() {
         `;
     }
 
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-        <html>
-        <head>
-            <title>Lista de Compras de Insumos - Agri Doce</title>
-            <style>
-                body { font-family: sans-serif; padding: 2rem; color: #111; max-width: 800px; margin: 0 auto; line-height: 1.4; }
-                .header { border-bottom: 2px solid #111; padding-bottom: 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-end; }
-                .header h2 { margin: 0; font-size: 1.8rem; }
-                table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-                th, td { border-bottom: 1px solid #ddd; padding: 10px 8px; text-align: left; }
-                th { background-color: #f5f5f5; }
-                .footer { margin-top: 3rem; text-align: center; font-size: 0.85rem; color: #666; border-top: 1px solid #ddd; padding-top: 1rem; }
-                @media print {
-                    body { padding: 1rem; }
-                    th { background-color: #fff !important; border-bottom: 2px solid #111 !important; }
-                    .no-print { display: none !important; }
-                }
-                .btn-close-print {
-                    display: block; width: 100%; padding: 12px; background-color: #ef4444; color: white;
-                    border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer;
-                    margin-bottom: 1.5rem; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                }
-                .btn-close-print:hover { background-color: #dc2626; }
-            </style>
-        </head>
-        <body>
-            <div class="no-print">
-                <button class="btn-close-print" onclick="window.close()">← Voltar para o Aplicativo</button>
+    const html = `
+        <div class="header">
+            <div>
+                <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-secondary); font-weight: bold;">Relatório de Reposição</span>
+                <h2>Lista de Compras (Estoque Baixo)</h2>
             </div>
-            <div class="header">
-                <div>
-                    <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; color: #666; font-weight: bold;">Relatório de Reposição</span>
-                    <h2>Lista de Compras (Estoque Baixo)</h2>
-                </div>
-                <span style="font-weight: bold; font-size: 1.2rem;">Total: ${insumosBaixos.length} item(ns)</span>
-            </div>
-            
-            <p>Os itens abaixo estão com o estoque atual abaixo do limite mínimo ideal configurado na ficha cadastral.</p>
-            
-            <table>
-                <thead>
-                    <tr>
-                        <th>Insumo</th>
-                        <th>Estoque Atual</th>
-                        <th>Mínimo Ideal</th>
-                        <th>Sugerido para Comprar</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${itensHtml}
-                </tbody>
-            </table>
-            
-            <div class="footer">
-                Agri Doce Controle de Produção - Relatório emitido em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}
-            </div>
-            <script>window.print();</script>
-        </body>
-        </html>
-    `);
-    printWindow.document.close();
+            <span style="font-weight: bold; font-size: 1.2rem;">Total: ${insumosBaixos.length} item(ns)</span>
+        </div>
+        
+        <p>Os itens abaixo estão com o estoque atual abaixo do limite mínimo ideal configurado na ficha cadastral.</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Insumo</th>
+                    <th>Estoque Atual</th>
+                    <th>Mínimo Ideal</th>
+                    <th>Sugerido para Comprar</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${itensHtml}
+            </tbody>
+        </table>
+        
+        <div class="footer">
+            Agri Doce Controle de Produção - Relatório emitido em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}
+        </div>
+    `;
+    abrirPrintPreview("Lista de Compras", html);
+}
+
+function abrirPrintPreview(titulo, conteudoHtml) {
+    document.getElementById('print-preview-title').textContent = titulo;
+    document.getElementById('print-preview-body').innerHTML = conteudoHtml;
+    document.getElementById('print-preview-modal').style.display = 'flex';
+}
+
+function fecharPrintPreview() {
+    document.getElementById('print-preview-modal').style.display = 'none';
+    document.getElementById('print-preview-body').innerHTML = '';
 }
