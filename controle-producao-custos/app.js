@@ -2709,6 +2709,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
     
     document.getElementById('btn-compartilhar-print-preview').addEventListener('click', compartilharOuCopiar);
+    document.getElementById('btn-baixar-pdf-preview').addEventListener('click', baixarPDF);
 });
 
 // --- SISTEMA DE GESTÃO DE OPERADORES (MODAIS E FLUXO) ---
@@ -3111,5 +3112,131 @@ function copiarTexto(texto) {
         });
     } catch (err) {
         alert("Por favor, copie o texto manualmente.");
+    }
+}
+
+function baixarPDF() {
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        const body = document.getElementById('print-preview-body');
+        const header = body.querySelector('.header');
+        if (!header) {
+            alert("Não foi possível identificar o conteúdo do relatório.");
+            return;
+        }
+        
+        const titulo = header.querySelector('h2') ? header.querySelector('h2').innerText : 'Relatório';
+        const sub = header.querySelector('span') ? header.querySelector('span').innerText : '';
+        
+        // Coordenada Y inicial
+        let y = 20;
+        
+        // Desenha Cabeçalho
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        doc.text(titulo.toUpperCase(), 14, y);
+        y += 8;
+        
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text(sub, 14, y);
+        y += 10;
+        
+        // Linha divisória
+        doc.setDrawColor(50, 50, 50);
+        doc.line(14, y, 196, y);
+        y += 10;
+        
+        // Se houver metadados (como na Ficha Técnica ou Lote)
+        const metaGrid = body.querySelector('.meta-grid');
+        if (metaGrid) {
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            
+            const metaTexts = metaGrid.innerText.split('\n').filter(t => t.trim() !== '');
+            metaTexts.forEach(text => {
+                if (y > 270) { doc.addPage(); y = 20; }
+                doc.text(text, 14, y);
+                y += 6;
+            });
+            y += 4;
+        }
+        
+        // Desenhar Tabela
+        const table = body.querySelector('table');
+        if (table) {
+            const headers = [];
+            table.querySelectorAll('thead th').forEach(th => headers.push(th.innerText.trim()));
+            
+            // Desenhar cabeçalho da tabela
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(9);
+            doc.setTextColor(0, 0, 0);
+            
+            // Posições X das colunas (distribuídas proporcionalmente)
+            const colWidth = 182 / headers.length;
+            headers.forEach((h, idx) => {
+                doc.text(h, 14 + (idx * colWidth), y);
+            });
+            
+            y += 3;
+            doc.setDrawColor(200, 200, 200);
+            doc.line(14, y, 196, y);
+            y += 7;
+            
+            // Desenhar linhas da tabela
+            doc.setFont("helvetica", "normal");
+            table.querySelectorAll('tbody tr').forEach(tr => {
+                if (y > 270) {
+                    doc.addPage();
+                    y = 20;
+                    // Redesenha cabeçalho da tabela na nova página
+                    doc.setFont("helvetica", "bold");
+                    headers.forEach((h, idx) => {
+                        doc.text(h, 14 + (idx * colWidth), y);
+                    });
+                    y += 3;
+                    doc.line(14, y, 196, y);
+                    y += 7;
+                    doc.setFont("helvetica", "normal");
+                }
+                
+                const cells = [];
+                tr.querySelectorAll('td').forEach(td => cells.push(td.innerText.trim()));
+                
+                cells.forEach((cell, idx) => {
+                    let text = cell;
+                    if (doc.getTextWidth(text) > colWidth - 2) {
+                        while (doc.getTextWidth(text + "...") > colWidth - 2 && text.length > 0) {
+                            text = text.slice(0, -1);
+                        }
+                        text += "...";
+                    }
+                    doc.text(text, 14 + (idx * colWidth), y);
+                });
+                
+                y += 7;
+            });
+        }
+        
+        // Rodapé
+        y += 10;
+        if (y > 270) { doc.addPage(); y = 20; }
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text(`Agri Doce Controle de Produção - Relatório emitido em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`, 14, y);
+        
+        // Salva o PDF
+        const nomeArquivo = titulo.toLowerCase().replace(/[^a-z0-9]/g, "_") + ".pdf";
+        doc.save(nomeArquivo);
+        
+    } catch (err) {
+        console.error("Erro ao gerar PDF:", err);
+        alert("Ocorreu um erro ao gerar o PDF. Use o WhatsApp como alternativa.");
     }
 }

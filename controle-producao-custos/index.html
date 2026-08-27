@@ -753,8 +753,9 @@
             </div>
             <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--color-border); padding-top: 0.8rem; margin-top: 1rem; flex-wrap: wrap; width: 100%;">
                 <button class="btn btn-secondary" id="btn-cancelar-print-preview" style="width: auto; margin-right: auto;">Fechar</button>
-                <button class="btn btn-secondary" id="btn-compartilhar-print-preview" style="width: auto; background-color: #007bff; color: white; border-color: #007bff;">📱 Compartilhar (WhatsApp)</button>
-                <button class="btn btn-primary" id="btn-executar-print" style="width: auto; background-color: var(--color-accent); border-color: var(--color-accent);">🖨️ Imprimir / PDF</button>
+                <button class="btn btn-secondary" id="btn-compartilhar-print-preview" style="width: auto; background-color: #007bff; color: white; border-color: #007bff;">📱 WhatsApp (Texto)</button>
+                <button class="btn btn-primary" id="btn-baixar-pdf-preview" style="width: auto; background-color: #e28743; border-color: #e28743;">📥 Salvar PDF (Arquivo)</button>
+                <button class="btn btn-primary" id="btn-executar-print" style="width: auto; background-color: var(--color-accent); border-color: var(--color-accent);">🖨️ Imprimir (PC)</button>
             </div>
         </div>
     </div>
@@ -764,6 +765,8 @@
         <span id="toast-message">Mensagem</span>
     </div>
 
+    <!-- Biblioteca de PDF local -->
+    <script src="jspdf.umd.min.js"></script>
     <!-- Script de Lógica Principal -->
     <script src="app.js"></script>
 </body>
