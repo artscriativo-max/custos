@@ -2662,17 +2662,50 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-cancelar-print-preview').addEventListener('click', fecharPrintPreview);
     document.getElementById('btn-executar-print').addEventListener('click', () => {
         const conteudoHtml = document.getElementById('print-preview-body').innerHTML;
-        let printSection = document.getElementById('print-section');
-        if (!printSection) {
-            printSection = document.createElement('div');
-            printSection.id = 'print-section';
-            document.body.appendChild(printSection);
+        
+        let iframe = document.getElementById('print-iframe');
+        if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.id = 'print-iframe';
+            iframe.style.position = 'fixed';
+            iframe.style.right = '0';
+            iframe.style.bottom = '0';
+            iframe.style.width = '0';
+            iframe.style.height = '0';
+            iframe.style.border = 'none';
+            document.body.appendChild(iframe);
         }
-        printSection.innerHTML = conteudoHtml;
-        window.print();
+        
+        const doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write(`
+            <html>
+            <head>
+                <title>Relatório</title>
+                <style>
+                    body { font-family: sans-serif; padding: 1.5rem; color: #111; line-height: 1.4; background-color: #ffffff; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.95rem; }
+                    th, td { border-bottom: 1px solid #ddd; padding: 10px 8px; text-align: left; }
+                    th { background-color: #f5f5f5; font-weight: bold; }
+                    .header { border-bottom: 2px solid #111; padding-bottom: 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-end; }
+                    .header h2 { margin: 0; font-size: 1.6rem; }
+                    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; background-color: #f9f9f9; padding: 15px; border: 1px solid #ddd; border-radius: 4px; }
+                    .meta-grid p { margin: 4px 0; }
+                    .section-title { font-size: 1.1rem; font-weight: bold; border-bottom: 1px solid #111; padding-bottom: 0.3rem; margin-top: 1.5rem; text-transform: uppercase; }
+                    .footer { margin-top: 3rem; text-align: center; font-size: 0.8rem; color: #666; border-top: 1px solid #ddd; padding-top: 1rem; }
+                </style>
+            </head>
+            <body>
+                ${conteudoHtml}
+            </body>
+            </html>
+        `);
+        doc.close();
+        
         setTimeout(() => {
-            printSection.innerHTML = '';
-        }, 1000);
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+        }, 250);
     });
     
     document.getElementById('btn-compartilhar-print-preview').addEventListener('click', compartilharOuCopiar);
