@@ -751,12 +751,16 @@
             <div id="print-preview-body" style="overflow-y: auto; flex: 1; padding-right: 5px;">
                 <!-- O HTML da impressão será injetado aqui -->
             </div>
-            <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--color-border); padding-top: 0.8rem; margin-top: 1rem; flex-wrap: wrap;">
-                <button class="btn btn-secondary" id="btn-cancelar-print-preview" style="width: auto;">Fechar</button>
+            <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--color-border); padding-top: 0.8rem; margin-top: 1rem; flex-wrap: wrap; width: 100%;">
+                <button class="btn btn-secondary" id="btn-cancelar-print-preview" style="width: auto; margin-right: auto;">Fechar</button>
+                <button class="btn btn-secondary" id="btn-compartilhar-print-preview" style="width: auto; background-color: #007bff; color: white; border-color: #007bff;">📱 Compartilhar (WhatsApp)</button>
                 <button class="btn btn-primary" id="btn-executar-print" style="width: auto; background-color: var(--color-accent); border-color: var(--color-accent);">🖨️ Imprimir / PDF</button>
             </div>
         </div>
     </div>
+
+    <!-- Div invisível usada exclusivamente para receber dados na hora da impressão física -->
+    <div id="print-section"></div>
 
     <!-- Toast de Notificações -->
     <div class="toast" id="toast">

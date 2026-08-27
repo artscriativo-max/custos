@@ -2661,12 +2661,21 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-fechar-print-preview').addEventListener('click', fecharPrintPreview);
     document.getElementById('btn-cancelar-print-preview').addEventListener('click', fecharPrintPreview);
     document.getElementById('btn-executar-print').addEventListener('click', () => {
-        const titulo = document.getElementById('print-preview-title').textContent;
-        const conteudo = document.getElementById('print-preview-body').innerHTML;
-        localStorage.setItem('printTitle', titulo);
-        localStorage.setItem('printContent', conteudo);
-        window.open('print.html', '_blank');
+        const conteudoHtml = document.getElementById('print-preview-body').innerHTML;
+        let printSection = document.getElementById('print-section');
+        if (!printSection) {
+            printSection = document.createElement('div');
+            printSection.id = 'print-section';
+            document.body.appendChild(printSection);
+        }
+        printSection.innerHTML = conteudoHtml;
+        window.print();
+        setTimeout(() => {
+            printSection.innerHTML = '';
+        }, 1000);
     });
+    
+    document.getElementById('btn-compartilhar-print-preview').addEventListener('click', compartilharOuCopiar);
 });
 
 // --- SISTEMA DE GESTÃO DE OPERADORES (MODAIS E FLUXO) ---
@@ -2957,10 +2966,117 @@ function imprimirListaCompras() {
 function abrirPrintPreview(titulo, conteudoHtml) {
     document.getElementById('print-preview-title').textContent = titulo;
     document.getElementById('print-preview-body').innerHTML = conteudoHtml;
-    document.getElementById('print-preview-modal').style.display = 'flex';
+    const modal = document.getElementById('print-preview-modal');
+    modal.classList.add('active');
+    modal.style.display = 'flex';
 }
 
 function fecharPrintPreview() {
-    document.getElementById('print-preview-modal').style.display = 'none';
+    const modal = document.getElementById('print-preview-modal');
+    modal.classList.remove('active');
+    modal.style.display = 'none';
     document.getElementById('print-preview-body').innerHTML = '';
+}
+
+function gerarTextoFormatado() {
+    try {
+        let texto = "";
+        const body = document.getElementById('print-preview-body');
+        const header = body.querySelector('.header');
+        if (!header) return body.innerText;
+        
+        const titulo = header.querySelector('h2') ? header.querySelector('h2').innerText : '';
+        const sub = header.querySelector('span') ? header.querySelector('span').innerText : '';
+        
+        if (sub.includes('Relatório de Reposição') || titulo.includes('Lista de Compras')) {
+            texto += `📋 *LISTA DE COMPRAS (ESTOQUE BAIXO)*\n`;
+            const itens = [];
+            body.querySelectorAll('tbody tr').forEach(tr => {
+                const tds = tr.querySelectorAll('td');
+                if (tds.length >= 4) {
+                    const insumo = tds[0].innerText.trim();
+                    const atual = tds[1].innerText.trim();
+                    const comprar = tds[3].innerText.trim();
+                    itens.push(`• *${insumo}*: comprar *${comprar}* (Atual: ${atual})`);
+                }
+            });
+            texto += itens.join('\n') + `\n\n_Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}_`;
+        } 
+        else if (sub.includes('Guia de Fabricação') || sub.includes('LOTE')) {
+            const loteTxt = header.querySelector('span:last-child') ? header.querySelector('span:last-child').innerText : '';
+            texto += `🍳 *ORDEM DE PRODUÇÃO - ${loteTxt}*\n`;
+            texto += `*Receita:* ${titulo}\n`;
+            
+            const metaGrid = body.querySelector('.meta-grid');
+            if (metaGrid) {
+                texto += metaGrid.innerText.replace(/\n+/g, '\n') + `\n`;
+            }
+            
+            texto += `\n*Ingredientes a pesar:*\n`;
+            const ingreds = [];
+            body.querySelectorAll('tbody tr').forEach(tr => {
+                const tds = tr.querySelectorAll('td');
+                if (tds.length >= 3) {
+                    const nome = tds[0].innerText.trim();
+                    const total = tds[2].innerText.trim();
+                    ingreds.push(`• *${nome}*: *${total}*`);
+                }
+            });
+            texto += ingreds.join('\n') + `\n\n_Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}_`;
+        }
+        else {
+            texto += `💰 *${sub ? sub + ' - ' : ''}${titulo}*\n\n`;
+            const metaGrid = body.querySelector('.meta-grid');
+            if (metaGrid) {
+                texto += metaGrid.innerText.replace(/\n+/g, '\n') + `\n`;
+            }
+            
+            texto += `\n*Ingredientes:*\n`;
+            const ingreds = [];
+            body.querySelectorAll('tbody tr').forEach(tr => {
+                const tds = tr.querySelectorAll('td');
+                if (tds.length >= 3) {
+                    const nome = tds[0].innerText.trim();
+                    const qtd = tds[1].innerText.trim();
+                    const custo = tds[2].innerText.trim();
+                    ingreds.push(`• ${nome}: ${qtd} (${custo})`);
+                }
+            });
+            texto += ingreds.join('\n') + `\n\n_Gerado em ${new Date().toLocaleDateString('pt-BR')}_`;
+        }
+        return texto;
+    } catch (err) {
+        return document.getElementById('print-preview-body').innerText;
+    }
+}
+
+function compartilharOuCopiar() {
+    try {
+        const texto = gerarTextoFormatado();
+        
+        if (navigator.share) {
+            navigator.share({
+                title: document.getElementById('print-preview-title').textContent,
+                text: texto
+            }).catch(err => {
+                copiarTexto(texto);
+            });
+        } else {
+            copiarTexto(texto);
+        }
+    } catch (err) {
+        copiarTexto(document.getElementById('print-preview-body').innerText);
+    }
+}
+
+function copiarTexto(texto) {
+    try {
+        navigator.clipboard.writeText(texto).then(() => {
+            alert("📋 Lista copiada com sucesso!\nVocê pode colar diretamente no WhatsApp.");
+        }).catch(err => {
+            alert("Erro ao copiar automaticamente. Por favor, copie manualmente.");
+        });
+    } catch (err) {
+        alert("Por favor, copie o texto manualmente.");
+    }
 }

@@ -832,4 +832,92 @@ tr:hover td {
     padding-top: 1rem;
 }
 
+/* Configuração invisível para a seção de impressão do app */
+#print-section {
+    display: none;
+}
+
+@media print {
+    /* Oculta absolutamente tudo no corpo da página */
+    body > * {
+        display: none !important;
+    }
+    /* Exibe apenas a div dedicada de impressão */
+    #print-section, #print-section * {
+        display: block !important;
+        visibility: visible !important;
+    }
+    #print-section {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        background: white !important;
+        color: #111 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    /* Estilos das tabelas na impressão do print-section */
+    #print-section table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        margin-top: 1rem !important;
+    }
+    #print-section th, #print-section td {
+        border-bottom: 1px solid #ddd !important;
+        padding: 10px 8px !important;
+        text-align: left !important;
+        color: #111 !important;
+    }
+    #print-section th {
+        background-color: #f5f5f5 !important;
+        font-weight: bold !important;
+    }
+    #print-section .header {
+        border-bottom: 2px solid #111 !important;
+        padding-bottom: 1rem !important;
+        margin-bottom: 1.5rem !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: flex-end !important;
+    }
+    #print-section .header h2 {
+        margin: 0 !important;
+        font-size: 1.6rem !important;
+        color: #111 !important;
+    }
+    #print-section .meta-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 1rem !important;
+        margin-bottom: 1.5rem !important;
+        background-color: #f9f9f9 !important;
+        padding: 15px !important;
+        border: 1px solid #ddd !important;
+        border-radius: 4px !important;
+    }
+    #print-section .meta-grid p {
+        margin: 4px 0 !important;
+        color: #111 !important;
+    }
+    #print-section .section-title {
+        font-size: 1.1rem !important;
+        font-weight: bold !important;
+        border-bottom: 1px solid #111 !important;
+        padding-bottom: 0.3rem !important;
+        margin-top: 1.5rem !important;
+        text-transform: uppercase !important;
+        color: #111 !important;
+    }
+    #print-section .footer {
+        margin-top: 3rem !important;
+        text-align: center !important;
+        font-size: 0.8rem !important;
+        color: #666 !important;
+        border-top: 1px solid #ddd !important;
+        padding-top: 1rem !important;
+    }
+}
+
 
