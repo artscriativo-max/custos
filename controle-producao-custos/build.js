@@ -10,7 +10,7 @@ if (!fs.existsSync(destDir)) {
 }
 
 // Arquivos de produção a serem copiados
-const filesToCopy = ['index.html', 'style.css', 'app.js'];
+const filesToCopy = ['index.html', 'style.css', 'app.js', 'print.html'];
 
 filesToCopy.forEach(file => {
     const srcPath = path.join(srcDir, file);

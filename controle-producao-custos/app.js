@@ -2661,7 +2661,11 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-fechar-print-preview').addEventListener('click', fecharPrintPreview);
     document.getElementById('btn-cancelar-print-preview').addEventListener('click', fecharPrintPreview);
     document.getElementById('btn-executar-print').addEventListener('click', () => {
-        window.print();
+        const titulo = document.getElementById('print-preview-title').textContent;
+        const conteudo = document.getElementById('print-preview-body').innerHTML;
+        sessionStorage.setItem('printTitle', titulo);
+        sessionStorage.setItem('printContent', conteudo);
+        window.open('print.html', '_blank');
     });
 });
 
