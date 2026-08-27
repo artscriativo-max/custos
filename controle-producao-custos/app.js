@@ -2710,6 +2710,7 @@ window.addEventListener('DOMContentLoaded', () => {
     
     document.getElementById('btn-compartilhar-print-preview').addEventListener('click', compartilharOuCopiar);
     document.getElementById('btn-baixar-pdf-preview').addEventListener('click', baixarPDF);
+    document.getElementById('btn-processar-olaclick').addEventListener('click', processarOlaClickTicket);
 });
 
 // --- SISTEMA DE GESTÃO DE OPERADORES (MODAIS E FLUXO) ---
@@ -3194,5 +3195,132 @@ function fazerDownloadFallback(htmlContent, filename) {
         // Fallback final: copiar texto formatado para área de transferência
         alert("Sua WebView impede downloads de arquivos locais. Copiando dados formatados para sua Área de Transferência...");
         copiarTexto(gerarTextoFormatado());
+    }
+}
+
+function processarOlaClickTicket() {
+    try {
+        const text = document.getElementById('olaclick-ticket-input').value.trim();
+        if (!text) {
+            alert("Por favor, cole o texto de um ticket do OlaClick primeiro.");
+            return;
+        }
+        
+        const linhas = text.split('\n');
+        const itensEncontrados = [];
+        
+        // Pega as linhas no formato "X20 Pastelzinho de Queijo..." ou "20 Pastelzinho de Queijo..."
+        const regex = /^\s*X?\s*(\d+)\s+(.*?)(?:\s+-\s+Unidade)?\s*(?:R\$\s*[\d,.]+|\s*$)/i;
+        
+        linhas.forEach(linha => {
+            const l = parseInt(linha.trim()); // check if start with number
+            const lineStr = linha.trim();
+            if (!lineStr) return;
+            
+            const match = lineStr.match(regex);
+            if (match) {
+                const qtd = parseInt(match[1]) || 1;
+                let nomeItem = match[2].trim();
+                
+                // Limpar sufixos e valores de preço
+                nomeItem = nomeItem.replace(/\s*-\s*Unidade\s*$/i, '');
+                nomeItem = nomeItem.replace(/\s*R\$\s*[\d,.]+$/i, '');
+                nomeItem = nomeItem.trim();
+                
+                itensEncontrados.push({
+                    quantidade: qtd,
+                    nomeOriginal: nomeItem
+                });
+            }
+        });
+        
+        if (itensEncontrados.length === 0) {
+            alert("Nenhum item do pedido foi identificado no texto colado. Verifique se copiou o ticket completo.");
+            return;
+        }
+        
+        const logSucesso = [];
+        const receitasNaoEncontradas = [];
+        const insumosFaltandoGeral = [];
+        const itensParaLancar = [];
+        
+        // 1. Validar se as receitas existem e simular estoque de forma recursiva
+        itensEncontrados.forEach(item => {
+            const receita = state.receitas.find(r => r.nome.trim().toLowerCase() === item.nomeOriginal.toLowerCase());
+            
+            if (!receita) {
+                receitasNaoEncontradas.push(item.nomeOriginal);
+                return;
+            }
+            
+            const errosEstoqueItem = [];
+            receita.ingredientes.forEach(ing => {
+                verificarEstoqueIngredienteRecursivo(ing.insumoId, ing.quantidade, ing.unidade, item.quantidade, errosEstoqueItem);
+            });
+            
+            if (errosEstoqueItem.length > 0) {
+                errosEstoqueItem.forEach(erro => {
+                    insumosFaltandoGeral.push(`[${receita.nome}]: ${erro}`);
+                });
+            } else {
+                itensParaLancar.push({
+                    receita: receita,
+                    quantidade: item.quantidade
+                });
+            }
+        });
+        
+        // Alerta se houver produtos no ticket que não têm ficha técnica cadastrada com o mesmo nome
+        if (receitasNaoEncontradas.length > 0) {
+            alert(`Atenção: Os seguintes produtos do ticket do OlaClick não foram encontrados em suas Fichas Técnicas cadastradas:\n\n- ${receitasNaoEncontradas.join('\n- ')}\n\nPor favor, cadastre as Fichas Técnicas correspondentes com estes nomes exatos para poder prosseguir.`);
+            return;
+        }
+        
+        // Alerta se faltar ingredientes
+        if (insumosFaltandoGeral.length > 0) {
+            alert(`Não há estoque suficiente de insumos para processar essa venda do OlaClick:\n\n- ${insumosFaltandoGeral.join('\n- ')}`);
+            return;
+        }
+        
+        // 2. Abater estoque recursivamente e lançar produções
+        const dataAtual = new Date().toISOString().split('T')[0];
+        
+        itensParaLancar.forEach(item => {
+            item.receita.ingredientes.forEach(ing => {
+                abaterEstoqueIngredienteRecursivo(ing.insumoId, ing.quantidade, ing.unidade, item.quantidade);
+            });
+            
+            const analise = calcularFichaTecnica(item.receita);
+            const custoTotal = analise.custoTotal * item.quantidade;
+            
+            const novaProd = {
+                id: 'p' + Date.now() + Math.floor(Math.random() * 1000),
+                receitaId: item.receita.id,
+                quantidade: item.quantidade,
+                data: dataAtual,
+                custoTotal: custoTotal,
+                status: "Concluído",
+                operador: state.operadorAtivo || "Administrador"
+            };
+            
+            state.producoes.push(novaProd);
+            logSucesso.push(`${item.quantidade}x ${item.receita.nome}`);
+        });
+        
+        // Salvar e atualizar interface
+        salvarEstado();
+        renderProducoes();
+        renderInsumos();
+        renderDashboard();
+        
+        // Limpar campo de texto
+        document.getElementById('olaclick-ticket-input').value = '';
+        
+        alert(`🎉 Pedido processado com sucesso!\n\nLançamentos registrados e insumos abatidos:\n- ${logSucesso.join('\n- ')}\n\nO estoque foi atualizado!`);
+        mostrarToast("Pedido importado com sucesso!");
+        
+    } catch (err) {
+        console.error("Erro ao processar ticket OlaClick:", err);
+        alert("Ocorreu um erro ao processar o ticket. Verifique os dados.");
     }
 }
