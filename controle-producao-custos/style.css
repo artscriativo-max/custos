@@ -581,6 +581,12 @@ tr:hover td {
         position: relative;
     }
 
+    /* Esconde botões incompatíveis com a WebView do celular no modal de relatórios */
+    #btn-executar-print,
+    #btn-baixar-pdf-preview {
+        display: none !important;
+    }
+
     .app-container {
         padding: 1rem;
         width: 100%;
