@@ -1413,9 +1413,21 @@ function verFichaTecnicaRecheio(id) {
                     .resumo { margin-top: 1.5rem; background-color: #f9f9f9; padding: 15px; border: 1px solid #ddd; }
                     .row { display: flex; justify-content: space-between; margin-bottom: 8px; }
                     .row.total { font-weight: bold; border-top: 1px solid #111; padding-top: 8px; }
+                    @media print {
+                        .no-print { display: none !important; }
+                    }
+                    .btn-close-print {
+                        display: block; width: 100%; padding: 12px; background-color: #ef4444; color: white;
+                        border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer;
+                        margin-bottom: 1.5rem; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    }
+                    .btn-close-print:hover { background-color: #dc2626; }
                 </style>
             </head>
             <body>
+                <div class="no-print">
+                    <button class="btn-close-print" onclick="window.close()">← Voltar para o Aplicativo</button>
+                </div>
                 <h2>Ficha Técnica Recheio: ${recheio.nome}</h2>
                 <p><strong>Rendimento:</strong> ${analise.rendimentoExibicao}</p>
                 
@@ -1545,9 +1557,21 @@ function verFichaTecnica(id) {
                     .resumo { margin-top: 1.5rem; background-color: #f9f9f9; padding: 15px; border: 1px solid #ddd; }
                     .row { display: flex; justify-content: space-between; margin-bottom: 8px; }
                     .row.total { font-weight: bold; border-top: 1px solid #111; padding-top: 8px; }
+                    @media print {
+                        .no-print { display: none !important; }
+                    }
+                    .btn-close-print {
+                        display: block; width: 100%; padding: 12px; background-color: #ef4444; color: white;
+                        border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer;
+                        margin-bottom: 1.5rem; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    }
+                    .btn-close-print:hover { background-color: #dc2626; }
                 </style>
             </head>
             <body>
+                <div class="no-print">
+                    <button class="btn-close-print" onclick="window.close()">← Voltar para o Aplicativo</button>
+                </div>
                 <h2>Ficha Técnica: ${receita.nome}</h2>
                 <p><strong>Rendimento:</strong> ${analise.rendimento}</p>
                 
@@ -1683,10 +1707,20 @@ function imprimirOrdemProducao(id) {
                     body { padding: 1rem; }
                     .meta-grid { background-color: #fff !important; border: 1px solid #111 !important; }
                     th { background-color: #fff !important; border-bottom: 2px solid #111 !important; }
+                    .no-print { display: none !important; }
                 }
+                .btn-close-print {
+                    display: block; width: 100%; padding: 12px; background-color: #ef4444; color: white;
+                    border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer;
+                    margin-bottom: 1.5rem; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+                .btn-close-print:hover { background-color: #dc2626; }
             </style>
         </head>
         <body>
+            <div class="no-print">
+                <button class="btn-close-print" onclick="window.close()">← Voltar para o Aplicativo</button>
+            </div>
             <div class="header">
                 <div>
                     <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; color: #666; font-weight: bold;">Guia de Fabricação</span>
@@ -2996,10 +3030,20 @@ function imprimirListaCompras() {
                 @media print {
                     body { padding: 1rem; }
                     th { background-color: #fff !important; border-bottom: 2px solid #111 !important; }
+                    .no-print { display: none !important; }
                 }
+                .btn-close-print {
+                    display: block; width: 100%; padding: 12px; background-color: #ef4444; color: white;
+                    border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer;
+                    margin-bottom: 1.5rem; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+                .btn-close-print:hover { background-color: #dc2626; }
             </style>
         </head>
         <body>
+            <div class="no-print">
+                <button class="btn-close-print" onclick="window.close()">← Voltar para o Aplicativo</button>
+            </div>
             <div class="header">
                 <div>
                     <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; color: #666; font-weight: bold;">Relatório de Reposição</span>
