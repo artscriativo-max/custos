@@ -773,8 +773,8 @@ tr:hover td {
 
 /* ================= REGRAS DE IMPRESSÃO UNIFICADAS ================= */
 @media print {
-    /* Esconde tudo na página */
-    body > * {
+    /* Esconde os elementos principais da tela, exceto o visualizador de impressão */
+    .sidebar, .main-content, .toast, .modal:not(#print-preview-modal) {
         display: none !important;
     }
     /* Exibe apenas o modal de visualização e seus descendentes */
