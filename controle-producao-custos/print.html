@@ -30,119 +30,129 @@
 <body>
     <div class="no-print" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem; width: 100%;">
         <div style="display: flex; gap: 10px; width: 100%;">
-            <button class="btn-voltar" onclick="voltarParaApp()" style="flex: 1;">← Voltar</button>
+            <!-- Ações executadas diretamente inline para garantir que funcionem independente do parser JS do WebView -->
+            <button class="btn-voltar" onclick="if(window.opener){window.close();}else{window.location.href='index.html';}" style="flex: 1;">← Voltar</button>
             <button class="btn-imprimir" onclick="window.print()" style="flex: 1;">🖨️ Imprimir (PC)</button>
         </div>
         <button class="btn-compartilhar" onclick="compartilharOuCopiar()">📱 Compartilhar / Copiar Lista (WhatsApp)</button>
     </div>
     <div id="print-container"></div>
     <script>
-        document.title = sessionStorage.getItem('printTitle') || "Imprimir";
-        document.getElementById('print-container').innerHTML = sessionStorage.getItem('printContent') || "";
+        try {
+            document.title = localStorage.getItem('printTitle') || "Imprimir";
+            document.getElementById('print-container').innerHTML = localStorage.getItem('printContent') || "";
 
-        // Tenta abrir a impressão automaticamente no computador
-        if (window.opener) {
-            setTimeout(() => {
-                window.print();
-            }, 400);
-        }
-
-        function voltarParaApp() {
+            // Tenta abrir a impressão automaticamente no computador
             if (window.opener) {
-                window.close();
-            } else {
-                window.location.href = 'index.html';
+                setTimeout(() => {
+                    window.print();
+                }, 400);
             }
+        } catch (e) {
+            console.error("Erro na carga inicial de dados:", e);
         }
 
         function gerarTextoFormatado() {
-            let texto = "";
-            const header = document.querySelector('.header');
-            if (!header) return document.getElementById('print-container').innerText;
-            
-            const titulo = header.querySelector('h2') ? header.querySelector('h2').innerText : '';
-            const sub = header.querySelector('span') ? header.querySelector('span').innerText : '';
-            
-            if (sub.includes('Relatório de Reposição') || titulo.includes('Lista de Compras')) {
-                texto += `📋 *LISTA DE COMPRAS (ESTOQUE BAIXO)*\n`;
-                const itens = [];
-                document.querySelectorAll('tbody tr').forEach(tr => {
-                    const tds = tr.querySelectorAll('td');
-                    if (tds.length >= 4) {
-                        const insumo = tds[0].innerText.trim();
-                        const atual = tds[1].innerText.trim();
-                        const comprar = tds[3].innerText.trim();
-                        itens.push(`• *${insumo}*: comprar *${comprar}* (Atual: ${atual})`);
-                    }
-                });
-                texto += itens.join('\n') + `\n\n_Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}_`;
-            } 
-            else if (sub.includes('Guia de Fabricação') || sub.includes('LOTE')) {
-                const loteTxt = header.querySelector('span:last-child') ? header.querySelector('span:last-child').innerText : '';
-                texto += `🍳 *ORDEM DE PRODUÇÃO - ${loteTxt}*\n`;
-                texto += `*Receita:* ${titulo}\n`;
+            try {
+                let texto = "";
+                const header = document.querySelector('.header');
+                if (!header) return document.getElementById('print-container').innerText;
                 
-                const metaGrid = document.querySelector('.meta-grid');
-                if (metaGrid) {
-                    texto += metaGrid.innerText.replace(/\n+/g, '\n') + `\n`;
+                const titulo = header.querySelector('h2') ? header.querySelector('h2').innerText : '';
+                const sub = header.querySelector('span') ? header.querySelector('span').innerText : '';
+                
+                if (sub.includes('Relatório de Reposição') || titulo.includes('Lista de Compras')) {
+                    texto += `📋 *LISTA DE COMPRAS (ESTOQUE BAIXO)*\n`;
+                    const itens = [];
+                    document.querySelectorAll('tbody tr').forEach(tr => {
+                        const tds = tr.querySelectorAll('td');
+                        if (tds.length >= 4) {
+                            const insumo = tds[0].innerText.trim();
+                            const atual = tds[1].innerText.trim();
+                            const comprar = tds[3].innerText.trim();
+                            itens.push(`• *${insumo}*: comprar *${comprar}* (Atual: ${atual})`);
+                        }
+                    });
+                    texto += itens.join('\n') + `\n\n_Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}_`;
+                } 
+                else if (sub.includes('Guia de Fabricação') || sub.includes('LOTE')) {
+                    const loteTxt = header.querySelector('span:last-child') ? header.querySelector('span:last-child').innerText : '';
+                    texto += `🍳 *ORDEM DE PRODUÇÃO - ${loteTxt}*\n`;
+                    texto += `*Receita:* ${titulo}\n`;
+                    
+                    const metaGrid = document.querySelector('.meta-grid');
+                    if (metaGrid) {
+                        texto += metaGrid.innerText.replace(/\n+/g, '\n') + `\n`;
+                    }
+                    
+                    texto += `\n*Ingredientes a pesar:*\n`;
+                    const ingreds = [];
+                    document.querySelectorAll('tbody tr').forEach(tr => {
+                        const tds = tr.querySelectorAll('td');
+                        if (tds.length >= 3) {
+                            const nome = tds[0].innerText.trim();
+                            const total = tds[2].innerText.trim();
+                            ingreds.push(`• *${nome}*: *${total}*`);
+                        }
+                    });
+                    texto += ingreds.join('\n') + `\n\n_Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}_`;
                 }
-                
-                texto += `\n*Ingredientes a pesar:*\n`;
-                const ingreds = [];
-                document.querySelectorAll('tbody tr').forEach(tr => {
-                    const tds = tr.querySelectorAll('td');
-                    if (tds.length >= 3) {
-                        const nome = tds[0].innerText.trim();
-                        const total = tds[2].innerText.trim();
-                        ingreds.push(`• *${nome}*: *${total}*`);
+                else {
+                    texto += `💰 *${sub ? sub + ' - ' : ''}${titulo}*\n\n`;
+                    const metaGrid = document.querySelector('.meta-grid');
+                    if (metaGrid) {
+                        texto += metaGrid.innerText.replace(/\n+/g, '\n') + `\n`;
                     }
-                });
-                texto += ingreds.join('\n') + `\n\n_Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}_`;
-            }
-            else {
-                texto += `💰 *${sub ? sub + ' - ' : ''}${titulo}*\n\n`;
-                const metaGrid = document.querySelector('.meta-grid');
-                if (metaGrid) {
-                    texto += metaGrid.innerText.replace(/\n+/g, '\n') + `\n`;
+                    
+                    texto += `\n*Ingredientes:*\n`;
+                    const ingreds = [];
+                    document.querySelectorAll('tbody tr').forEach(tr => {
+                        const tds = tr.querySelectorAll('td');
+                        if (tds.length >= 3) {
+                            const nome = tds[0].innerText.trim();
+                            const qtd = tds[1].innerText.trim();
+                            const custo = tds[2].innerText.trim();
+                            ingreds.push(`• ${nome}: ${qtd} (${custo})`);
+                        }
+                    });
+                    texto += ingreds.join('\n') + `\n\n_Gerado em ${new Date().toLocaleDateString('pt-BR')}_`;
                 }
-                
-                texto += `\n*Ingredientes:*\n`;
-                const ingreds = [];
-                document.querySelectorAll('tbody tr').forEach(tr => {
-                    const tds = tr.querySelectorAll('td');
-                    if (tds.length >= 3) {
-                        const nome = tds[0].innerText.trim();
-                        const qtd = tds[1].innerText.trim();
-                        const custo = tds[2].innerText.trim();
-                        ingreds.push(`• ${nome}: ${qtd} (${custo})`);
-                    }
-                });
-                texto += ingreds.join('\n') + `\n\n_Gerado em ${new Date().toLocaleDateString('pt-BR')}_`;
+                return texto;
+            } catch (err) {
+                return document.getElementById('print-container').innerText;
             }
-            return texto;
         }
 
         function compartilharOuCopiar() {
-            const texto = gerarTextoFormatado();
-            
-            if (navigator.share) {
-                navigator.share({
-                    title: document.title,
-                    text: texto
-                }).catch(err => {
+            try {
+                const texto = gerarTextoFormatado();
+                
+                if (navigator.share) {
+                    navigator.share({
+                        title: document.title,
+                        text: texto
+                    }).catch(err => {
+                        copiarTexto(texto);
+                    });
+                } else {
                     copiarTexto(texto);
-                });
-            } else {
-                copiarTexto(texto);
+                }
+            } catch (err) {
+                alert("Erro ao compartilhar. Copiando texto...");
+                copiarTexto(document.getElementById('print-container').innerText);
             }
         }
 
         function copiarTexto(texto) {
-            navigator.clipboard.writeText(texto).then(() => {
-                alert("📋 Lista copiada com sucesso!\nVocê pode colar diretamente no WhatsApp de quem preferir.");
-            }).catch(err => {
-                alert("Erro ao copiar automaticamente. Por favor, selecione e copie o texto manualmente.");
-            });
+            try {
+                navigator.clipboard.writeText(texto).then(() => {
+                    alert("📋 Lista copiada com sucesso!\nVocê pode colar diretamente no WhatsApp de quem preferir.");
+                }).catch(err => {
+                    alert("Erro ao copiar automaticamente. Por favor, selecione e copie o texto manualmente.");
+                });
+            } catch (err) {
+                alert("Por favor, selecione e copie o texto manualmente.");
+            }
         }
     </script>
 </body>

@@ -2663,8 +2663,8 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-executar-print').addEventListener('click', () => {
         const titulo = document.getElementById('print-preview-title').textContent;
         const conteudo = document.getElementById('print-preview-body').innerHTML;
-        sessionStorage.setItem('printTitle', titulo);
-        sessionStorage.setItem('printContent', conteudo);
+        localStorage.setItem('printTitle', titulo);
+        localStorage.setItem('printContent', conteudo);
         window.open('print.html', '_blank');
     });
 });
