@@ -838,12 +838,12 @@ tr:hover td {
 }
 
 @media print {
-    /* Oculta absolutamente tudo no corpo da página */
-    body > * {
+    /* Oculta os elementos principais da tela, exceto a seção de impressão dedicada */
+    body > :not(#print-section) {
         display: none !important;
     }
     /* Exibe apenas a div dedicada de impressão */
-    #print-section, #print-section * {
+    #print-section {
         display: block !important;
         visibility: visible !important;
     }
