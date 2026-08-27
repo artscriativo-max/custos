@@ -30,8 +30,8 @@
 <body>
     <div class="no-print" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem; width: 100%;">
         <div style="display: flex; gap: 10px; width: 100%;">
-            <!-- Ações executadas diretamente inline para garantir que funcionem independente do parser JS do WebView -->
-            <button class="btn-voltar" onclick="if(window.opener){window.close();}else{window.location.href='index.html';}" style="flex: 1;">← Voltar</button>
+            <!-- Botão Voltar usando history.back() com fallback para redirecionamento direto, 100% inline -->
+            <button class="btn-voltar" onclick="if(window.opener){window.close();}else{if(history.length>1){history.back();}else{window.location.href='index.html';}}" style="flex: 1;">← Voltar</button>
             <button class="btn-imprimir" onclick="window.print()" style="flex: 1;">🖨️ Imprimir (PC)</button>
         </div>
         <button class="btn-compartilhar" onclick="compartilharOuCopiar()">📱 Compartilhar / Copiar Lista (WhatsApp)</button>
