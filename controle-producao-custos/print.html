@@ -6,8 +6,10 @@
     <title>Imprimir Relatório</title>
     <style>
         body { font-family: sans-serif; padding: 2rem; color: #111; max-width: 800px; margin: 0 auto; line-height: 1.4; background-color: #ffffff; }
-        .no-print { display: block; width: 100%; padding: 12px; background-color: #ef4444; color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 1.5rem; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .no-print:hover { background-color: #dc2626; }
+        .btn-voltar { padding: 12px; background-color: #ef4444; color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background-color 0.2s; }
+        .btn-voltar:hover { background-color: #dc2626; }
+        .btn-imprimir { padding: 12px; background-color: #10b981; color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background-color 0.2s; }
+        .btn-imprimir:hover { background-color: #059669; }
         @media print {
             .no-print { display: none !important; }
             body { padding: 1rem; }
@@ -24,15 +26,18 @@
     </style>
 </head>
 <body>
-    <button class="no-print" onclick="window.close()">← Voltar para o Aplicativo</button>
+    <div class="no-print" style="display: flex; gap: 10px; margin-bottom: 1.5rem; width: 100%;">
+        <button class="btn-voltar" onclick="window.close()" style="flex: 1;">← Voltar para o Aplicativo</button>
+        <button class="btn-imprimir" onclick="window.print()" style="flex: 1;">🖨️ Imprimir / Salvar PDF</button>
+    </div>
     <div id="print-container"></div>
     <script>
         document.title = sessionStorage.getItem('printTitle') || "Imprimir";
         document.getElementById('print-container').innerHTML = sessionStorage.getItem('printContent') || "";
-        // Dispara o diálogo de impressão de forma mais confiável após carregar o conteúdo
+        // Tentativa de print automático caso o dispositivo suporte sem User Activation
         setTimeout(() => {
             window.print();
-        }, 500);
+        }, 400);
     </script>
 </body>
 </html>
