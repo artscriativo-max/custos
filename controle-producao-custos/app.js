@@ -1195,7 +1195,8 @@ formReceita.addEventListener('submit', (e) => {
 
     const id = document.getElementById('receita-id').value;
     const nome = document.getElementById('receita-nome').value.trim();
-    const maoObra = parseFloat(document.getElementById('receita-mao-obra').value) || 0;
+    const tempoPreparo = parseInt(document.getElementById('receita-tempo-preparo').value) || 0;
+    const custoHora = parseFloat(document.getElementById('receita-custo-hora').value) || 0;
     const custosFixos = parseFloat(document.getElementById('receita-custos-fixos').value) || 0;
     const margemLucro = parseFloat(document.getElementById('receita-margem').value) || 0;
     const rendimento = document.getElementById('receita-rendimento').value.trim() || 'Lote Único';
@@ -1212,7 +1213,11 @@ formReceita.addEventListener('submit', (e) => {
         const unidade = selects[1].value;
 
         if (insumoId && quantidade > 0) {
-            ingredientes.push({ insumoId, quantidade, unidade });
+            ingredientes.push({ insumoId, quantidade, ...((insumoId.startsWith('rec_') || (insumoId.startsWith('r') && !insumoId.startsWith('rec_'))) ? {} : { unidade }) });
+            // Nota: Para ingredientes que são recheios ou massas bases, o cálculo de custo de ingrediente
+            // já gerencia isso, mas para manter consistência salvamos a unidade que o usuário escolheu no select!
+            const idx = ingredientes.length - 1;
+            ingredientes[idx].unidade = unidade;
         }
     });
 
@@ -1225,13 +1230,13 @@ formReceita.addEventListener('submit', (e) => {
         // Editar
         const index = state.receitas.findIndex(r => r.id === id);
         if (index !== -1) {
-            state.receitas[index] = { id, nome, rendimento, maoObra, custosFixos, margemLucro, ingredientes };
+            state.receitas[index] = { id, nome, rendimento, tempoPreparo, custoHora, custosFixos, margemLucro, ingredientes };
             mostrarToast("Ficha técnica editada!");
         }
     } else {
         // Nova
         const novoId = 'r' + Date.now();
-        state.receitas.push({ id: novoId, nome, rendimento, maoObra, custosFixos, margemLucro, ingredientes });
+        state.receitas.push({ id: novoId, nome, rendimento, tempoPreparo, custoHora, custosFixos, margemLucro, ingredientes });
         mostrarToast("Nova ficha técnica adicionada!");
     }
 
