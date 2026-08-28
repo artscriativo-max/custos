@@ -3248,8 +3248,11 @@ function baixarPDF() {
         const nomeArquivo = titulo.toLowerCase().replace(/[^a-z0-9]/g, "_") + ".html";
         const file = new File([htmlCompleto], nomeArquivo, { type: "text/html" });
         
-        // Tenta compartilhar como arquivo real para abrir a gaveta de impressão do Android
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        // Detecta se é dispositivo móvel (celular)
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        // No celular, tenta compartilhar o arquivo para abrir o diálogo nativo. No PC, faz download direto.
+        if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
             navigator.share({
                 files: [file],
                 title: titulo,
