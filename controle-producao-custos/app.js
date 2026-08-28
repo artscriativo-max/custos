@@ -156,6 +156,8 @@ let state = {
     senhaAdmin: "1234"
 };
 
+let loginObrigatorio = false;
+
 // --- FUNÇÕES DE CONVERSÃO DE UNIDADES E CÁLCULO ---
 
 /**
@@ -386,6 +388,12 @@ function carregarEstado() {
     }
     atualizarUI();
     exportarJSONParaBackup();
+
+    // Se o operador ativo for Administrador, exige login obrigatório com senha na inicialização
+    if (state.operadorAtivo === "Administrador") {
+        loginObrigatorio = true;
+        abrirModalOperador();
+    }
 }
 
 function restaurarPadroes() {
@@ -2826,6 +2834,10 @@ function abrirModalOperador() {
 }
 
 function fecharModalOperador() {
+    if (loginObrigatorio) {
+        alert("Identificação obrigatória! Digite a senha ou escolha outro perfil de operador.");
+        return;
+    }
     document.getElementById('operador-modal').style.display = 'none';
     document.getElementById('senha-operador-input').value = '';
 }
@@ -2834,6 +2846,7 @@ function controlarCamposModalOperador() {
     const select = document.getElementById('select-operador-perfil');
     const senhaContainer = document.getElementById('senha-operador-container');
     const btnGerenciar = document.getElementById('btn-gerenciar-operadores-modal');
+    const btnFechar = document.getElementById('btn-fechar-operador-modal');
     
     const isAtivoAdmin = state.operadorAtivo === "Administrador";
     
@@ -2842,8 +2855,13 @@ function controlarCamposModalOperador() {
         senhaContainer.style.display = 'block';
     }
     
-    // Botão de gerenciar/configurar só é visível se o operador ATUAL logado for o Administrador
-    btnGerenciar.style.display = isAtivoAdmin ? 'inline-block' : 'none';
+    // Botão de gerenciar/configurar só é visível se o operador ATUAL logado for o Administrador e não estiver em login obrigatório
+    btnGerenciar.style.display = (isAtivoAdmin && !loginObrigatorio) ? 'inline-block' : 'none';
+
+    // Oculta botão de fechar "X" se o login for obrigatório na inicialização
+    if (btnFechar) {
+        btnFechar.style.display = loginObrigatorio ? 'none' : 'block';
+    }
 }
 
 function confirmarTrocaOperador() {
@@ -2868,6 +2886,8 @@ function confirmarTrocaOperador() {
         }
     }
     
+    // Login efetuado com sucesso
+    loginObrigatorio = false; // Desativa barreira obrigatória
     state.operadorAtivo = nomeSelecionado;
     salvarEstado();
     fecharModalOperador();
