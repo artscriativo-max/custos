@@ -817,18 +817,23 @@ function renderProducoes() {
     state.producoes.forEach(prod => {
         const receita = state.receitas.find(r => r.id === prod.receitaId);
         const dataFmt = prod.data ? prod.data.split('-').reverse().join('/') : '';
+        const isAgendado = prod.status === "Agendado";
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${dataFmt}</td>
-            <td><strong>${receita ? receita.nome : 'Excluída'}</strong></td>
+            <td>
+                <strong>${receita ? receita.nome : 'Excluída'}</strong>
+                ${isAgendado ? '<span class="badge" style="background-color: #ffc107; color: #333; font-size: 0.65rem; padding: 2px 6px; margin-left: 6px; font-weight: bold; border-radius: 4px;">AGENDADO</span>' : ''}
+            </td>
             <td>${prod.quantidade} lote(s)</td>
             <td>${formatarMoeda(prod.custoTotal)}</td>
             <td>${prod.operador || 'Administrador'}</td>
             <td>
                 <div style="display: flex; gap: 4px; align-items: center; justify-content: flex-start; flex-wrap: wrap;">
                     <button class="btn btn-primary btn-sm print-prod-btn" data-id="${prod.id}" style="padding: 2px 6px; font-size: 0.7rem; width: auto; text-transform: none; letter-spacing: 0;">Imprimir</button>
-                    <button class="btn btn-danger btn-sm delete-prod-btn" data-id="${prod.id}" style="padding: 2px 6px; font-size: 0.7rem; width: auto; text-transform: none; letter-spacing: 0;">Desfazer</button>
+                    ${isAgendado ? `<button class="btn btn-success btn-sm confirm-prod-btn" data-id="${prod.id}" style="padding: 2px 6px; font-size: 0.7rem; width: auto; text-transform: none; letter-spacing: 0; background-color: #28a745; border-color: #28a745;">Confirmar</button>` : ''}
+                    <button class="btn btn-danger btn-sm delete-prod-btn" data-id="${prod.id}" style="padding: 2px 6px; font-size: 0.7rem; width: auto; text-transform: none; letter-spacing: 0;">${isAgendado ? 'Excluir' : 'Desfazer'}</button>
                 </div>
             </td>
         `;
@@ -841,6 +846,10 @@ function renderProducoes() {
 
     document.querySelectorAll('.print-prod-btn').forEach(btn => {
         btn.addEventListener('click', (e) => imprimirOrdemProducao(e.currentTarget.dataset.id));
+    });
+
+    document.querySelectorAll('.confirm-prod-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => confirmarProducaoAgendada(e.currentTarget.dataset.id));
     });
 }
 
@@ -1869,23 +1878,34 @@ formProducao.addEventListener('submit', (e) => {
     const receita = state.receitas.find(r => r.id === receitaId);
     if (!receita) return;
 
-    // Verificar e simular abatimento de estoque recursivamente
-    let estoqueSuficiente = true;
-    let insumosFaltando = [];
+    // Verificar se a data é futura
+    const hoje = new Date().toISOString().split('T')[0];
+    const isFutura = data > hoje;
 
-    receita.ingredientes.forEach(ing => {
-        verificarEstoqueIngredienteRecursivo(ing.insumoId, ing.quantidade, ing.unidade, quantidade, insumosFaltando);
-    });
-
-    if (insumosFaltando.length > 0) {
-        alert(`Não há estoque suficiente de insumos para registrar esta produção:\n\n- ${insumosFaltando.join('\n- ')}`);
-        return;
+    let status = "Concluído";
+    if (isFutura) {
+        status = "Agendado";
     }
 
-    // Abater do estoque recursivamente
-    receita.ingredientes.forEach(ing => {
-        abaterEstoqueIngredienteRecursivo(ing.insumoId, ing.quantidade, ing.unidade, quantidade);
-    });
+    if (!isFutura) {
+        // Verificar e simular abatimento de estoque recursivamente
+        let estoqueSuficiente = true;
+        let insumosFaltando = [];
+
+        receita.ingredientes.forEach(ing => {
+            verificarEstoqueIngredienteRecursivo(ing.insumoId, ing.quantidade, ing.unidade, quantidade, insumosFaltando);
+        });
+
+        if (insumosFaltando.length > 0) {
+            alert(`Não há estoque suficiente de insumos para registrar esta produção:\n\n- ${insumosFaltando.join('\n- ')}`);
+            return;
+        }
+
+        // Abater do estoque recursivamente
+        receita.ingredientes.forEach(ing => {
+            abaterEstoqueIngredienteRecursivo(ing.insumoId, ing.quantidade, ing.unidade, quantidade);
+        });
+    }
 
     const analise = calcularFichaTecnica(receita);
     const custoTotal = analise.custoTotal * quantidade;
@@ -1896,18 +1916,23 @@ formProducao.addEventListener('submit', (e) => {
         quantidade,
         data,
         custoTotal,
-        status: "Concluído",
+        status,
         operador: state.operadorAtivo || "Administrador"
     };
 
     state.producoes.push(novaProd);
     
-    // Incrementar estoque de salgado acabado (freezer)
-    if (!state.estoqueSalgados) state.estoqueSalgados = {};
-    const rendimentoUn = extrairNumeroRendimento(receita.rendimento);
-    state.estoqueSalgados[receitaId] = (state.estoqueSalgados[receitaId] || 0) + (rendimentoUn * quantidade);
-    
-    mostrarToast(`Produção de ${quantidade} lote(s) registrada com sucesso! Estoque atualizado.`);
+    if (!isFutura) {
+        // Incrementar estoque de salgado acabado (freezer)
+        if (!state.estoqueSalgados) state.estoqueSalgados = {};
+        const rendimentoUn = extrairNumeroRendimento(receita.rendimento);
+        state.estoqueSalgados[receitaId] = (state.estoqueSalgados[receitaId] || 0) + (rendimentoUn * quantidade);
+        
+        mostrarToast(`Produção de ${quantidade} lote(s) registrada com sucesso! Estoque atualizado.`);
+    } else {
+        mostrarToast(`Produção para o dia ${data.split('-').reverse().join('/')} agendada com sucesso!`, "info");
+    }
+
     formProducao.reset();
     document.getElementById('prod-data').valueAsDate = new Date();
     salvarEstado();
@@ -1917,25 +1942,30 @@ function desfazerProducao(id) {
     const prod = state.producoes.find(p => p.id === id);
     if (!prod) return;
 
-    if (confirm("Ao desfazer esta ordem de produção, os insumos utilizados serão DEVOLVIDOS ao estoque. Deseja continuar?")) {
+    const msg = prod.status === "Agendado"
+        ? "Deseja realmente cancelar este agendamento de produção?"
+        : "Ao desfazer esta ordem de produção, os insumos utilizados serão DEVOLVIDOS ao estoque e o estoque do freezer será reduzido. Deseja continuar?";
+
+    if (confirm(msg)) {
         const receita = state.receitas.find(r => r.id === prod.receitaId);
         
-        if (receita) {
-            // Devolver ao estoque recursivamente
-            receita.ingredientes.forEach(ing => {
-                devolverEstoqueIngredienteRecursivo(ing.insumoId, ing.quantidade, ing.unidade, prod.quantidade);
-            });
+        if (prod.status !== "Agendado") {
+            if (receita) {
+                // Devolver ao estoque recursivamente
+                receita.ingredientes.forEach(ing => {
+                    devolverEstoqueIngredienteRecursivo(ing.insumoId, ing.quantidade, ing.unidade, prod.quantidade);
+                });
+            }
+
+            // Diminuir estoque de salgado acabado (freezer)
+            if (receita && state.estoqueSalgados && state.estoqueSalgados[prod.receitaId]) {
+                const rendimentoUn = extrairNumeroRendimento(receita.rendimento);
+                state.estoqueSalgados[prod.receitaId] = Math.max(0, state.estoqueSalgados[prod.receitaId] - (rendimentoUn * prod.quantidade));
+            }
         }
 
         state.producoes = state.producoes.filter(p => p.id !== id);
-
-        // Diminuir estoque de salgado acabado (freezer)
-        if (receita && state.estoqueSalgados && state.estoqueSalgados[prod.receitaId]) {
-            const rendimentoUn = extrairNumeroRendimento(receita.rendimento);
-            state.estoqueSalgados[prod.receitaId] = Math.max(0, state.estoqueSalgados[prod.receitaId] - (rendimentoUn * prod.quantidade));
-        }
-
-        mostrarToast("Produção cancelada e insumos devolvidos ao estoque.", "warning");
+        mostrarToast(prod.status === "Agendado" ? "Agendamento cancelado com sucesso." : "Produção desfeita e insumos devolvidos.", "warning");
         salvarEstado();
     }
 }
@@ -3477,4 +3507,42 @@ function renderEstoqueSalgados() {
             }
         });
     });
+}
+
+function confirmarProducaoAgendada(id) {
+    const prod = state.producoes.find(p => p.id === id);
+    if (!prod) return;
+
+    const receita = state.receitas.find(r => r.id === prod.receitaId);
+    if (!receita) return;
+
+    // Verificar e simular estoque de insumos
+    let insumosFaltando = [];
+    receita.ingredientes.forEach(ing => {
+        verificarEstoqueIngredienteRecursivo(ing.insumoId, ing.quantidade, ing.unidade, prod.quantidade, insumosFaltando);
+    });
+
+    if (insumosFaltando.length > 0) {
+        alert(`Não há estoque suficiente de insumos para confirmar esta produção agora:\n\n- ${insumosFaltando.join('\n- ')}`);
+        return;
+    }
+
+    if (confirm(`Deseja confirmar a produção de ${prod.quantidade} lote(s) de ${receita.nome}? Isso dará baixa nos insumos e entrada no estoque do freezer.`)) {
+        // Abater estoque de insumos
+        receita.ingredientes.forEach(ing => {
+            abaterEstoqueIngredienteRecursivo(ing.insumoId, ing.quantidade, ing.unidade, prod.quantidade);
+        });
+
+        // Incrementar estoque de salgado acabado (freezer)
+        if (!state.estoqueSalgados) state.estoqueSalgados = {};
+        const rendimentoUn = extrairNumeroRendimento(receita.rendimento);
+        state.estoqueSalgados[prod.receitaId] = (state.estoqueSalgados[prod.receitaId] || 0) + (rendimentoUn * prod.quantidade);
+
+        // Mudar status e atualizar data para hoje (data da produção real)
+        prod.status = "Concluído";
+        prod.data = new Date().toISOString().split('T')[0];
+
+        salvarEstado();
+        mostrarToast(`Produção de ${receita.nome} confirmada e estoque atualizado!`);
+    }
 }
