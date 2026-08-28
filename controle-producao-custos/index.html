@@ -28,6 +28,7 @@
             <nav class="nav-tabs" id="main-nav" style="width: 100%; border-top: 1px solid var(--color-border); padding-top: 0.75rem; margin-top: 0.5rem;">
                 <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
                 <button class="tab-btn" data-tab="insumos">Insumos (Estoque)</button>
+                <button class="tab-btn" data-tab="estoque-salgados">Estoque de Salgados</button>
                 <button class="tab-btn only-admin" data-tab="recheios">Recheios</button>
                 <button class="tab-btn only-admin" data-tab="receitas">Receitas & Custos</button>
                 <button class="tab-btn" data-tab="producao">Ordens de Produção</button>
@@ -198,6 +199,39 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= ABA ESTOQUE DE SALGADOS ================= -->
+        <section id="estoque-salgados" class="tab-content">
+            <div class="card">
+                <h3 class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>📦 Estoque de Salgados (Produtos Acabados)</span>
+                    <small style="color: var(--color-text-secondary); font-size: 0.85rem; font-weight: normal;">
+                        *Congelados / Prontos no Freezer
+                    </small>
+                </h3>
+                <p style="color: var(--color-text-secondary); font-size: 0.85rem; margin-bottom: 1.25rem;">
+                    Este painel controla o estoque físico de salgados prontos (congelados). As **Ordens de Produção** adicionam automaticamente salgados aqui. Você também pode **Ajustar Manualmente** a quantidade após fazer a contagem do freezer.
+                </p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Salgado / Produto</th>
+                                <th>Rendimento Padrão</th>
+                                <th>Custo Unitário (Produção)</th>
+                                <th>Preço Sugerido (Venda)</th>
+                                <th style="text-align: center;">Estoque Atual (Unidades)</th>
+                                <th>Valor em Estoque (Custo)</th>
+                                <th style="text-align: center;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="estoque-salgados-table-body">
+                            <!-- Preenchido via JS -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </section>

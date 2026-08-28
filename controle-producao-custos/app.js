@@ -359,6 +359,7 @@ function carregarEstado() {
             if (!state.operadores) state.operadores = [];
             if (!state.operadorAtivo) state.operadorAtivo = "Administrador";
             if (!state.senhaAdmin) state.senhaAdmin = "1234";
+            if (!state.estoqueSalgados) state.estoqueSalgados = {};
             
             // Migração de operadores simples (strings) para objetos
             if (state.operadores) {
@@ -395,6 +396,7 @@ function restaurarPadroes() {
     state.operadores = [];
     state.operadorAtivo = "Administrador";
     state.senhaAdmin = "1234";
+    state.estoqueSalgados = {};
     salvarEstado();
 }
 
@@ -435,6 +437,7 @@ function atualizarUI() {
     renderRecheios();
     renderReceitas();
     renderProducoes();
+    renderEstoqueSalgados();
     atualizarDropdownReceitas();
     aplicarPermissoesOperador();
 }
@@ -1898,6 +1901,12 @@ formProducao.addEventListener('submit', (e) => {
     };
 
     state.producoes.push(novaProd);
+    
+    // Incrementar estoque de salgado acabado (freezer)
+    if (!state.estoqueSalgados) state.estoqueSalgados = {};
+    const rendimentoUn = extrairNumeroRendimento(receita.rendimento);
+    state.estoqueSalgados[receitaId] = (state.estoqueSalgados[receitaId] || 0) + (rendimentoUn * quantidade);
+    
     mostrarToast(`Produção de ${quantidade} lote(s) registrada com sucesso! Estoque atualizado.`);
     formProducao.reset();
     document.getElementById('prod-data').valueAsDate = new Date();
@@ -1919,6 +1928,13 @@ function desfazerProducao(id) {
         }
 
         state.producoes = state.producoes.filter(p => p.id !== id);
+
+        // Diminuir estoque de salgado acabado (freezer)
+        if (receita && state.estoqueSalgados && state.estoqueSalgados[prod.receitaId]) {
+            const rendimentoUn = extrairNumeroRendimento(receita.rendimento);
+            state.estoqueSalgados[prod.receitaId] = Math.max(0, state.estoqueSalgados[prod.receitaId] - (rendimentoUn * prod.quantidade));
+        }
+
         mostrarToast("Produção cancelada e insumos devolvidos ao estoque.", "warning");
         salvarEstado();
     }
@@ -3381,4 +3397,84 @@ function processarOlaClickTicket() {
         console.error("Erro ao processar ticket OlaClick:", err);
         alert("Ocorreu um erro ao processar o ticket. Verifique os dados.");
     }
+}
+
+function renderEstoqueSalgados() {
+    const tableBody = document.getElementById('estoque-salgados-table-body');
+    if (!tableBody) return;
+    tableBody.innerHTML = '';
+
+    // Inicializa se não existir
+    if (!state.estoqueSalgados) {
+        state.estoqueSalgados = {};
+    }
+
+    const receitasValidas = state.receitas;
+
+    if (receitasValidas.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" style="text-align: center; color: var(--color-text-secondary);">Nenhum salgado / produto final cadastrado.</td>
+            </tr>
+        `;
+        return;
+    }
+
+    // Ordenar receitas por nome
+    const receitasOrdenadas = [...receitasValidas].sort((a, b) => a.nome.localeCompare(b.nome));
+
+    receitasOrdenadas.forEach(rec => {
+        const estoqueAtual = state.estoqueSalgados[rec.id] || 0;
+        const analise = calcularFichaTecnica(rec);
+        const rendimentoUn = extrairNumeroRendimento(rec.rendimento);
+
+        // Calcula os custos e preços unitários por unidade
+        const custoUnitario = rendimentoUn > 0 ? (analise.custoTotal / rendimentoUn) : analise.custoTotal;
+        const precoSugeridoUnitario = rendimentoUn > 0 ? (analise.precoSugerido / rendimentoUn) : analise.precoSugerido;
+        const valorTotalEstoque = estoqueAtual * custoUnitario;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${rec.nome}</strong></td>
+            <td>${rec.rendimento || 'Lote Único'}</td>
+            <td>${formatarMoeda(custoUnitario)}</td>
+            <td>${formatarMoeda(precoSugeridoUnitario)}</td>
+            <td style="text-align: center;">
+                <span class="badge" style="background-color: ${estoqueAtual > 0 ? '#10b981' : 'var(--color-text-secondary)'}; font-size: 0.95rem; padding: 6px 12px; color: white;">
+                    ${estoqueAtual} un
+                </span>
+            </td>
+            <td><strong>${formatarMoeda(valorTotalEstoque)}</strong></td>
+            <td style="text-align: center;">
+                <button class="btn btn-primary btn-sm btn-ajustar-estoque-salgado" data-id="${rec.id}" style="padding: 4px 8px; font-size: 0.75rem; text-transform: none; width: auto; letter-spacing: 0; background-color: #007bff; border-color: #007bff;">
+                    ✏️ Ajustar Estoque
+                </button>
+            </td>
+        `;
+        tableBody.appendChild(tr);
+    });
+
+    // Registrar o clique dos botões de ajuste
+    document.querySelectorAll('.btn-ajustar-estoque-salgado').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const id = e.currentTarget.dataset.id;
+            const receita = state.receitas.find(r => r.id === id);
+            if (!receita) return;
+
+            const estoqueAtual = state.estoqueSalgados[id] || 0;
+            const novoValorStr = prompt(`Ajustar estoque de "${receita.nome}".\n\nDigite a quantidade atual de unidades que estão no freezer/estoque:`, estoqueAtual);
+            
+            if (novoValorStr !== null) {
+                const novoValor = parseInt(novoValorStr.trim());
+                if (!isNaN(novoValor) && novoValor >= 0) {
+                    if (!state.estoqueSalgados) state.estoqueSalgados = {};
+                    state.estoqueSalgados[id] = novoValor;
+                    salvarEstado();
+                    mostrarToast(`Estoque de ${receita.nome} atualizado para ${novoValor} un.`);
+                } else {
+                    alert("Por favor, digite um número inteiro maior ou igual a zero.");
+                }
+            }
+        });
+    });
 }
