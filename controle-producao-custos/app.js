@@ -2729,6 +2729,12 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-nfe-tab-leitor').addEventListener('click', () => alternarNfeTab('leitor'));
     document.getElementById('btn-nfe-tab-manual').addEventListener('click', () => alternarNfeTab('manual'));
     document.getElementById('btn-processar-nfe').addEventListener('click', processarLinkNfe);
+    document.getElementById('nfe-link-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            processarLinkNfe();
+        }
+    });
     document.getElementById('btn-salvar-entrada-nfe').addEventListener('click', () => {
         const isManual = document.getElementById('nfe-panel-manual').style.display === 'block';
         if (isManual) {
