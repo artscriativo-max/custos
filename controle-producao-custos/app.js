@@ -2205,6 +2205,27 @@ async function processarLinkNfe() {
         alert("Por favor, cole um link de nota fiscal (NFC-e) ou de QR Code válido!");
         return;
     }
+
+    // Detectar se o valor inserido é uma chave de acesso (44 dígitos numéricos)
+    const chaveLimpa = url.replace(/\D/g, '');
+    if (chaveLimpa.length === 44) {
+        const codEstado = chaveLimpa.substring(0, 2);
+        if (codEstado === "43") { // Rio Grande do Sul (RS)
+            url = `https://www.sefaz.rs.gov.br/NFCE/NFCE-COM.aspx?chNFe=${chaveLimpa}`;
+        } else if (codEstado === "35") { // São Paulo (SP)
+            url = `https://www.nfce.fazenda.sp.gov.br/NFCePortal/Paginas/ConsultaPublica.aspx?chNFe=${chaveLimpa}`;
+        } else if (codEstado === "31") { // Minas Gerais (MG)
+            url = `https://portalsped.fazenda.mg.gov.br/portalsped/sistema/consulta.xhtml?chave=${chaveLimpa}`;
+        } else if (codEstado === "33") { // Rio de Janeiro (RJ)
+            url = `https://www4.fazenda.rj.gov.br/consultaNFCe/QRCode?chNFe=${chaveLimpa}`;
+        } else if (codEstado === "41") { // Paraná (PR)
+            url = `http://www.fazenda.pr.gov.br/nfce/qrcode?chNFe=${chaveLimpa}`;
+        } else if (codEstado === "42") { // Santa Catarina (SC)
+            url = `https://sat.sef.sc.gov.br/nfce/consulta?chNFe=${chaveLimpa}`;
+        } else {
+            url = `https://www.sefaz.rs.gov.br/NFCE/NFCE-COM.aspx?chNFe=${chaveLimpa}`;
+        }
+    }
     
     // Força HTTPS para evitar restrições de Cleartext do Android OS em links HTTP comuns
     if (url.startsWith('http://')) {
