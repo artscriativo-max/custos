@@ -2170,7 +2170,82 @@ function localizarEQuicarInsumoNaEntradaManual(codigo) {
     const insumo = state.insumos.find(ins => ins.codigoBarras === codigo);
     
     if (!insumo) {
-        mostrarToast(`Código de barras "${codigo}" não encontrado nos insumos! Cadastre-o no estoque.`, "warning");
+        // Fluxo de Cadastro Rápido de Novo Insumo
+        const cadastrarAgora = confirm(`O código de barras "${codigo}" não pertence a nenhum insumo cadastrado.\n\nDeseja cadastrar esse novo insumo de forma rápida agora mesmo?`);
+        
+        if (cadastrarAgora) {
+            const nome = prompt("Digite o NOME do novo insumo (ex: Leite Condensado Piracanjuba 395g):");
+            if (!nome || !nome.trim()) {
+                alert("Cadastro cancelado: O nome do insumo é obrigatório.");
+                return;
+            }
+            
+            const unidade = prompt("Digite a UNIDADE de medida (g, kg, ml, L ou un):", "un");
+            if (unidade === null) return;
+            const unidadeFmt = unidade.trim().toLowerCase();
+            const unidadesValidas = ["g", "kg", "ml", "L", "un"];
+            if (!unidadesValidas.includes(unidadeFmt)) {
+                alert("Cadastro cancelado: Unidade de medida inválida (deve ser g, kg, ml, L ou un).");
+                return;
+            }
+            
+            const precoStr = prompt("Digite o PREÇO de compra pago por essa embalagem (R$):", "0.00");
+            if (precoStr === null) return;
+            const preco = parseFloat(precoStr.replace(",", "."));
+            if (isNaN(preco) || preco < 0) {
+                alert("Cadastro cancelado: Preço inválido.");
+                return;
+            }
+            
+            const embalagemStr = prompt(`Digite a QUANTIDADE que vem na embalagem (ex: 395 para gramas, 1 para unidade, 1000 para kg):`, "1");
+            if (embalagemStr === null) return;
+            const embalagem = parseFloat(embalagemStr.replace(",", "."));
+            if (isNaN(embalagem) || embalagem <= 0) {
+                alert("Cadastro cancelado: Quantidade de embalagem inválida.");
+                return;
+            }
+            
+            // Cadastra no estado
+            const novoId = 'i' + Date.now();
+            const novoInsumo = {
+                id: novoId,
+                nome: nome.trim(),
+                categoria: "Ingrediente",
+                unidade: unidadeFmt,
+                preco,
+                quantidade: embalagem,
+                estoqueAtual: 0,
+                estoqueMinimo: 0,
+                codigoBarras: codigo
+            };
+            
+            state.insumos.push(novoInsumo);
+            salvarEstado();
+            
+            // Atualiza planilhas e visualizações
+            renderNfeEntradaManual();
+            renderInsumos();
+            
+            // Foca e rola até o novo insumo
+            setTimeout(() => {
+                const inputQtd = document.querySelector(`.nfe-manual-qtd[data-id="${novoId}"]`);
+                if (inputQtd) {
+                    inputQtd.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    inputQtd.focus();
+                    inputQtd.select();
+                    
+                    const tr = inputQtd.closest('tr');
+                    if (tr) {
+                        tr.style.backgroundColor = 'rgba(40, 167, 69, 0.25)'; // Destaque verde para novo cadastro
+                        setTimeout(() => {
+                            tr.style.backgroundColor = '';
+                        }, 2500);
+                    }
+                }
+            }, 300);
+            
+            mostrarToast(`Insumo "${novoInsumo.nome}" cadastrado com sucesso!`);
+        }
         return;
     }
     
