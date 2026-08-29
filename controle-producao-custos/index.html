@@ -166,6 +166,11 @@
                             </div>
                         </div>
 
+                        <div class="form-group">
+                            <label for="insumo-codigo-barras">Código de Barras (Opcional - para Leitor)</label>
+                            <input type="text" id="insumo-codigo-barras" placeholder="Bipe o código de barras ou digite...">
+                        </div>
+
                         <div class="btn-group">
                             <button type="submit" class="btn btn-primary" id="btn-save-insumo">Salvar Insumo</button>
                             <button type="button" class="btn btn-secondary" id="btn-cancel-insumo" style="display:none;">Cancelar</button>
@@ -614,8 +619,11 @@
             <!-- Aba 2: Entrada Rápida Manual (Planilha) -->
             <div id="nfe-panel-manual" style="display: none;">
                 <p style="margin-bottom: 1rem; color: var(--color-text-secondary); font-size: 0.85rem; line-height: 1.4;">
-                    Digite rapidamente as quantidades e valores pagos de cada insumo comprado no mercado:
+                    Digite as quantidades compradas e valores. Se preferir, **bipe o código de barras** do produto para localizá-lo instantaneamente:
                 </p>
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <input type="text" id="manual-nfe-scanner-input" placeholder="👉 Clique aqui e bipe o produto com o leitor..." style="width: 100%; border: 2px solid var(--color-accent); font-weight: bold; background-color: var(--color-bg-primary); padding: 0.75rem;">
+                </div>
                 <div class="table-container" style="max-height: 250px; overflow-y: auto;">
                     <table>
                         <thead>

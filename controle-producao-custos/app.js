@@ -901,23 +901,25 @@ formInsumo.addEventListener('submit', (e) => {
     const quantidade = parseFloat(document.getElementById('insumo-quantidade').value);
     const estoqueAtual = parseFloat(document.getElementById('insumo-estoque-atual').value) || 0;
     const estoqueMinimo = parseFloat(document.getElementById('insumo-estoque-minimo').value) || 0;
+    const codigoBarras = document.getElementById('insumo-codigo-barras').value.trim();
 
     if (id) {
         // Modo Edição
         const index = state.insumos.findIndex(ins => ins.id === id);
         if (index !== -1) {
-            state.insumos[index] = { id, nome, categoria, unidade, preco, quantidade, estoqueAtual, estoqueMinimo };
+            state.insumos[index] = { id, nome, categoria, unidade, preco, quantidade, estoqueAtual, estoqueMinimo, codigoBarras };
             mostrarToast("Insumo editado com sucesso!");
         }
     } else {
         // Novo Insumo
         const novoId = 'i' + Date.now();
-        state.insumos.push({ id: novoId, nome, categoria, unidade, preco, quantidade, estoqueAtual, estoqueMinimo });
+        state.insumos.push({ id: novoId, nome, categoria, unidade, preco, quantidade, estoqueAtual, estoqueMinimo, codigoBarras });
         mostrarToast("Insumo adicionado com sucesso!");
     }
 
     formInsumo.reset();
     document.getElementById('insumo-id').value = '';
+    document.getElementById('insumo-codigo-barras').value = '';
     document.getElementById('btn-cancel-insumo').style.display = 'none';
     document.getElementById('insumo-form-title').textContent = "Cadastrar Novo Insumo";
     atualizarRotulosUnidadeInsumo();
@@ -937,6 +939,7 @@ function editarInsumo(id) {
     document.getElementById('insumo-quantidade').value = insumo.quantidade;
     document.getElementById('insumo-estoque-atual').value = insumo.estoqueAtual;
     document.getElementById('insumo-estoque-minimo').value = insumo.estoqueMinimo;
+    document.getElementById('insumo-codigo-barras').value = insumo.codigoBarras || '';
 
     document.getElementById('btn-cancel-insumo').style.display = 'inline-flex';
     document.getElementById('insumo-form-title').textContent = "Editar Insumo";
@@ -957,6 +960,7 @@ function editarInsumo(id) {
 document.getElementById('btn-cancel-insumo').addEventListener('click', () => {
     formInsumo.reset();
     document.getElementById('insumo-id').value = '';
+    document.getElementById('insumo-codigo-barras').value = '';
     document.getElementById('btn-cancel-insumo').style.display = 'none';
     document.getElementById('insumo-form-title').textContent = "Cadastrar Novo Insumo";
     atualizarRotulosUnidadeInsumo();
@@ -2117,6 +2121,15 @@ function alternarNfeTab(tab) {
         panelManual.style.display = 'block';
         document.getElementById('nfe-panel-conferencia').style.display = 'none';
         document.getElementById('btn-salvar-entrada-nfe').style.display = 'block';
+        
+        // Foca no input do scanner manual
+        const inputScanner = document.getElementById('manual-nfe-scanner-input');
+        if (inputScanner) {
+            inputScanner.value = '';
+            setTimeout(() => {
+                inputScanner.focus();
+            }, 150);
+        }
     }
 }
 
@@ -2150,6 +2163,43 @@ function renderNfeEntradaManual() {
         `;
         tbody.appendChild(tr);
     });
+}
+
+function localizarEQuicarInsumoNaEntradaManual(codigo) {
+    // Busca em todos os insumos qual tem o código de barras exato
+    const insumo = state.insumos.find(ins => ins.codigoBarras === codigo);
+    
+    if (!insumo) {
+        mostrarToast(`Código de barras "${codigo}" não encontrado nos insumos! Cadastre-o no estoque.`, "warning");
+        return;
+    }
+    
+    // Busca o input de quantidade correspondente na tabela da planilha manual
+    const inputQtd = document.querySelector(`.nfe-manual-qtd[data-id="${insumo.id}"]`);
+    
+    if (inputQtd) {
+        // Rolagem suave até o input
+        inputQtd.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Foca e seleciona o texto
+        inputQtd.focus();
+        inputQtd.select();
+        
+        // Destaca a linha inteira mudando a cor de fundo temporariamente
+        const tr = inputQtd.closest('tr');
+        if (tr) {
+            tr.style.backgroundColor = 'rgba(255, 193, 7, 0.25)'; // Amarelo dourado suave
+            tr.style.transition = 'background-color 0.2s ease';
+            
+            setTimeout(() => {
+                tr.style.backgroundColor = '';
+            }, 2000);
+        }
+        
+        mostrarToast(`Localizado: ${insumo.nome}`, "success");
+    } else {
+        mostrarToast("Insumo encontrado, mas não está visível na tabela manual.", "warning");
+    }
 }
 
 // Salva entrada manual
@@ -2764,6 +2814,20 @@ window.addEventListener('DOMContentLoaded', () => {
             salvarEntradaNotaFiscal();
         }
     });
+
+    const scannerManual = document.getElementById('manual-nfe-scanner-input');
+    if (scannerManual) {
+        scannerManual.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const codigo = scannerManual.value.trim();
+                scannerManual.value = '';
+                if (codigo) {
+                    localizarEQuicarInsumoNaEntradaManual(codigo);
+                }
+            }
+        });
+    }
     
     // Listeners do Scanner de Câmera
     document.getElementById('btn-iniciar-scanner-nfe').addEventListener('click', iniciarScannerCamera);
