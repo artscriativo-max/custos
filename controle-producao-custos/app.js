@@ -2875,12 +2875,22 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-nfe-tab-leitor').addEventListener('click', () => alternarNfeTab('leitor'));
     document.getElementById('btn-nfe-tab-manual').addEventListener('click', () => alternarNfeTab('manual'));
     document.getElementById('btn-processar-nfe').addEventListener('click', processarLinkNfe);
-    document.getElementById('nfe-link-input').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            processarLinkNfe();
-        }
-    });
+    const nfeLinkInput = document.getElementById('nfe-link-input');
+    if (nfeLinkInput) {
+        nfeLinkInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                processarLinkNfe();
+            }
+        });
+        nfeLinkInput.addEventListener('keydown', (e) => {
+            // Bloqueia qualquer caractere de controle (como Ctrl+H do leitor) para não disparar atalhos do navegador
+            if (e.ctrlKey && e.key !== 'v' && e.key !== 'c' && e.key !== 'x') {
+                e.preventDefault();
+            }
+        });
+    }
+
     document.getElementById('btn-salvar-entrada-nfe').addEventListener('click', () => {
         const isManual = document.getElementById('nfe-panel-manual').style.display === 'block';
         if (isManual) {
@@ -2900,6 +2910,12 @@ window.addEventListener('DOMContentLoaded', () => {
                 if (codigo) {
                     localizarEQuicarInsumoNaEntradaManual(codigo);
                 }
+            }
+        });
+        scannerManual.addEventListener('keydown', (e) => {
+            // Bloqueia caracteres de controle/atalhos do leitor que abrem historico/downloads no Chrome
+            if (e.ctrlKey && e.key !== 'v' && e.key !== 'c' && e.key !== 'x') {
+                e.preventDefault();
             }
         });
     }
