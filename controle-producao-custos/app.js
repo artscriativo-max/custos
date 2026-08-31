@@ -3,6 +3,15 @@
  * Lógica do aplicativo com armazenamento persistente em localStorage
  */
 
+// --- BLOQUEADOR DE ATALHOS DE LEITORES DE CÓDIGO DE BARRAS (EVITA ABRIR DOWNLOADS/HISTÓRICO NO CHROME) ---
+window.addEventListener('keydown', (e) => {
+    // Intercepta Ctrl+J (Downloads), Ctrl+H (Histórico) e LineFeed (ASCII 10) disparados por leitores de código de barras
+    if ((e.ctrlKey && (e.key === 'j' || e.key === 'J' || e.key === 'h' || e.key === 'H' || e.keyCode === 74 || e.keyCode === 72)) || e.keyCode === 10) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+}, true);
+
 // --- DADOS E INICIALIZAÇÃO DO ESTADO ---
 
 const DADOS_PADRAO_INSUMOS = [
