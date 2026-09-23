@@ -24,5 +24,9 @@ controle-compras-pessoais/package-lock.json
 !.github/
 !.github/**
 
+# Permitir o download do arquivo APK
+!controle-compras-pessoais/www/compras-pessoais.apk
+!controle-compras-pessoais/compras-pessoais.apk
+
 # Permitir o próprio .gitignore
 !.gitignore

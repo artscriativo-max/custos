@@ -1,0 +1,8 @@
+{
+  "appId": "com.agridece.compraspessoais",
+  "appName": "Compras Pessoais",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}
