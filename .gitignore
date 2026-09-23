@@ -1,16 +1,24 @@
 # Ignorar tudo por padrão na raiz
 *
 
-# Permitir apenas a pasta controle-producao-custos
+# Permitir a pasta controle-producao-custos
 !controle-producao-custos/
 !controle-producao-custos/**
 
-# Ignorar dependências, builds e pastas locais do aplicativo
+# Permitir a pasta controle-compras-pessoais
+!controle-compras-pessoais/
+!controle-compras-pessoais/**
+
+# Ignorar dependências, builds e pastas locais dos aplicativos
 controle-producao-custos/node_modules/
 controle-producao-custos/www/
 controle-producao-custos/dist/
 controle-producao-custos/.gradle/
 controle-producao-custos/package-lock.json
+
+controle-compras-pessoais/node_modules/
+controle-compras-pessoais/.gradle/
+controle-compras-pessoais/package-lock.json
 
 # Permitir a pasta do GitHub Actions
 !.github/

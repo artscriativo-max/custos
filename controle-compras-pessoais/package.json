@@ -1,0 +1,26 @@
+{
+  "name": "controle-compras-pessoais",
+  "version": "1.0.0",
+  "description": "Aplicativo de Controle de Compras Pessoais e Orçamento Mensal com Leitor de NF-e",
+  "main": "app.js",
+  "scripts": {
+    "build": "node build.js",
+    "cap:sync": "npm run build && npx cap sync"
+  },
+  "keywords": [
+    "compras",
+    "orcamento",
+    "financas",
+    "nfe",
+    "qrcode"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@capacitor/android": "^5.0.0",
+    "@capacitor/core": "^5.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^5.0.0"
+  }
+}

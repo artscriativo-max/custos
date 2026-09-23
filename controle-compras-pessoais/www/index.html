@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Compras Pessoais & Orçamento</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js para gráficos estatísticos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- html5-qrcode para scanner de câmera -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+<body>
+    <!-- ================= CABEÇALHO DO APLICATIVO ================= -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="brand">
+                <div class="brand-icon">🛒</div>
+                <div>
+                    <h1 class="brand-title">Compras Pessoais & Orçamento</h1>
+                    <p class="brand-subtitle">Gestão de notas fiscais, metas e custos mensais</p>
+                </div>
+            </div>
+            
+            <div class="header-badge-container">
+                <div class="header-badge" id="header-meta-badge">
+                    <span class="badge-label">Meta do Mês:</span>
+                    <span class="badge-val" id="header-meta-val">R$ 0,00</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- ================= MENU DE NAVEGAÇÃO POR ABAS ================= -->
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="dashboard">📊 Dashboard & Meta</button>
+            <button class="tab-btn" data-tab="nova-compra">🧾 Nova Compra (NF-e / QR Code)</button>
+            <button class="tab-btn" data-tab="historico">📜 Histórico & Compras</button>
+            <button class="tab-btn" data-tab="configuracoes">⚙️ Metas & Categorias</button>
+        </nav>
+
+        <!-- ================= ABA 1: DASHBOARD & META DE GASTOS ================= -->
+        <section class="tab-content active" id="tab-dashboard">
+            <!-- ALERTA DINÂMICO DE META ULTRAPASSADA -->
+            <div class="alert-banner" id="budget-alert-banner" style="display: none;">
+                <div class="alert-icon">⚠️</div>
+                <div class="alert-info">
+                    <strong id="alert-title">ATENÇÃO: Meta de Gastos Ultrapassada!</strong>
+                    <p id="alert-desc">Seus gastos deste mês ultrapassaram a meta estipulada. Reduza compras não essenciais!</p>
+                </div>
+            </div>
+
+            <!-- CARD PRINCIPAL DE ORÇAMENTO E PROGRESSO DA META -->
+            <div class="card budget-hero-card" id="budget-card">
+                <div class="budget-header">
+                    <h2>Orçamento do Mês Atual</h2>
+                    <span class="month-pill" id="current-month-lbl">Setembro / 2026</span>
+                </div>
+
+                <div class="budget-grid">
+                    <div class="budget-stat">
+                        <span class="stat-label">Meta Estipulada</span>
+                        <strong class="stat-value text-primary" id="dash-meta-val">R$ 0,00</strong>
+                    </div>
+                    <div class="budget-stat">
+                        <span class="stat-label">Gasto Total Acumulado</span>
+                        <strong class="stat-value" id="dash-gasto-val">R$ 0,00</strong>
+                    </div>
+                    <div class="budget-stat">
+                        <span class="stat-label" id="dash-saldo-lbl">Saldo Restante</span>
+                        <strong class="stat-value" id="dash-saldo-val">R$ 0,00</strong>
+                    </div>
+                </div>
+
+                <!-- BARRA DE PROGRESSO DA META (VERDE / AMRELO / VERMELHO) -->
+                <div class="progress-container">
+                    <div class="progress-labels">
+                        <span>Progresso do Orçamento</span>
+                        <span id="dash-progress-pct">0%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="dash-progress-bar" style="width: 0%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ESTATÍSTICAS RÁPIDAS DO MÊS -->
+            <div class="kpi-grid">
+                <div class="card kpi-card">
+                    <div class="kpi-icon">🛍️</div>
+                    <div class="kpi-data">
+                        <span class="kpi-label">Compras no Mês</span>
+                        <strong class="kpi-value" id="kpi-compras-count">0</strong>
+                    </div>
+                </div>
+                <div class="card kpi-card">
+                    <div class="kpi-icon">🏆</div>
+                    <div class="kpi-data">
+                        <span class="kpi-label">Maior Compra</span>
+                        <strong class="kpi-value" id="kpi-maior-compra">R$ 0,00</strong>
+                    </div>
+                </div>
+                <div class="card kpi-card">
+                    <div class="kpi-icon">🏷️</div>
+                    <div class="kpi-data">
+                        <span class="kpi-label">Maior Categoria de Gasto</span>
+                        <strong class="kpi-value" id="kpi-maior-categoria">-</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GRÁFICOS VISUAIS -->
+            <div class="charts-grid">
+                <div class="card chart-card">
+                    <h3 class="card-title">Gastos por Categoria no Mês</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="chart-categorias"></canvas>
+                    </div>
+                </div>
+
+                <div class="card chart-card">
+                    <h3 class="card-title">Evolução de Gastos vs Meta Mensal</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="chart-historico-meses"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= ABA 2: NOVA COMPRA / LEITOR DE NOTA FISCAL ================= -->
+        <section class="tab-content" id="tab-nova-compra">
+            <div class="card">
+                <h2 class="card-title">Lançar Nova Compra</h2>
+                <p class="section-desc">Importe compras automaticamente pelo QR Code / Link da Nota Fiscal ou faça a entrada manual rápida.</p>
+
+                <!-- ALTERNÂNCIA DE MODO (NF-e VS MANUAL VS FIXAS VS TEXTO) -->
+                <div class="mode-switch-group">
+                    <button class="btn btn-primary mode-btn active" id="btn-mode-nfe">📷 Leitor de Nota Fiscal (QR Code / Link)</button>
+                    <button class="btn btn-secondary mode-btn" id="btn-mode-manual">✍️ Lançamento Manual Direto</button>
+                    <button class="btn btn-secondary mode-btn" id="btn-mode-fixas">📌 Despesas Fixas Padrão</button>
+                    <button class="btn btn-secondary mode-btn" id="btn-mode-texto">📋 Colar Texto do Cupom</button>
+                </div>
+
+                <!-- PAINEL DE LEITURA DE NOTA FISCAL -->
+                <div id="panel-nfe-input">
+                    <div class="form-group" style="margin-top: 1.5rem;">
+                        <label for="nfe-url-input">Link da SEFAZ, QR Code ou Chave de Acesso da Nota Fiscal</label>
+                        <div class="input-with-button">
+                            <input type="text" id="nfe-url-input" placeholder="Cole o link da SEFAZ ou bipe com o leitor físico USB...">
+                            <button type="button" class="btn btn-primary" id="btn-importar-nfe">Importar Nota</button>
+                        </div>
+                    </div>
+
+                    <div class="camera-actions" style="margin-top: 1rem;">
+                        <button type="button" class="btn btn-secondary" id="btn-abrir-camera">📷 Escanear QR Code com a Câmera</button>
+                        <button type="button" class="btn btn-danger" id="btn-fechar-camera" style="display: none;">🛑 Fechar Câmera</button>
+                    </div>
+
+                    <!-- CONTAINER DA CÂMERA -->
+                    <div id="camera-preview-container" style="display: none; margin-top: 1rem; border: 2px solid var(--color-primary); border-radius: 8px; overflow: hidden; max-width: 400px; margin-left: auto; margin-right: auto;">
+                        <div id="camera-reader"></div>
+                    </div>
+
+                    <!-- LOADER DA NOTA -->
+                    <div id="nfe-loading" style="display: none; text-align: center; margin: 2rem 0;">
+                        <div class="spinner"></div>
+                        <p style="margin-top: 0.5rem; font-weight: bold; color: var(--color-primary);">Buscando itens da nota fiscal na Receita Estadual...</p>
+                    </div>
+                </div>
+
+                <!-- PAINEL DE LANÇAMENTO MANUAL DIRETO -->
+                <div id="panel-manual-input" style="display: none; margin-top: 1.5rem;">
+                    <form id="form-compra-manual">
+                        <div class="form-group row-group">
+                            <div>
+                                <label for="manual-estabelecimento">Nome da Loja / Mercado / Farmácia</label>
+                                <input type="text" id="manual-estabelecimento" required placeholder="Ex: Supermercado Carrefour, Farmácia Panvel">
+                            </div>
+                            <div>
+                                <label for="manual-data">Data da Compra</label>
+                                <input type="date" id="manual-data" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group row-group">
+                            <div>
+                                <label for="manual-categoria">Categoria do Gasto</label>
+                                <select id="manual-categoria" required>
+                                    <!-- Injetado via JS -->
+                                </select>
+                            </div>
+                            <div>
+                                <label for="manual-valor-total">Valor Total da Compra (R$)</label>
+                                <input type="number" id="manual-valor-total" step="0.01" min="0.01" required placeholder="0.00">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="manual-observacao">Observações ou Itens (Opcional)</label>
+                            <input type="text" id="manual-observacao" placeholder="Ex: Compras da semana, remédios, presente...">
+                        </div>
+
+                        <button type="submit" class="btn btn-success" style="width: 100%; padding: 0.9rem; font-size: 1rem;">💾 Salvar Compra Manual</button>
+                    </form>
+                </div>
+
+                <!-- PAINEL DE LANÇAMENTO DE DESPESAS FIXAS PADRÃO -->
+                <div id="panel-fixas-input" style="display: none; margin-top: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                        <p class="section-desc" style="margin-bottom: 0;">Lançamento rápido de despesas recorrentes cadastradas como padrão:</p>
+                        <button type="button" class="btn btn-primary btn-sm" id="btn-lancar-todas-fixas">⚡ Lançar TODAS no Mês Atual</button>
+                    </div>
+
+                    <div id="lista-despesas-fixas-cards" class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+                        <!-- Injetado via JS -->
+                    </div>
+                <!-- PAINEL DE LEITURA POR TEXTO DO CUPOM -->
+                <div id="panel-texto-input" style="display: none; margin-top: 1.5rem;">
+                    <div class="form-group">
+                        <label for="texto-cupom-input">Cole aqui o texto ou linhas do Cupom Fiscal impresso</label>
+                        <textarea id="texto-cupom-input" rows="6" placeholder="Cole as linhas do cupom aqui (ex: 7896506900011 FARINHA ROSEFLOR 5KG 1UN 16.59)..." style="width: 100%; padding: 0.75rem; border: 1px solid var(--color-border); border-radius: 6px; font-family: monospace;"></textarea>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="btn-processar-texto-cupom" style="width: 100%;">⚡ Processar Texto do Cupom</button>
+                </div>
+            </div>
+
+            <!-- PAINEL DE CONFERÊNCIA DA NOTA FISCAL IMPORTADA -->
+            <div class="card" id="card-conferencia-nfe" style="display: none; margin-top: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                    <h3 class="card-title" style="margin: 0;">Conferir Itens da Nota Importada</h3>
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-add-item-conf">+ Adicionar Produto</button>
+                </div>
+                
+                <div class="form-group row-group" style="margin-bottom: 1rem;">
+                    <div>
+                        <label for="conf-estabelecimento">Estabelecimento</label>
+                        <input type="text" id="conf-estabelecimento" required>
+                    </div>
+                    <div>
+                        <label for="conf-data">Data da Nota</label>
+                        <input type="date" id="conf-data" required>
+                    </div>
+                    <div>
+                        <label for="conf-categoria-padrao">Categoria Geral da Compra</label>
+                        <select id="conf-categoria-padrao">
+                            <!-- Injetado via JS -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-container" style="max-height: 300px; overflow-y: auto; margin-bottom: 1rem;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th style="width: 100px;">Qtd</th>
+                                <th style="width: 110px;">Preço Un.</th>
+                                <th style="width: 120px;">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="conf-nfe-table-body">
+                            <!-- Injetado via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="conf-summary" style="display: flex; justify-content: space-between; align-items: center; background-color: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px solid var(--color-border); flex-wrap: wrap; gap: 1rem;">
+                    <span>Total de Itens: <strong id="conf-total-itens">0</strong></span>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <label for="conf-valor-total-input" style="font-weight: bold;">Valor Total da Nota (R$):</label>
+                        <input type="number" id="conf-valor-total-input" step="0.01" min="0" style="width: 140px; font-size: 1.1rem; font-weight: bold; color: var(--color-primary); border: 2px solid var(--color-primary); border-radius: 6px; padding: 0.4rem 0.6rem;">
+                    </div>
+                </div>
+
+                <div class="btn-group" style="margin-top: 1.5rem; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" id="btn-cancelar-conf">Cancelar</button>
+                    <button type="button" class="btn btn-success" id="btn-confirmar-salvar-nfe">💾 Confirmar e Salvar Compra</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= ABA 3: HISTÓRICO & RELATÓRIOS ================= -->
+        <section class="tab-content" id="tab-historico">
+            <div class="card">
+                <div class="card-header-flex">
+                    <h2 class="card-title">Histórico de Compras</h2>
+                    <button class="btn btn-primary btn-sm" id="btn-exportar-relatorio">🖨️ Exportar / Imprimir Relatório</button>
+                </div>
+
+                <!-- FILTROS DO HISTÓRICO -->
+                <div class="filter-bar">
+                    <div class="form-group" style="margin: 0; min-width: 180px;">
+                        <label for="filtro-mes-ano">Filtrar por Mês/Ano</label>
+                        <input type="month" id="filtro-mes-ano">
+                    </div>
+                    <div class="form-group" style="margin: 0; min-width: 180px;">
+                        <label for="filtro-categoria">Filtrar por Categoria</label>
+                        <select id="filtro-categoria">
+                            <option value="">Todas as Categorias</option>
+                            <!-- Injetado via JS -->
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin: 0; flex-grow: 1;">
+                        <label for="filtro-busca-texto">Buscar Estabelecimento/Item</label>
+                        <input type="text" id="filtro-busca-texto" placeholder="Digite para buscar...">
+                    </div>
+                </div>
+
+                <!-- TABELA DE COMPRAS -->
+                <div class="table-container" style="margin-top: 1.5rem;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Estabelecimento / Loja</th>
+                                <th>Categoria</th>
+                                <th style="text-align: center;">Itens</th>
+                                <th>Valor Total</th>
+                                <th style="text-align: center;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historico-table-body">
+                            <!-- Injetado via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= ABA 4: CONFIGURAÇÃO DE META E CATEGORIAS ================= -->
+        <section class="tab-content" id="tab-configuracoes">
+            <div class="grid-2col">
+                <!-- FORMULÁRIO DE META MENSAL -->
+                <div class="card">
+                    <h2 class="card-title">🎯 Meta de Gastos Mensal</h2>
+                    <p class="section-desc">Defina o valor máximo que você planeja gastar por mês. O sistema avisará em vermelho se os gastos superarem esta meta.</p>
+
+                    <form id="form-meta-mensal" style="margin-top: 1.5rem;">
+                        <div class="form-group">
+                            <label for="input-meta-mensal">Valor da Meta Mensal (R$)</label>
+                            <input type="number" id="input-meta-mensal" step="10" min="0" required placeholder="Ex: 2500.00">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">💾 Salvar Nova Meta</button>
+                    </form>
+                </div>
+
+                <!-- GERENCIAMENTO DE CATEGORIAS -->
+                <div class="card">
+                    <h2 class="card-title">🏷️ Categorias de Compras</h2>
+                    <p class="section-desc">Cadastre ou edite as categorias de gastos para classificar suas notas de compra.</p>
+
+                    <form id="form-categoria-nova" style="margin-top: 1rem; margin-bottom: 1.5rem;">
+                        <div class="form-group row-group">
+                            <div>
+                                <label for="cat-nome-input">Nome da Categoria</label>
+                                <input type="text" id="cat-nome-input" required placeholder="Ex: Farmácia, Lazer">
+                            </div>
+                            <div>
+                                <label for="cat-cor-input">Cor</label>
+                                <input type="color" id="cat-cor-input" value="#2563eb" style="height: 42px; padding: 2px;">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-secondary btn-sm" style="width: 100%;">+ Adicionar Categoria</button>
+                    </form>
+
+                    <div class="table-container" style="max-height: 220px; overflow-y: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Categoria</th>
+                                    <th>Cor</th>
+                                    <th style="text-align: center;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="categorias-table-body">
+                                <!-- Injetado via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CARD DE GERENCIAMENTO DE DESPESAS FIXAS PADRÃO -->
+            <div class="card" style="margin-top: 1.5rem;">
+                <h2 class="card-title">📌 Cadastrar Despesas Fixas Padrão (Recorrentes)</h2>
+                <p class="section-desc">Cadastre suas contas mensais fixas (Aluguel, Luz, Internet, Academia) para lançá-las rapidamente com 1 clique todos os meses.</p>
+
+                <form id="form-despesa-fixa-nova" style="margin-top: 1rem; margin-bottom: 1.5rem;">
+                    <div class="form-group row-group">
+                        <div>
+                            <label for="fixa-nome-input">Nome da Despesa</label>
+                            <input type="text" id="fixa-nome-input" required placeholder="Ex: Aluguel da Casa, Internet Fibra">
+                        </div>
+                        <div>
+                            <label for="fixa-categoria-input">Categoria</label>
+                            <select id="fixa-categoria-input" required>
+                                <!-- Injetado via JS -->
+                            </select>
+                        </div>
+                        <div>
+                            <label for="fixa-valor-input">Valor Padrão (R$)</label>
+                            <input type="number" id="fixa-valor-input" step="0.01" min="0.01" required placeholder="0.00">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">+ Cadastrar Nova Despesa Fixa Padrão</button>
+                </form>
+
+                <div class="table-container" style="max-height: 250px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Despesa Padrão</th>
+                                <th>Categoria</th>
+                                <th>Valor Padrão</th>
+                                <th style="text-align: center;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="despesas-fixas-table-body">
+                            <!-- Injetado via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ================= MODAL DE DETALHES DA COMPRA ================= -->
+    <div class="modal" id="compra-detalhes-modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <button class="close-btn" id="btn-fechar-modal-detalhes">&times;</button>
+            <h2 class="card-title" id="modal-detalhes-titulo">Detalhes da Compra</h2>
+            <div id="modal-detalhes-meta" class="meta-box" style="margin: 1rem 0;"></div>
+
+            <div class="table-container" style="max-height: 250px; overflow-y: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th style="width: 80px;">Qtd</th>
+                            <th style="width: 100px;">Preço Un.</th>
+                            <th style="width: 110px;">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modal-detalhes-table-body">
+                        <!-- Injetado via JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="modal-footer" style="margin-top: 1.5rem; text-align: right;">
+                <button type="button" class="btn btn-secondary" id="btn-fechar-modal-detalhes-btn">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST DE NOTIFICAÇÃO -->
+    <div class="toast" id="toast">
+        <span id="toast-message">Mensagem do Toast</span>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
