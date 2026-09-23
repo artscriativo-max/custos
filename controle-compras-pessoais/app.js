@@ -465,18 +465,19 @@ async function processarNfeEntrada() {
     const matchChave = url.match(/\d{44}/);
     const chave44 = matchChave ? matchChave[0] : null;
 
-    // Normalização das URLs do Rio Grande do Sul para o portal oficial unificado da SVRS
+    let targetUrls = [];
+
     if (url.includes('sefaz.rs.gov.br/NFCE/NFCE-COM.aspx')) {
+        targetUrls.push(url);
         const paramP = url.split('p=')[1] || url.split('chNFe=')[1] || chave44;
         if (paramP) {
-            url = `https://dfe-portal.svrs.rs.gov.br/NFCe/qrCode?p=${paramP}`;
+            targetUrls.push(`https://dfe-portal.svrs.rs.gov.br/NFCe/qrCode?p=${paramP}`);
         }
     } else if (chave44 && !url.includes('http')) {
-        url = `https://dfe-portal.svrs.rs.gov.br/NFCe/qrCode?p=${chave44}`;
-    }
-
-    if (url.startsWith('http://')) {
-        url = url.replace('http://', 'https://');
+        targetUrls.push(`https://www.sefaz.rs.gov.br/NFCE/NFCE-COM.aspx?chNFe=${chave44}`);
+        targetUrls.push(`https://dfe-portal.svrs.rs.gov.br/NFCe/qrCode?p=${chave44}`);
+    } else {
+        targetUrls.push(url);
     }
 
     const loader = document.getElementById('nfe-loading');
@@ -487,40 +488,48 @@ async function processarNfeEntrada() {
 
     let htmlText = "";
 
-    // 1ª Tentativa: Fetch direto do Portal SVRS
-    try {
-        const response = await fetch(url);
-        if (response.ok) {
-            htmlText = await response.text();
+    // 1ª Tentativa: Fetch direto (que no Android Capacitor com CapacitorHttp funciona sem CORS)
+    for (let targetUrl of targetUrls) {
+        if (targetUrl.startsWith('http://')) targetUrl = targetUrl.replace('http://', 'https://');
+        try {
+            const response = await fetch(targetUrl);
+            if (response.ok) {
+                const text = await response.text();
+                if (text && text.length > 200 && (text.includes('txtNome') || text.includes('tabResult') || text.includes('table-striped') || text.includes('totalNFe'))) {
+                    htmlText = text;
+                    break;
+                }
+            }
+        } catch (errDirect) {
+            console.warn("Fetch direto bloqueado ou falhou:", errDirect);
         }
-    } catch (errDirect) {
-        console.warn("Fetch direto bloqueado por CORS. Tentando proxies SVRS...", errDirect);
     }
 
-    // 2ª Tentativa: Proxies CORS de contingência
-    if (!htmlText || htmlText.length < 200 || !htmlText.includes('txtNome')) {
-        const urlClean = url.replace(/\|/g, '%7C');
-        const proxies = [
-            `https://api.allorigins.win/raw?url=${encodeURIComponent(urlClean)}`,
-            `https://corsproxy.io/?${encodeURIComponent(urlClean)}`,
-            `https://thingproxy.freeboard.io/fetch/${urlClean}`
-        ];
+    // 2ª Tentativa: Proxies CORS de contingência (para execução no navegador Web do PC ou celular)
+    if (!htmlText || htmlText.length < 200 || (!htmlText.includes('txtNome') && !htmlText.includes('tabResult'))) {
+        for (let targetUrl of targetUrls) {
+            const urlClean = targetUrl.replace(/\|/g, '%7C');
+            const proxies = [
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(urlClean)}`,
+                `https://corsproxy.io/?${encodeURIComponent(urlClean)}`,
+                `https://thingproxy.freeboard.io/fetch/${urlClean}`
+            ];
 
-        for (const proxy of proxies) {
-            try {
-                const res = await fetch(proxy);
-                if (res.ok) {
-                    const text = await res.text();
-                    if (text && text.length > 200) {
-                        htmlText = text;
-                        if (text.includes('txtNome') || text.includes('tabResult') || text.includes('table-striped') || text.includes('totalNFe')) {
+            for (const proxy of proxies) {
+                try {
+                    const res = await fetch(proxy);
+                    if (res.ok) {
+                        const text = await res.text();
+                        if (text && text.length > 200 && (text.includes('txtNome') || text.includes('tabResult') || text.includes('table-striped') || text.includes('totalNFe'))) {
+                            htmlText = text;
                             break;
                         }
                     }
+                } catch (errProxy) {
+                    // Tenta o próximo proxy
                 }
-            } catch (errProxy) {
-                // Tenta o próximo proxy
             }
+            if (htmlText) break;
         }
     }
 
