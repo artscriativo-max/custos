@@ -522,6 +522,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const btnGerarJsonCodigo = document.getElementById('btn-gerar-json-codigo');
+    if (btnGerarJsonCodigo) {
+        btnGerarJsonCodigo.addEventListener('click', () => {
+            const jsonStr = JSON.stringify(state, null, 2);
+            navigator.clipboard.writeText(jsonStr).then(() => {
+                mostrarToast("📋 Dados copiados para a área de transferência!");
+                alert("Os dados atualizados do seu navegador foram COPIADOS!\n\nCole (Ctrl+V) aqui no chat da nossa conversa para atualizar o arquivo ZIP definitivamente para o seu cliente!");
+            }).catch(() => {
+                prompt("Copie (Ctrl+C) todo o texto abaixo e envie no nosso chat:", jsonStr);
+            });
+        });
+    }
+
     // Imprimir
     btnImprimir.addEventListener('click', () => {
         window.print();
