@@ -413,3 +413,18 @@ input[type="file"] {
         page-break-inside: avoid; /* Evita que uma linha da tabela seja cortada ao meio na virada da página */
     }
 }
+
+/* Notificação Toast */
+.toast-msg {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: #10b981;
+    color: #ffffff;
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    z-index: 99999;
+}

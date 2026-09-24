@@ -2,12 +2,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const categoriasContainer = document.getElementById('categorias-container');
     const previewContainer = document.getElementById('catalogo-preview');
     const btnImprimir = document.getElementById('btn-imprimir');
+    const btnSalvar = document.getElementById('btn-salvar');
+    const btnReset = document.getElementById('btn-reset');
     const inputTitulo = document.getElementById('titulo-catalogo');
     const logoUpload = document.getElementById('logo-upload');
     const chkOrdemAlfabetica = document.getElementById('chk-ordem-alfabetica');
 
-    // Dados baseados na raspagem do site
-    let state = {
+    // Dados padrão originais do catálogo Copelli
+    const STATE_PADRAO = {
         titulo: "Catálogo de Produtos - Copelli Delícias Caseiras",
         logoUrl: "",
         ordemAlfabetica: true,
@@ -98,7 +100,54 @@ document.addEventListener('DOMContentLoaded', () => {
         ]
     };
 
+    let state = JSON.parse(JSON.stringify(STATE_PADRAO));
     let globalIdCount = 400;
+
+    function salvarEstado(mostrarNotificacao = false) {
+        try {
+            localStorage.setItem('copelli_catalogo_state', JSON.stringify(state));
+            if (mostrarNotificacao) {
+                mostrarToast("💾 Alterações salvas com sucesso!");
+            }
+        } catch (e) {
+            console.error("Erro ao salvar no localStorage", e);
+        }
+    }
+
+    function carregarEstado() {
+        const dados = localStorage.getItem('copelli_catalogo_state');
+        if (dados) {
+            try {
+                const parsed = JSON.parse(dados);
+                if (parsed && parsed.categorias) {
+                    state = parsed;
+                }
+            } catch (e) {
+                console.error("Erro ao carregar do localStorage", e);
+            }
+        }
+    }
+
+    function mostrarToast(mensagem) {
+        const antigo = document.querySelector('.toast-msg');
+        if (antigo) antigo.remove();
+
+        const toast = document.createElement('div');
+        toast.className = 'toast-msg';
+        toast.textContent = mensagem;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }, 2200);
+    }
+
+    // Carrega os dados salvos anteriormente
+    carregarEstado();
+    if (inputTitulo) inputTitulo.value = state.titulo || "Catálogo de Produtos - Copelli Delícias Caseiras";
+    if (chkOrdemAlfabetica) chkOrdemAlfabetica.checked = state.ordemAlfabetica !== false;
 
     function ordenarProdutosEstado() {
         if (!state.ordemAlfabetica) return;
@@ -231,6 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
             chk.addEventListener('change', (e) => {
                 const cIdx = parseInt(e.target.getAttribute('data-cat'), 10);
                 state.categorias[cIdx].ativo = e.target.checked;
+                salvarEstado();
                 renderEditor();
                 updatePreview();
             });
@@ -242,6 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const cIdx = parseInt(e.target.getAttribute('data-cat'), 10);
                 const iIdx = parseInt(e.target.getAttribute('data-idx'), 10);
                 state.categorias[cIdx].itens[iIdx].ativo = e.target.checked;
+                salvarEstado();
                 updatePreview();
             });
         });
@@ -254,6 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const field = e.target.getAttribute('data-field');
                 
                 state.categorias[cIdx].itens[iIdx][field] = e.target.value;
+                salvarEstado();
                 updatePreview();
             });
         });
@@ -265,6 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const id = parseInt(e.target.getAttribute('data-id'), 10);
                 
                 state.categorias[cIdx].itens = state.categorias[cIdx].itens.filter(i => i.id !== id);
+                salvarEstado();
                 renderEditor();
                 updatePreview();
                 document.querySelectorAll('.accordion')[cIdx].classList.add('active');
@@ -365,6 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ordenarProdutosEstado();
                 renderEditor();
             }
+            salvarEstado();
             updatePreview();
         });
     }
@@ -372,6 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Título Geral Listener
     inputTitulo.addEventListener('input', (e) => {
         state.titulo = e.target.value;
+        salvarEstado();
         updatePreview();
     });
 
@@ -382,14 +437,39 @@ document.addEventListener('DOMContentLoaded', () => {
             const reader = new FileReader();
             reader.onload = function(evt) {
                 state.logoUrl = evt.target.result;
+                salvarEstado();
                 updatePreview();
             };
             reader.readAsDataURL(file);
         } else {
             state.logoUrl = '';
+            salvarEstado();
             updatePreview();
         }
     });
+
+    // Botão Salvar Explícito
+    if (btnSalvar) {
+        btnSalvar.addEventListener('click', () => {
+            salvarEstado(true);
+        });
+    }
+
+    // Botão Restaurar Padrões
+    if (btnReset) {
+        btnReset.addEventListener('click', () => {
+            if (confirm("Tem certeza de que deseja restaurar a tabela para a versão padrão de fábrica da Copelli?")) {
+                localStorage.removeItem('copelli_catalogo_state');
+                state = JSON.parse(JSON.stringify(STATE_PADRAO));
+                ordenarProdutosEstado();
+                if (inputTitulo) inputTitulo.value = state.titulo;
+                if (chkOrdemAlfabetica) chkOrdemAlfabetica.checked = state.ordemAlfabetica;
+                renderEditor();
+                updatePreview();
+                mostrarToast("Tabela padrão restaurada!");
+            }
+        });
+    }
 
     // Imprimir
     btnImprimir.addEventListener('click', () => {
