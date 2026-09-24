@@ -662,16 +662,21 @@ function obterNomePorCNPJ(cnpj) {
     return "Mercado / Loja";
 }
 
-// Conversor inteligente de moeda brasileira (ex: 1.283,64 ou 283,64 para float 1283.64)
-function parseMoedaBR(str) {
+// Conversor inteligente de números e moedas brasileiras da SEFAZ (ex: 16,59 ou 1.283,64 de "Vl. Unit.: 16,59")
+function extrairNumeroSEFAZ(str) {
     if (!str) return 0;
-    const match = str.match(/[\d\.\,]+/);
+    // Busca sequências numéricas no formato brasileiro (ex: 16,59 ou 1.283,64 ou 16.59) ignorando os pontos de "Vl." ou "Unit."
+    const match = str.match(/\d+(?:\.\d+)*(?:,\d+)?/) || str.match(/\d+(?:,\d+)?/);
     if (!match) return 0;
     let s = match[0];
     if (s.includes(',')) {
         s = s.replace(/\./g, '').replace(',', '.');
     }
     return parseFloat(s) || 0;
+}
+
+function parseMoedaBR(str) {
+    return extrairNumeroSEFAZ(str);
 }
 
 // Parser completo do HTML do cupom fiscal da SEFAZ / SVRS
@@ -685,16 +690,30 @@ function parseHtmlSefazCompleto(htmlText) {
     let valorTotalNota = 0;
     let dataNota = "";
 
-    // 1. Extração do Nome do Estabelecimento/Mercado
-    const estabEl = doc.querySelector('.txtCenter .txtTit, #Header .txtTit, .tit, .txtBox .txtTit, #conteudo .txtTit, .txtTop');
-    if (estabEl) {
-        estabelecimento = estabEl.textContent.trim().replace(/\s+/g, ' ');
+    // 1. Extração do Nome do Estabelecimento/Mercado (Ignorando títulos genéricos de Documento Auxiliar)
+    const titulos = doc.querySelectorAll('.txtCenter .txtTit, #Header .txtTit, .tit, .txtBox .txtTit, #conteudo .txtTit, .txtTop, div[class*="txtTit"]');
+    for (let el of titulos) {
+        const txt = el.textContent.trim().replace(/\s+/g, ' ');
+        if (txt && !txt.toUpperCase().includes("DOCUMENTO AUXILIAR") && !txt.toUpperCase().includes("NOTA FISCAL") && !txt.toUpperCase().includes("NFC-E")) {
+            estabelecimento = txt;
+            break;
+        }
+    }
+    if (!estabelecimento && titulos.length > 0) {
+        estabelecimento = titulos[0].textContent.trim().replace(/\s+/g, ' ');
     }
 
     // 2. Extração do Valor Total da Nota
-    const totalEl = doc.querySelector('.totalNFe .txtMax, .txtValTotal, .vTot, .totalNfe, #totalNota, .total');
+    const totalEl = doc.querySelector('.totalNFe .txtMax, .txtValTotal, .vTot, .totalNfe, #totalNota, .total, .vPag');
     if (totalEl) {
-        valorTotalNota = parseMoedaBR(totalEl.textContent);
+        valorTotalNota = extrairNumeroSEFAZ(totalEl.textContent);
+    }
+    if (valorTotalNota === 0) {
+        const textoCompleto = doc.body ? doc.body.textContent : "";
+        const matchTotalText = textoCompleto.match(/(?:Valor\s+a\s+Pagar|Valor\s+Total|TOTAL|VALOR\s+PAGO)\s*:?\s*R?\$?\s*([\d\.,]+)/i);
+        if (matchTotalText) {
+            valorTotalNota = extrairNumeroSEFAZ(matchTotalText[1]);
+        }
     }
 
     // 3. Extração da Data da Nota
@@ -705,8 +724,8 @@ function parseHtmlSefazCompleto(htmlText) {
         dataNota = `${parts[2]}-${parts[1]}-${parts[0]}`;
     }
 
-    // 4. Extração dos Itens da Tabela
-    const rows = doc.querySelectorAll('table[id^="tabResult"] tr, #tabResult tr, .table tr, .table-striped tr, table.trItem');
+    // 4. Extração dos Itens da Tabela da SEFAZ
+    const rows = doc.querySelectorAll('table[id^="tabResult"] tr, #tabResult tr, .table tr, .table-striped tr, table.trItem, tr[id^="Item"]');
     
     if (rows.length === 0) {
         const nomes = doc.querySelectorAll('.txtNome, .txtTit');
@@ -718,8 +737,8 @@ function parseHtmlSefazCompleto(htmlText) {
             const qtdText = qtds[i] ? qtds[i].textContent.trim() : '1';
             const valText = vals[i] ? vals[i].textContent.trim() : '0';
             
-            const qtd = parseMoedaBR(qtdText) || 1;
-            const val = parseMoedaBR(valText);
+            const qtd = extrairNumeroSEFAZ(qtdText) || 1;
+            const val = extrairNumeroSEFAZ(valText);
             
             if (nome && !nome.toLowerCase().includes('total') && !nome.toLowerCase().includes('cnpj')) {
                 itens.push({ nome: nome.replace(/\s+/g, ' '), quantidade: qtd, precoUnitario: val, subtotal: qtd * val });
@@ -729,32 +748,38 @@ function parseHtmlSefazCompleto(htmlText) {
         rows.forEach(row => {
             const nomeEl = row.querySelector('.txtNome, .txtTit, .fixo-txt-tit');
             if (nomeEl) {
+                const nomeItem = nomeEl.textContent.trim().replace(/\s+/g, ' ');
+                if (!nomeItem || nomeItem.toUpperCase().includes("DOCUMENTO AUXILIAR") || nomeItem.toLowerCase() === "item") {
+                    return;
+                }
+
                 const qtdEl = row.querySelector('.Rqtd, .qtd');
                 const valEl = row.querySelector('.RvalUnit, .RvlUnit, .txtValUnit');
                 const subEl = row.querySelector('.vItem, .RvlTot, .vTot, .RvalTotal');
                 
-                let qtdText = qtdEl ? qtdEl.textContent.trim() : '1';
-                let valText = valEl ? valEl.textContent.trim() : '0';
-                let subText = subEl ? subEl.textContent.trim() : '0';
+                let qtdText = qtdEl ? qtdEl.textContent : (row.textContent.match(/Qtde\.?:?\s*([\d\.,]+)/i)?.[1] || '1');
+                let valText = valEl ? valEl.textContent : (row.textContent.match(/Vl\.?\s*Unit\.?:?\s*([\d\.,]+)/i)?.[1] || '0');
+                let subText = subEl ? subEl.textContent : (row.textContent.match(/Vl\.?\s*Total:?\s*([\d\.,]+)/i)?.[1] || '0');
                 
-                let quantidade = parseMoedaBR(qtdText) || 1;
-                let precoUnitario = parseMoedaBR(valText);
-                let subtotal = parseMoedaBR(subText);
+                let quantidade = extrairNumeroSEFAZ(qtdText) || 1;
+                let precoUnitario = extrairNumeroSEFAZ(valText);
+                let subtotal = extrairNumeroSEFAZ(subText);
 
                 if (subtotal === 0 && precoUnitario > 0) subtotal = quantidade * precoUnitario;
                 if (precoUnitario === 0 && subtotal > 0 && quantidade > 0) precoUnitario = subtotal / quantidade;
                 
-                const nomeItem = nomeEl.textContent.trim().replace(/\s+/g, ' ');
-                if (nomeItem && !nomeItem.toLowerCase().includes('total')) {
-                    itens.push({
-                        nome: nomeItem,
-                        quantidade,
-                        precoUnitario,
-                        subtotal
-                    });
-                }
+                itens.push({
+                    nome: nomeItem,
+                    quantidade,
+                    precoUnitario,
+                    subtotal: subtotal || (quantidade * precoUnitario)
+                });
             }
         });
+    }
+
+    if (valorTotalNota === 0 && itens.length > 0) {
+        valorTotalNota = itens.reduce((acc, it) => acc + (it.subtotal || 0), 0);
     }
     
     return { estabelecimento, dataNota, valorTotalNota, itens };
@@ -773,13 +798,13 @@ function renderConferenciaNfe() {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>
-                <input type="text" class="conf-item-nome" data-index="${index}" value="${item.nome}" style="width: 100%; border: 1px solid var(--color-border); padding: 0.35rem 0.5rem; border-radius: 4px;">
+                <input type="text" class="conf-item-nome" data-index="${index}" value="${item.nome}" style="min-width: 160px; width: 100%; border: 1px solid var(--color-border); padding: 0.35rem 0.5rem; border-radius: 4px;">
             </td>
             <td>
-                <input type="number" class="conf-item-qtd" data-index="${index}" value="${item.quantidade}" step="0.001" min="0.001" style="width: 80px; border: 1px solid var(--color-border); padding: 0.35rem 0.5rem; border-radius: 4px;">
+                <input type="number" class="conf-item-qtd" data-index="${index}" value="${item.quantidade}" step="0.001" min="0.001" style="width: 70px; border: 1px solid var(--color-border); padding: 0.35rem 0.5rem; border-radius: 4px;">
             </td>
             <td>
-                <input type="number" class="conf-item-preco" data-index="${index}" value="${item.precoUnitario}" step="0.01" min="0" style="width: 100px; border: 1px solid var(--color-border); padding: 0.35rem 0.5rem; border-radius: 4px;">
+                <input type="number" class="conf-item-preco" data-index="${index}" value="${item.precoUnitario}" step="0.01" min="0" style="width: 85px; border: 1px solid var(--color-border); padding: 0.35rem 0.5rem; border-radius: 4px;">
             </td>
             <td>
                 <strong class="conf-item-subtotal" data-index="${index}">${formatarMoeda(subtotal)}</strong>
