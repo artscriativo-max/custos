@@ -709,16 +709,20 @@ function parseHtmlSefazCompleto(htmlText) {
         estabelecimento = titulos[0].textContent.trim().replace(/\s+/g, ' ');
     }
 
-    // 2. Extração do Valor Total da Nota
-    const totalEl = doc.querySelector('.totalNFe .txtMax, .txtValTotal, .vTot, .totalNfe, #totalNota, .total, .vPag');
-    if (totalEl) {
+    // 2. Extração do Valor Total da Nota (Ignorando a classe .total que contém "Qtd. total de itens")
+    const totalEl = doc.querySelector('.totalNFe .txtMax, .txtValTotal, #totalNota, .vPag, .vTot');
+    if (totalEl && !totalEl.textContent.toLowerCase().includes('qtd') && !totalEl.textContent.toLowerCase().includes('item')) {
         valorTotalNota = extrairNumeroSEFAZ(totalEl.textContent);
     }
-    if (valorTotalNota === 0) {
+    
+    if (valorTotalNota === 0 || (itens.length > 0 && valorTotalNota === itens.length)) {
         const textoCompleto = doc.body ? doc.body.textContent : "";
-        const matchTotalText = textoCompleto.match(/(?:Valor\s+a\s+Pagar|Valor\s+Total|TOTAL|VALOR\s+PAGO)\s*:?\s*R?\$?\s*([\d\.,]+)/i);
+        const matchTotalText = textoCompleto.match(/(?:Valor\s+a\s+Pagar|VALOR\s+TOTAL\s*R?\$?|TOTAL\s*R?\$?)\s*:?\s*R?\$?\s*([\d\.,]+)/i);
         if (matchTotalText) {
-            valorTotalNota = extrairNumeroSEFAZ(matchTotalText[1]);
+            const valExt = extrairNumeroSEFAZ(matchTotalText[1]);
+            if (valExt > 0 && valExt !== itens.length) {
+                valorTotalNota = valExt;
+            }
         }
     }
 
@@ -784,11 +788,13 @@ function parseHtmlSefazCompleto(htmlText) {
         });
     }
 
-    if (valorTotalNota === 0 && itens.length > 0) {
-        valorTotalNota = itens.reduce((acc, it) => acc + (it.subtotal || 0), 0);
+    // Calcula sempre o valor monetário real somando todos os subtotais dos itens
+    const somaMonetaria = itens.reduce((acc, it) => acc + (it.subtotal || 0), 0);
+    if (somaMonetaria > 0 && (valorTotalNota === 0 || valorTotalNota === itens.length)) {
+        valorTotalNota = somaMonetaria;
     }
     
-    return { estabelecimento, dataNota, valorTotalNota, itens };
+    return { estabelecimento, dataNota, valorTotalNota: valorTotalNota || somaMonetaria, itens };
 }
 
 function renderConferenciaNfe() {
@@ -963,7 +969,12 @@ function salvarCompraNfeConferida() {
 
     const totalInputVal = parseFloat(document.getElementById('conf-valor-total-input').value);
     const valorCalculado = nfeItensTemporarios.reduce((acc, item) => acc + (item.subtotal || 0), 0);
-    const valorTotal = !isNaN(totalInputVal) && totalInputVal > 0 ? totalInputVal : valorCalculado;
+    let valorTotal = !isNaN(totalInputVal) && totalInputVal > 0 ? totalInputVal : valorCalculado;
+
+    // Proteção: Se por qualquer motivo o total for igual à quantidade de itens e houver soma monetária real, usa a soma dos produtos
+    if (valorCalculado > 0 && (valorTotal === nfeItensTemporarios.length || isNaN(valorTotal) || valorTotal <= 0)) {
+        valorTotal = valorCalculado;
+    }
 
     if (isNaN(valorTotal) || valorTotal <= 0) {
         alert("Por favor, preencha o Valor Total da Nota antes de confirmar.");
