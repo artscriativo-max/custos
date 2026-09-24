@@ -525,7 +525,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnGerarJsonCodigo = document.getElementById('btn-gerar-json-codigo');
     if (btnGerarJsonCodigo) {
         btnGerarJsonCodigo.addEventListener('click', () => {
-            const jsonStr = JSON.stringify(state, null, 2);
+            const exportState = JSON.parse(JSON.stringify(state));
+            if (exportState.logoUrl && exportState.logoUrl.length > 300) {
+                exportState.logoUrl = "";
+            }
+            const jsonStr = JSON.stringify(exportState, null, 2);
             navigator.clipboard.writeText(jsonStr).then(() => {
                 mostrarToast("📋 Dados copiados para a área de transferência!");
                 alert("Os dados atualizados do seu navegador foram COPIADOS!\n\nCole (Ctrl+V) aqui no chat da nossa conversa para atualizar o arquivo ZIP definitivamente para o seu cliente!");
