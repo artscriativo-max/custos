@@ -549,10 +549,16 @@ async function processarNfeEntrada() {
         if (nfeDados.estabelecimento) {
             document.getElementById('conf-estabelecimento').value = nfeDados.estabelecimento;
         }
-        if (nfeDados.valorTotalNota > 0) {
-            const totalInput = document.getElementById('conf-valor-total-input');
-            if (totalInput) totalInput.value = nfeDados.valorTotalNota.toFixed(2);
+
+        // Soma automática dos itens extraídos
+        const somaItens = nfeItensTemporarios.reduce((acc, it) => acc + (it.subtotal || (it.quantidade * it.precoUnitario)), 0);
+        const totalFinal = nfeDados.valorTotalNota > 0 ? nfeDados.valorTotalNota : somaItens;
+        
+        const totalInput = document.getElementById('conf-valor-total-input');
+        if (totalInput && totalFinal > 0) {
+            totalInput.value = totalFinal.toFixed(2);
         }
+
         document.getElementById('conf-data').value = nfeDados.dataNota || hoje;
 
         cardConf.style.display = 'block';
