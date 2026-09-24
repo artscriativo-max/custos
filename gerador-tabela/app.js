@@ -471,6 +471,57 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Exportar Backup JSON
+    const btnExportarJson = document.getElementById('btn-exportar-json');
+    const btnImportarTrigger = document.getElementById('btn-importar-trigger');
+    const inputImportarJson = document.getElementById('input-importar-json');
+
+    if (btnExportarJson) {
+        btnExportarJson.addEventListener('click', () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `catalogo-copelli-backup-${new Date().toISOString().substring(0, 10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            mostrarToast("📥 Backup JSON exportado com sucesso!");
+        });
+    }
+
+    if (btnImportarTrigger && inputImportarJson) {
+        btnImportarTrigger.addEventListener('click', () => {
+            inputImportarJson.click();
+        });
+
+        inputImportarJson.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    try {
+                        const imported = JSON.parse(evt.target.result);
+                        if (imported && imported.categorias) {
+                            state = imported;
+                            salvarEstado();
+                            if (inputTitulo) inputTitulo.value = state.titulo || "";
+                            if (chkOrdemAlfabetica) chkOrdemAlfabetica.checked = state.ordemAlfabetica !== false;
+                            ordenarProdutosEstado();
+                            renderEditor();
+                            updatePreview();
+                            mostrarToast("📤 Backup JSON importado com sucesso!");
+                        } else {
+                            alert("O arquivo selecionado não contém uma estrutura válida de catálogo.");
+                        }
+                    } catch (err) {
+                        alert("Erro ao ler o arquivo JSON selecionado.");
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+    }
+
     // Imprimir
     btnImprimir.addEventListener('click', () => {
         window.print();
