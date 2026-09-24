@@ -461,22 +461,38 @@ async function processarNfeEntrada() {
         return;
     }
 
-    // Extração inteligente de Chave de Acesso de 44 dígitos da URL
-    const matchChave = url.match(/\d{44}/);
-    const chave44 = matchChave ? matchChave[0] : null;
-
+    // Identica lógica do NOD: Detecta chave de acesso de 44 dígitos na URL ou texto
+    const chaveLimpa = url.replace(/\D/g, '');
     let targetUrls = [];
 
-    if (url.includes('sefaz.rs.gov.br/NFCE/NFCE-COM.aspx')) {
-        targetUrls.push(url);
-        const paramP = url.split('p=')[1] || url.split('chNFe=')[1] || chave44;
-        if (paramP) {
-            targetUrls.push(`https://dfe-portal.svrs.rs.gov.br/NFCe/qrCode?p=${paramP}`);
+    if (chaveLimpa.length >= 44) {
+        const chave44 = chaveLimpa.substring(0, 44);
+        const codEstado = chave44.substring(0, 2);
+        
+        // URL direta da SEFAZ oficial (idêntica ao NOD)
+        let urlOficial = `https://www.sefaz.rs.gov.br/NFCE/NFCE-COM.aspx?chNFe=${chave44}`;
+        if (codEstado === "35") {
+            urlOficial = `https://www.nfce.fazenda.sp.gov.br/NFCePortal/Paginas/ConsultaPublica.aspx?chNFe=${chave44}`;
+        } else if (codEstado === "31") {
+            urlOficial = `https://portalsped.fazenda.mg.gov.br/portalsped/sistema/consulta.xhtml?chave=${chave44}`;
+        } else if (codEstado === "33") {
+            urlOficial = `https://www4.fazenda.rj.gov.br/consultaNFCe/QRCode?chNFe=${chave44}`;
+        } else if (codEstado === "41") {
+            urlOficial = `https://www.fazenda.pr.gov.br/nfce/qrcode?chNFe=${chave44}`;
+        } else if (codEstado === "42") {
+            urlOficial = `https://sat.sef.sc.gov.br/nfce/consulta?chNFe=${chave44}`;
         }
-    } else if (chave44 && !url.includes('http')) {
-        targetUrls.push(`https://www.sefaz.rs.gov.br/NFCE/NFCE-COM.aspx?chNFe=${chave44}`);
-        targetUrls.push(`https://dfe-portal.svrs.rs.gov.br/NFCe/qrCode?p=${chave44}`);
+
+        targetUrls.push(urlOficial);
+        
+        // Mantém a URL original de contingência caso seja um link com parâmetro p=
+        if (url.includes('http')) {
+            let urlFmt = url;
+            if (urlFmt.startsWith('http://')) urlFmt = urlFmt.replace('http://', 'https://');
+            targetUrls.push(urlFmt);
+        }
     } else {
+        if (url.startsWith('http://')) url = url.replace('http://', 'https://');
         targetUrls.push(url);
     }
 
@@ -488,9 +504,8 @@ async function processarNfeEntrada() {
 
     let htmlText = "";
 
-    // 1ª Tentativa: Fetch direto (que no Android Capacitor com CapacitorHttp funciona sem CORS)
+    // 1ª Tentativa: Fetch direto (Como o CapacitorHttp está habilitado, no Android ele contorna o CORS exatamente como no NOD)
     for (let targetUrl of targetUrls) {
-        if (targetUrl.startsWith('http://')) targetUrl = targetUrl.replace('http://', 'https://');
         try {
             const response = await fetch(targetUrl);
             if (response.ok) {
