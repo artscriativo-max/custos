@@ -550,13 +550,16 @@ async function processarNfeEntrada() {
             document.getElementById('conf-estabelecimento').value = nfeDados.estabelecimento;
         }
 
-        // Soma automática dos itens extraídos
+        // Soma matemática automática de todos os itens extraídos
         const somaItens = nfeItensTemporarios.reduce((acc, it) => acc + (it.subtotal || (it.quantidade * it.precoUnitario)), 0);
-        const totalFinal = nfeDados.valorTotalNota > 0 ? nfeDados.valorTotalNota : somaItens;
+        let totalFinal = somaItens;
+        if (nfeDados.valorTotalNota > 0 && Math.abs(nfeDados.valorTotalNota - somaItens) < (somaItens * 0.25)) {
+            totalFinal = nfeDados.valorTotalNota;
+        }
         
         const totalInput = document.getElementById('conf-valor-total-input');
-        if (totalInput && totalFinal > 0) {
-            totalInput.value = totalFinal.toFixed(2);
+        if (totalInput) {
+            totalInput.value = totalFinal > 0 ? totalFinal.toFixed(2) : somaItens.toFixed(2);
         }
 
         document.getElementById('conf-data').value = nfeDados.dataNota || hoje;
@@ -790,7 +793,7 @@ function parseHtmlSefazCompleto(htmlText) {
 
     // Calcula sempre o valor monetário real somando todos os subtotais dos itens
     const somaMonetaria = itens.reduce((acc, it) => acc + (it.subtotal || 0), 0);
-    if (somaMonetaria > 0 && (valorTotalNota === 0 || valorTotalNota === itens.length)) {
+    if (somaMonetaria > 0 && (valorTotalNota === 0 || valorTotalNota === itens.length || Math.abs(valorTotalNota - somaMonetaria) > (somaMonetaria * 0.25))) {
         valorTotalNota = somaMonetaria;
     }
     
