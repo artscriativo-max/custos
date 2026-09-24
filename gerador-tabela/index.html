@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Catálogo - Copelli</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="editor-container">
+        <!-- Painel de Controle (Esquerda) -->
+        <aside class="control-panel no-print">
+            <header class="panel-header">
+                <h2>Catálogo Copelli</h2>
+                <p>Altere preços ou adicione produtos. A folha atualiza em tempo real.</p>
+            </header>
+
+            <form id="editor-form">
+                <!-- Seção 0: Logo e Título -->
+                <section class="form-section">
+                    <h3 class="section-title">Cabeçalho</h3>
+                    <div class="form-group">
+                        <label for="titulo-catalogo">Título do Catálogo</label>
+                        <input type="text" id="titulo-catalogo" value="Catálogo de Produtos - Copelli Delícias Caseiras" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="logo-upload">Carregar Logo (opcional)</label>
+                        <input type="file" id="logo-upload" accept="image/*">
+                    </div>
+                </section>
+
+                <!-- Categorias Geradas Dinamicamente pelo JS -->
+                <div id="categorias-container">
+                    <!-- Acordeões de categorias entrarão aqui -->
+                </div>
+            </form>
+
+            <footer class="panel-footer">
+                <button type="button" class="btn btn-primary" id="btn-imprimir">Imprimir / Salvar PDF</button>
+            </footer>
+        </aside>
+
+        <!-- Visualização do Catálogo (Direita) -->
+        <main class="preview-panel">
+            <div class="a4-sheet" id="catalogo-preview">
+                <!-- Conteúdo renderizado em tempo real -->
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

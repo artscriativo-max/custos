@@ -9,6 +9,10 @@
 !controle-compras-pessoais/
 !controle-compras-pessoais/**
 
+# Permitir a pasta gerador-tabela
+!gerador-tabela/
+!gerador-tabela/**
+
 # Ignorar dependências, builds e pastas locais dos aplicativos
 controle-producao-custos/node_modules/
 controle-producao-custos/www/

@@ -1,0 +1,414 @@
+/* Importação de fontes */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    /* Cores do Painel do Editor */
+    --editor-bg: #1e1e1f;
+    --editor-card: #282829;
+    --editor-border: #3e3e40;
+    --editor-text: #e1e1e6;
+    --editor-text-muted: #a1a1a6;
+    --editor-accent: #b33939; /* Vermelho/bordo para combinar com a marca de comida, opcional */
+    
+    /* Cores da Tabela (A4) */
+    --cv-bg: #ffffff;
+    --cv-text: #111111;
+    --cv-text-muted: #333333;
+    --cv-accent: #8b0000; /* Vermelho escuro */
+    
+    --transition: all 0.2s ease;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #121212;
+    color: var(--editor-text);
+    overflow: hidden;
+    height: 100vh;
+}
+
+/* Layout Split-Screen */
+.editor-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* Painel de Controle (Esquerda) */
+.control-panel {
+    width: 500px; /* Um pouco mais largo para acomodar as colunas */
+    background-color: var(--editor-bg);
+    border-right: 1px solid var(--editor-border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    height: 100%;
+}
+
+.panel-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--editor-border);
+}
+
+.panel-header h2 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.panel-header p {
+    font-size: 0.85rem;
+    color: var(--editor-text-muted);
+    margin-top: 0.4rem;
+    line-height: 1.4;
+}
+
+#editor-form {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Seções do Formulário */
+.form-section {
+    background-color: var(--editor-card);
+    border: 1px solid var(--editor-border);
+    border-radius: 6px;
+    padding: 1.25rem;
+}
+
+.section-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 0.75rem;
+}
+
+/* Campos de Entrada */
+.form-group {
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.form-group.row-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    align-items: flex-end;
+}
+
+label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--editor-text-muted);
+    margin-bottom: 0.3rem;
+}
+
+input[type="text"] {
+    width: 100%;
+    background-color: #1a1a1b;
+    border: 1px solid var(--editor-border);
+    border-radius: 4px;
+    color: #ffffff;
+    padding: 0.5rem 0.6rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    transition: var(--transition);
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: #ffffff;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+
+input[type="file"] {
+    font-size: 0.8rem;
+    color: var(--editor-text-muted);
+}
+
+/* Acordeões para Categorias */
+.accordion {
+    background-color: var(--editor-card);
+    border: 1px solid var(--editor-border);
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.accordion.cat-disabled {
+    opacity: 0.65;
+    border-color: #444446;
+}
+
+.accordion-header {
+    padding: 1rem;
+    background-color: #333335;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+.accordion.cat-disabled .accordion-header {
+    background-color: #242426;
+}
+
+.accordion-header:hover {
+    background-color: #3e3e40;
+}
+
+.accordion-body {
+    padding: 1rem;
+    display: none;
+    border-top: 1px solid var(--editor-border);
+}
+
+.accordion.active .accordion-body {
+    display: block;
+}
+
+.accordion.active .accordion-header {
+    border-bottom: 1px solid var(--editor-border);
+}
+
+/* Itens Dinâmicos */
+.item-form {
+    border-bottom: 1px dashed var(--editor-border);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.item-form:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+.btn-remove {
+    background: none;
+    border: none;
+    color: #b33939;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-top: 5px;
+}
+
+.btn-remove:hover {
+    color: #ff5252;
+}
+
+/* Botões */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 1.2rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: var(--transition);
+    border: 1px solid transparent;
+}
+
+.btn-primary {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+.btn-primary:hover {
+    background-color: #e1e1e6;
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: #ffffff;
+    border-color: var(--editor-border);
+}
+
+.btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: #ffffff;
+}
+
+.btn-sm {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.panel-footer {
+    padding: 1.5rem;
+    border-top: 1px solid var(--editor-border);
+    display: flex;
+    gap: 1rem;
+}
+
+.panel-footer .btn {
+    flex-grow: 1;
+}
+
+/* Painel de Visualização (Direita) */
+.preview-panel {
+    flex-grow: 1;
+    background-color: #333333;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    overflow-y: auto;
+    padding: 2rem;
+    height: 100%;
+}
+
+/* Folha A4 */
+.a4-sheet {
+    background-color: var(--cv-bg);
+    color: var(--cv-text);
+    width: 210mm;
+    min-height: 297mm;
+    padding: 15mm 20mm;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    font-family: 'Inter', sans-serif;
+    font-size: 10pt;
+    line-height: 1.5;
+}
+
+/* Estilos do Catálogo */
+.cat-header {
+    text-align: center;
+    margin-bottom: 15px;
+    border-bottom: 2px solid var(--cv-accent);
+    padding-bottom: 10px;
+}
+
+.cat-header-logo img {
+    max-height: 80px;
+    width: auto;
+    margin-bottom: 5px;
+}
+
+.cat-header-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 18pt;
+    font-weight: 800;
+    color: var(--cv-accent);
+    text-transform: uppercase;
+}
+
+.cat-section {
+    margin-bottom: 15px;
+}
+
+.cat-section-title {
+    color: #ffffff;
+    background-color: var(--cv-accent);
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 12pt;
+    padding: 4px 10px;
+    margin-bottom: 5px;
+    border-radius: 3px;
+    display: inline-block;
+    width: 100%;
+}
+
+/* Tabela de Produtos */
+.cat-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 5px;
+    font-size: 9pt;
+}
+
+.cat-table th {
+    text-align: left;
+    font-weight: 600;
+    padding: 4px 6px;
+    border-bottom: 1px solid #ccc;
+    background-color: #f9f9f9;
+}
+
+.cat-table td {
+    padding: 4px 6px;
+    border-bottom: 1px solid #eeeeee;
+    vertical-align: middle;
+}
+
+.cat-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Ajustes de largura das colunas */
+.col-cod { width: 8%; text-align: center; }
+.col-produto { width: 45%; }
+.col-peso { width: 15%; }
+.col-qtd { width: 17%; }
+.col-preco { width: 15%; text-align: right; font-weight: 600; }
+
+.cat-table td.col-cod { text-align: center; color: #777; }
+.cat-table td.col-preco { text-align: right; color: var(--cv-accent); }
+
+/* CSS DE IMPRESSÃO */
+@media print {
+    @page {
+        margin: 0; /* Remove cabeçalho e rodapé padrão do navegador (garante que não aparece a URL) */
+    }
+
+    body {
+        background-color: #ffffff;
+        overflow: visible;
+        height: auto;
+    }
+    
+    .editor-container {
+        display: block;
+        height: auto;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    .preview-panel {
+        padding: 0;
+        background-color: transparent;
+        height: auto;
+        overflow: visible;
+        display: block;
+    }
+
+    .a4-sheet {
+        box-shadow: none;
+        width: 100%;
+        min-height: 100%;
+        padding: 0; /* A margem agora é controlada pelo @page para aplicar em todas as folhas */
+        margin: 0;
+    }
+    
+    .cat-table tr {
+        page-break-inside: avoid; /* Evita que uma linha da tabela seja cortada ao meio na virada da página */
+    }
+}
