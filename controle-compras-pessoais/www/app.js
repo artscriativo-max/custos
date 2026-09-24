@@ -1327,10 +1327,12 @@ function renderDespesasFixas() {
                         <span class="month-pill" style="background-color: ${catObj ? catObj.cor + '22' : '#eee'}; color: ${catObj ? catObj.cor : '#333'}; font-size: 0.75rem;">
                             ${catObj ? catObj.nome : 'Sem Categoria'}
                         </span>
-                        <strong class="text-primary" style="font-size: 1.1rem;">${formatarMoeda(df.valorPadrao)}</strong>
+                        <small style="color: var(--color-text-secondary);">Média: ${formatarMoeda(df.valorPadrao)}</small>
                     </div>
-                    <h3 style="font-size: 1.05rem; font-weight: 700; margin: 0.5rem 0;">${df.nome}</h3>
-                    <button type="button" class="btn btn-success btn-sm lancar-fixa-btn" data-id="${df.id}" style="width: 100%; margin-top: 0.5rem;">⚡ Lançar no Mês Atual</button>
+                    <h3 style="font-size: 1.05rem; font-weight: 700; margin: 0.4rem 0 0.2rem 0;">${df.nome}</h3>
+                    <label style="font-size: 0.75rem; color: var(--color-text-secondary); margin-bottom: 0.2rem;">Valor deste mês (R$):</label>
+                    <input type="number" step="0.01" min="0" class="input-valor-fixa-mes" data-id="${df.id}" value="${df.valorPadrao ? df.valorPadrao.toFixed(2) : '0.00'}" style="width: 100%; padding: 0.4rem; border: 1px solid var(--color-border); border-radius: 4px; font-weight: bold; color: var(--color-text-primary); background: var(--color-bg-primary); margin-bottom: 0.4rem;">
+                    <button type="button" class="btn btn-success btn-sm lancar-fixa-btn" data-id="${df.id}" style="width: 100%;">⚡ Lançar no Mês Atual</button>
                 `;
                 containerCards.appendChild(card);
             });
@@ -1352,11 +1354,16 @@ function renderDespesasFixas() {
                 <td><strong>${df.nome}</strong></td>
                 <td><span class="month-pill" style="background-color: ${catObj ? catObj.cor + '22' : '#eee'}; color: ${catObj ? catObj.cor : '#333'};">${catObj ? catObj.nome : 'Sem Categoria'}</span></td>
                 <td><strong class="text-primary">${formatarMoeda(df.valorPadrao)}</strong></td>
-                <td style="text-align: center;">
+                <td style="text-align: center; display: flex; gap: 0.3rem; justify-content: center;">
+                    <button type="button" class="btn btn-secondary btn-sm editar-fixa-btn" data-id="${df.id}">✏️ Alterar Padrão</button>
                     <button type="button" class="btn btn-danger btn-sm deletar-fixa-btn" data-id="${df.id}">🗑️ Excluir</button>
                 </td>
             `;
             tbodyConfig.appendChild(tr);
+        });
+
+        document.querySelectorAll('.editar-fixa-btn').forEach(b => {
+            b.addEventListener('click', (e) => editarValorPadraoDespesaFixa(e.currentTarget.dataset.id));
         });
 
         document.querySelectorAll('.deletar-fixa-btn').forEach(b => {
@@ -1365,9 +1372,42 @@ function renderDespesasFixas() {
     }
 }
 
+function editarValorPadraoDespesaFixa(id) {
+    const df = state.despesasFixas.find(d => d.id === id);
+    if (!df) return;
+
+    const novoValorStr = prompt(`Digite o novo valor padrão recorrente para "${df.nome}":`, df.valorPadrao.toFixed(2));
+    if (novoValorStr === null) return;
+    const novoValor = parseFloat(novoValorStr.replace(',', '.'));
+    if (isNaN(novoValor) || novoValor < 0) {
+        alert("Valor inválido.");
+        return;
+    }
+
+    df.valorPadrao = novoValor;
+    salvarEstado();
+    mostrarToast(`Valor padrão de "${df.nome}" atualizado para ${formatarMoeda(novoValor)}!`);
+}
+
 function lancarDespesaFixaNoMes(id) {
     const df = state.despesasFixas.find(d => d.id === id);
     if (!df) return;
+
+    let valorMes = df.valorPadrao;
+    const inputCard = document.querySelector(`.input-valor-fixa-mes[data-id="${id}"]`);
+    if (inputCard && inputCard.value) {
+        const parsed = parseFloat(inputCard.value.replace(',', '.'));
+        if (!isNaN(parsed) && parsed > 0) {
+            valorMes = parsed;
+        }
+    } else {
+        const valorPromptStr = prompt(`Informe o valor da despesa "${df.nome}" para o mês atual:`, df.valorPadrao.toFixed(2));
+        if (valorPromptStr === null) return;
+        const parsedPrompt = parseFloat(valorPromptStr.replace(',', '.'));
+        if (!isNaN(parsedPrompt) && parsedPrompt > 0) {
+            valorMes = parsedPrompt;
+        }
+    }
 
     const hoje = new Date().toISOString().split('T')[0];
 
@@ -1376,14 +1416,14 @@ function lancarDespesaFixaNoMes(id) {
         estabelecimento: df.nome,
         data: hoje,
         categoriaId: df.categoriaId,
-        valorTotal: df.valorPadrao,
-        observacao: "Despesa Fixa Recorrente Padrão",
-        itens: [{ nome: df.nome, quantidade: 1, precoUnitario: df.valorPadrao, subtotal: df.valorPadrao }]
+        valorTotal: valorMes,
+        observacao: `Despesa Recorrente (${formatarMoeda(valorMes)})`,
+        itens: [{ nome: df.nome, quantidade: 1, precoUnitario: valorMes, subtotal: valorMes }]
     };
 
     state.compras.push(novaCompra);
     salvarEstado();
-    mostrarToast(`Despesa fixa "${df.nome}" lançada com sucesso no mês atual!`);
+    mostrarToast(`Despesa "${df.nome}" de ${formatarMoeda(valorMes)} lançada com sucesso no mês atual!`, "success");
 
     // Redireciona para o Dashboard
     document.querySelector('.tab-btn[data-tab="dashboard"]').click();
