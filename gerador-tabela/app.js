@@ -10,95 +10,618 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Dados padrão originais do catálogo Copelli
     const STATE_PADRAO = {
-        titulo: "Catálogo de Produtos - Copelli Delícias Caseiras",
-        logoUrl: "",
-        ordemAlfabetica: true,
-        categorias: [
-            {
-                id: "massas",
-                nome: "Massas",
-                ativo: true,
-                itens: [
-                    { id: 101, cod: "1", produto: "CAPELLETTI DE FRANGO", peso: "400G", qtd: "-", preco: "R$ 12,98", ativo: true },
-                    { id: 102, cod: "2", produto: "CAPELLETTI DE GADO", peso: "400G", qtd: "-", preco: "R$ 13,98", ativo: true },
-                    { id: 103, cod: "3", produto: "SPAGUETTI", peso: "500G", qtd: "-", preco: "R$ 5,90", ativo: true },
-                    { id: 104, cod: "4", produto: "TALHARIM", peso: "500G", qtd: "-", preco: "R$ 5,90", ativo: true },
-                    { id: 105, cod: "5", produto: "MACARRÃO", peso: "500G", qtd: "-", preco: "R$ 5,90", ativo: true },
-                    { id: 106, cod: "6", produto: "TORTEI", peso: "500G", qtd: "-", preco: "R$ 9,49", ativo: true }
-                ]
-            },
-            {
-                id: "salgados-coquetel",
-                nome: "Salgados Coquetel",
-                ativo: true,
-                itens: [
-                    { id: 201, cod: "74", produto: "CHURROS DOCE DE LEITE", peso: "2KG", qtd: "80 a 90 und/pct", preco: "R$ 46,98", ativo: true },
-                    { id: 202, cod: "14", produto: "COXINHA DE FRANGO", peso: "2KG", qtd: "80 a 90 und/pct", preco: "R$ 38,98", ativo: true },
-                    { id: 203, cod: "15", produto: "RISOLES DE FRANGO", peso: "2KG", qtd: "55 a 65 und/pct", preco: "R$ 38,98", ativo: true },
-                    { id: 204, cod: "16", produto: "RISOLES DE CARNE", peso: "2KG", qtd: "55 a 65 und/pct", preco: "R$ 38,98", ativo: true },
-                    { id: 205, cod: "76", produto: "RISOLIS CALABRESA", peso: "2KG", qtd: "55 a 65 und/pct", preco: "R$ 38,98", ativo: true },
-                    { id: 206, cod: "17", produto: "RISOLES DE PALMITO", peso: "2KG", qtd: "55 a 65 und/pct", preco: "R$ 38,98", ativo: true },
-                    { id: 207, cod: "46", produto: "RISOLIS DE PIZZA", peso: "2KG", qtd: "55 a 65 und/pct", preco: "R$ 38,98", ativo: true },
-                    { id: 208, cod: "18", produto: "CROQUETE DE FRANGO", peso: "2KG", qtd: "80 a 90 und/pct", preco: "R$ 38,98", ativo: true },
-                    { id: 209, cod: "20", produto: "CROQUETE DE CARNE", peso: "2KG", qtd: "80 a 90 und/pct", preco: "R$ 38,98", ativo: true },
-                    { id: 210, cod: "21", produto: "ASSADO DE NATA DE FRANGO", peso: "2KG", qtd: "55 a 65 und/pct", preco: "R$ 59,98", ativo: true },
-                    { id: 211, cod: "22", produto: "ASSADO DE NATA PRESUNTO E QUEIJO", peso: "2KG", qtd: "55 a 65 und/pct", preco: "R$ 59,98", ativo: true },
-                    { id: 212, cod: "23", produto: "ASSADO DE NATA DE CARNE GADO", peso: "2KG", qtd: "55 a 65 und/pct", preco: "R$ 59,98", ativo: true },
-                    { id: 213, cod: "26", produto: "SALSICHA CORTADA", peso: "2KG", qtd: "80 a 90 und/pct", preco: "R$ 38,98", ativo: true },
-                    { id: 214, cod: "27", produto: "TRAVESSEIRINHO PRESUNTO E QUEIJO", peso: "2KG", qtd: "80 a 90 und/pct", preco: "R$ 38,98", ativo: true },
-                    { id: 215, cod: "28", produto: "BOLINHA DE QUEIJO COM ORÉGANO", peso: "2KG", qtd: "80 a 90 und/pct", preco: "R$ 38,98", ativo: true },
-                    { id: 216, cod: "49", produto: "PASTEL DE CARNE DE FRANGO", peso: "4KG", qtd: "130 und média/caixa", preco: "R$ 115,92", ativo: true },
-                    { id: 217, cod: "50", produto: "PASTEL DE CARNE DE GADO", peso: "4KG", qtd: "130 und média/caixa", preco: "R$ 115,92", ativo: true },
-                    { id: 218, cod: "56", produto: "PASTEL DE QUEIJO COM ORÉGANO", peso: "4KG", qtd: "130 und média/caixa", preco: "R$ 115,92", ativo: true },
-                    { id: 219, cod: "62", produto: "EMPADA DE FRANGO", peso: "2KG", qtd: "45 a 50 und/pct", preco: "R$ 59,98", ativo: true },
-                    { id: 220, cod: "63", produto: "EMPADA DE CARNE", peso: "2KG", qtd: "45 a 50 und/pct", preco: "R$ 59,98", ativo: true },
-                    { id: 221, cod: "64", produto: "EMPADA DE CALABRESA E REQUEIJÃO", peso: "2KG", qtd: "45 a 50 und/pct", preco: "R$ 59,98", ativo: true },
-                    { id: 222, cod: "51", produto: "FOLHADO DE FRANGO", peso: "2KG", qtd: "55 a 60 und/pct", preco: "R$ 46,98", ativo: true },
-                    { id: 223, cod: "52", produto: "FOLHADO DE PRESUNTO E QUEIJO", peso: "2KG", qtd: "55 a 60 und/pct", preco: "R$ 46,98", ativo: true },
-                    { id: 224, cod: "10", produto: "CROISSANT DE FRANGO", peso: "2KG", qtd: "55 a 60 und/pct", preco: "R$ 46,98", ativo: true },
-                    { id: 225, cod: "11", produto: "CROISSANT DE PRESUNTO", peso: "2KG", qtd: "55 a 60 und/pct", preco: "R$ 46,98", ativo: true },
-                    { id: 226, cod: "12", produto: "CROISSANT DE CHOCOLATE AO LEITE", peso: "2KG", qtd: "55 a 60 und/pct", preco: "R$ 48,98", ativo: true }
-                ]
-            },
-            {
-                id: "salgados-lanche",
-                nome: "Salgados Lanche",
-                ativo: true,
-                itens: [
-                    { id: 301, cod: "30", produto: "COXINHA DE FRANGO", peso: "2KG", qtd: "16 und/pct", preco: "R$ 38,98", ativo: true },
-                    { id: 302, cod: "31", produto: "CROQUETE DE FRANGO", peso: "2KG", qtd: "16 und/pct", preco: "R$ 38,98", ativo: true },
-                    { id: 303, cod: "89", produto: "TRAVESSEIRO DE PRESUNTO E QUEIJO", peso: "2KG", qtd: "16 und/pct", preco: "R$ 38,98", ativo: true },
-                    { id: 304, cod: "34", produto: "CROQUETE DE CARNE", peso: "2KG", qtd: "16 und/pct", preco: "R$ 38,98", ativo: true },
-                    { id: 305, cod: "35", produto: "RISOLIS DE FRANGO", peso: "2KG", qtd: "16 und/pct", preco: "R$ 38,98", ativo: true },
-                    { id: 306, cod: "37", produto: "ASSADO DE NATA FRANGO", peso: "2KG", qtd: "16 und/pct", preco: "R$ 59,98", ativo: true },
-                    { id: 307, cod: "36", produto: "ASSADO DE NATA CARNE GADO", peso: "2KG", qtd: "16 und/pct", preco: "R$ 59,98", ativo: true },
-                    { id: 308, cod: "39", produto: "RISOLIS DE CARNE GADO", peso: "2KG", qtd: "16 und/pct", preco: "R$ 38,98", ativo: true },
-                    { id: 309, cod: "40", produto: "SALSICHA", peso: "2KG", qtd: "16 und/pct", preco: "R$ 38,98", ativo: true },
-                    { id: 310, cod: "59", produto: "PASTEL DE CARNE DE FRANGO", peso: "4KG", qtd: "40 und/caixa", preco: "R$ 115,92", ativo: true },
-                    { id: 311, cod: "58", produto: "PASTEL DE CARNE DE GADO", peso: "4KG", qtd: "40 und/caixa", preco: "R$ 115,92", ativo: true },
-                    { id: 312, cod: "60", produto: "EMPADA DE FRANGO", peso: "2KG", qtd: "12 und/pct", preco: "R$ 59,98", ativo: true },
-                    { id: 313, cod: "65", produto: "EMPADA DE CALABRESA", peso: "2KG", qtd: "12 und/pct", preco: "R$ 59,98", ativo: true },
-                    { id: 314, cod: "86", produto: "EMPADA DE BRÓCOLIS", peso: "2KG", qtd: "12 und/pct", preco: "R$ 59,98", ativo: true },
-                    { id: 315, cod: "61", produto: "EMPADA DE CARNE", peso: "2KG", qtd: "12 und/pct", preco: "R$ 59,98", ativo: true },
-                    { id: 316, cod: "88", produto: "EMPADA DE BACON COM AZEITONA", peso: "2KG", qtd: "12 und/pct", preco: "R$ 59,98", ativo: true },
-                    { id: 317, cod: "66", produto: "EMPADA DE PALMITO", peso: "2KG", qtd: "12 und/pct", preco: "R$ 59,98", ativo: true },
-                    { id: 318, cod: "47", produto: "ESPETINHO DE FRANGO EMPANADO", peso: "2KG", qtd: "20 und/pct", preco: "R$ 47,98", ativo: true },
-                    { id: 319, cod: "53", produto: "FOLHADO DE FRANGO", peso: "2KG", qtd: "12 und/pct", preco: "R$ 46,98", ativo: true },
-                    { id: 320, cod: "54", produto: "FOLHADO DE PRESUNTO E QUEIJO", peso: "2KG", qtd: "12 und/pct", preco: "R$ 46,98", ativo: true },
-                    { id: 321, cod: "102", produto: "CROISSANT DE FRANGO", peso: "2KG", qtd: "16 und/pct", preco: "R$ 46,98", ativo: true },
-                    { id: 322, cod: "99", produto: "CROISSANT DE PRESUNTO E QUEIJO", peso: "2KG", qtd: "16 und/pct", preco: "R$ 46,98", ativo: true },
-                    { id: 323, cod: "94", produto: "CROISSANT DE CHOCOLATE", peso: "2KG", qtd: "16 und/pct", preco: "R$ 47,98", ativo: true },
-                    { id: 324, cod: "93", produto: "CROISSANT DE GOIABA", peso: "2KG", qtd: "16 und/pct", preco: "R$ 47,98", ativo: true },
-                    { id: 325, cod: "105", produto: "CATARINA DE CHOCOLATE PRETO", peso: "2KG", qtd: "4 und/pct", preco: "R$ 85,00", ativo: true },
-                    { id: 326, cod: "107", produto: "CATARINA DE CHOCOLATE BRANCO", peso: "2KG", qtd: "4 und/pct", preco: "R$ 85,00", ativo: true },
-                    { id: 327, cod: "112", produto: "CATARINA DE CALABRESA", peso: "2KG", qtd: "4 und/pct", preco: "R$ 58,00", ativo: true },
-                    { id: 328, cod: "103", produto: "DOG FOLHADO", peso: "2KG", qtd: "15 und/pct", preco: "R$ 48,98", ativo: true },
-                    { id: 329, cod: "104", produto: "GRAVATINHA FOLHADA", peso: "2KG", qtd: "20 und/pct", preco: "R$ 38,00", ativo: true },
-                    { id: 330, cod: "105", produto: "GROSTOLI", peso: "2KG", qtd: "-", preco: "R$ 38,98", ativo: true }
-                ]
-            }
+        "titulo": "Catálogo de Produtos - Copelli Delícias Caseiras",
+        "logoUrl": "",
+        "ordemAlfabetica": true,
+        "categorias": [
+                {
+                        "id": "massas",
+                        "nome": "Massas",
+                        "ativo": true,
+                        "itens": [
+                                {
+                                        "id": 101,
+                                        "cod": "1",
+                                        "produto": "CAPELLETTI DE FRANGO",
+                                        "peso": "400G",
+                                        "qtd": "-",
+                                        "preco": "R$ 12,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 102,
+                                        "cod": "2",
+                                        "produto": "CAPELLETTI DE GADO",
+                                        "peso": "400G",
+                                        "qtd": "-",
+                                        "preco": "R$ 13,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 105,
+                                        "cod": "5",
+                                        "produto": "MACARRÃO",
+                                        "peso": "500G",
+                                        "qtd": "-",
+                                        "preco": "R$ 6,45",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 103,
+                                        "cod": "3",
+                                        "produto": "SPAGUETTI",
+                                        "peso": "500G",
+                                        "qtd": "-",
+                                        "preco": "R$ 6,45",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 104,
+                                        "cod": "4",
+                                        "produto": "TALHARIM",
+                                        "peso": "500G",
+                                        "qtd": "-",
+                                        "preco": "R$ 6,45",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 106,
+                                        "cod": "6",
+                                        "produto": "TORTEI",
+                                        "peso": "500G",
+                                        "qtd": "-",
+                                        "preco": "R$ 9,98",
+                                        "ativo": true
+                                }
+                        ]
+                },
+                {
+                        "id": "salgados-coquetel",
+                        "nome": "Salgados Coquetel",
+                        "ativo": true,
+                        "itens": [
+                                {
+                                        "id": 212,
+                                        "cod": "23",
+                                        "produto": "ASSADO DE NATA DE CARNE GADO",
+                                        "peso": "2KG",
+                                        "qtd": "55 a 65 und/pct",
+                                        "preco": "R$ 63,50",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 210,
+                                        "cod": "21",
+                                        "produto": "ASSADO DE NATA DE FRANGO",
+                                        "peso": "2KG",
+                                        "qtd": "55 a 65 und/pct",
+                                        "preco": "R$ 63,50",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 211,
+                                        "cod": "22",
+                                        "produto": "ASSADO DE NATA PRESUNTO E QUEIJO",
+                                        "peso": "2KG",
+                                        "qtd": "55 a 65 und/pct",
+                                        "preco": "R$ 63,50",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 215,
+                                        "cod": "28",
+                                        "produto": "BOLINHA DE QUEIJO COM ORÉGANO",
+                                        "peso": "2KG",
+                                        "qtd": "80 a 90 und/pct",
+                                        "preco": "R$ 43,50",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 402,
+                                        "cod": "79",
+                                        "produto": "CHOCOLATE AO LEITE",
+                                        "peso": "2KG",
+                                        "qtd": "55 a 60 und/pct",
+                                        "preco": "R$ 52,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 201,
+                                        "cod": "74",
+                                        "produto": "CHURROS DOCE DE LEITE",
+                                        "peso": "2KG",
+                                        "qtd": "80 a 90 und/pct",
+                                        "preco": "R$ 46,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 202,
+                                        "cod": "14",
+                                        "produto": "COXINHA DE FRANGO",
+                                        "peso": "2KG",
+                                        "qtd": "80 a 90 und/pct",
+                                        "preco": "R$ 43,50",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 403,
+                                        "cod": "109",
+                                        "produto": "COXINHA ENTREVEIRO",
+                                        "peso": "2KG",
+                                        "qtd": "80 a 90 und/pct",
+                                        "preco": "R$ 44,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 226,
+                                        "cod": "12",
+                                        "produto": "CROISSANT DE CHOCOLATE AO LEITE",
+                                        "peso": "2KG",
+                                        "qtd": "55 a 60 und/pct",
+                                        "preco": "R$ 52,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 224,
+                                        "cod": "10",
+                                        "produto": "CROISSANT DE FRANGO",
+                                        "peso": "2KG",
+                                        "qtd": "55 a 60 und/pct",
+                                        "preco": "R$ 50,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 225,
+                                        "cod": "11",
+                                        "produto": "CROISSANT DE PRESUNTO",
+                                        "peso": "2KG",
+                                        "qtd": "55 a 60 und/pct",
+                                        "preco": "R$ 50,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 209,
+                                        "cod": "20",
+                                        "produto": "CROQUETE DE CARNE",
+                                        "peso": "2KG",
+                                        "qtd": "80 a 90 und/pct",
+                                        "preco": "R$ 43,50",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 208,
+                                        "cod": "18",
+                                        "produto": "CROQUETE DE FRANGO",
+                                        "peso": "2KG",
+                                        "qtd": "80 a 90 und/pct",
+                                        "preco": "R$ 43,50",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 221,
+                                        "cod": "64",
+                                        "produto": "EMPADA DE CALABRESA E REQUEIJÃO",
+                                        "peso": "2KG",
+                                        "qtd": "45 a 50 und/pct",
+                                        "preco": "R$ 59,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 220,
+                                        "cod": "63",
+                                        "produto": "EMPADA DE CARNE",
+                                        "peso": "2KG",
+                                        "qtd": "45 a 50 und/pct",
+                                        "preco": "R$ 59,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 219,
+                                        "cod": "62",
+                                        "produto": "EMPADA DE FRANGO",
+                                        "peso": "2KG",
+                                        "qtd": "45 a 50 und/pct",
+                                        "preco": "R$ 59,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 222,
+                                        "cod": "51",
+                                        "produto": "FOLHADO DE FRANGO",
+                                        "peso": "2KG",
+                                        "qtd": "55 a 60 und/pct",
+                                        "preco": "R$ 48,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 223,
+                                        "cod": "52",
+                                        "produto": "FOLHADO DE PRESUNTO E QUEIJO",
+                                        "peso": "2KG",
+                                        "qtd": "55 a 60 und/pct",
+                                        "preco": "R$ 48,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 401,
+                                        "cod": "110",
+                                        "produto": "FOLHADO MAÇÃ COM CANELA",
+                                        "peso": "2KG",
+                                        "qtd": "55 a 60 und/pct",
+                                        "preco": "R$ 52,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 216,
+                                        "cod": "49",
+                                        "produto": "PASTEL DE CARNE DE FRANGO",
+                                        "peso": "4KG",
+                                        "qtd": "130 und média/caixa",
+                                        "preco": "R$ 135,00",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 217,
+                                        "cod": "50",
+                                        "produto": "PASTEL DE CARNE DE GADO",
+                                        "peso": "4KG",
+                                        "qtd": "130 und média/caixa",
+                                        "preco": "R$ 135,00",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 218,
+                                        "cod": "56",
+                                        "produto": "PASTEL DE QUEIJO COM ORÉGANO",
+                                        "peso": "4KG",
+                                        "qtd": "130 und média/caixa",
+                                        "preco": "R$ 135,00",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 204,
+                                        "cod": "16",
+                                        "produto": "RISOLES DE CARNE",
+                                        "peso": "2KG",
+                                        "qtd": "55 a 65 und/pct",
+                                        "preco": "R$ 43,50",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 203,
+                                        "cod": "15",
+                                        "produto": "RISOLES DE FRANGO",
+                                        "peso": "2KG",
+                                        "qtd": "55 a 65 und/pct",
+                                        "preco": "R$ 43,50",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 206,
+                                        "cod": "17",
+                                        "produto": "RISOLES DE PALMITO",
+                                        "peso": "2KG",
+                                        "qtd": "55 a 65 und/pct",
+                                        "preco": "R$ 43,50",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 205,
+                                        "cod": "76",
+                                        "produto": "RISOLIS CALABRESA",
+                                        "peso": "2KG",
+                                        "qtd": "55 a 65 und/pct",
+                                        "preco": "R$ 43,50",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 207,
+                                        "cod": "46",
+                                        "produto": "RISOLIS DE PIZZA",
+                                        "peso": "2KG",
+                                        "qtd": "55 a 65 und/pct",
+                                        "preco": "R$ 43,50",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 213,
+                                        "cod": "26",
+                                        "produto": "SALSICHA CORTADA",
+                                        "peso": "2KG",
+                                        "qtd": "80 a 90 und/pct",
+                                        "preco": "R$ 43,50",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 214,
+                                        "cod": "27",
+                                        "produto": "TRAVESSEIRINHO PRESUNTO E QUEIJO",
+                                        "peso": "2KG",
+                                        "qtd": "80 a 90 und/pct",
+                                        "preco": "R$ 43,50",
+                                        "ativo": true
+                                }
+                        ]
+                },
+                {
+                        "id": "salgados-lanche",
+                        "nome": "Salgados Lanche",
+                        "ativo": true,
+                        "itens": [
+                                {
+                                        "id": 307,
+                                        "cod": "36",
+                                        "produto": "ASSADO DE NATA CARNE GADO",
+                                        "peso": "2KG",
+                                        "qtd": "16 und/pct",
+                                        "preco": "R$ 59,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 306,
+                                        "cod": "37",
+                                        "produto": "ASSADO DE NATA FRANGO",
+                                        "peso": "2KG",
+                                        "qtd": "16 und/pct",
+                                        "preco": "R$ 59,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 327,
+                                        "cod": "112",
+                                        "produto": "CATARINA DE CALABRESA",
+                                        "peso": "2KG",
+                                        "qtd": "4 und/pct",
+                                        "preco": "R$ 58,00",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 326,
+                                        "cod": "107",
+                                        "produto": "CATARINA DE CHOCOLATE BRANCO",
+                                        "peso": "2KG",
+                                        "qtd": "4 und/pct",
+                                        "preco": "R$ 85,00",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 325,
+                                        "cod": "105",
+                                        "produto": "CATARINA DE CHOCOLATE PRETO",
+                                        "peso": "2KG",
+                                        "qtd": "4 und/pct",
+                                        "preco": "R$ 85,00",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 301,
+                                        "cod": "30",
+                                        "produto": "COXINHA DE FRANGO",
+                                        "peso": "2KG",
+                                        "qtd": "16 und/pct",
+                                        "preco": "R$ 38,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 323,
+                                        "cod": "94",
+                                        "produto": "CROISSANT DE CHOCOLATE",
+                                        "peso": "2KG",
+                                        "qtd": "16 und/pct",
+                                        "preco": "R$ 52,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 321,
+                                        "cod": "102",
+                                        "produto": "CROISSANT DE FRANGO",
+                                        "peso": "2KG",
+                                        "qtd": "16 und/pct",
+                                        "preco": "R$ 50,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 324,
+                                        "cod": "93",
+                                        "produto": "CROISSANT DE GOIABA",
+                                        "peso": "2KG",
+                                        "qtd": "16 und/pct",
+                                        "preco": "R$ 52,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 322,
+                                        "cod": "99",
+                                        "produto": "CROISSANT DE PRESUNTO E QUEIJO",
+                                        "peso": "2KG",
+                                        "qtd": "16 und/pct",
+                                        "preco": "R$ 50,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 304,
+                                        "cod": "34",
+                                        "produto": "CROQUETE DE CARNE",
+                                        "peso": "2KG",
+                                        "qtd": "16 und/pct",
+                                        "preco": "R$ 38,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 302,
+                                        "cod": "31",
+                                        "produto": "CROQUETE DE FRANGO",
+                                        "peso": "2KG",
+                                        "qtd": "16 und/pct",
+                                        "preco": "R$ 38,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 328,
+                                        "cod": "103",
+                                        "produto": "DOG FOLHADO",
+                                        "peso": "2KG",
+                                        "qtd": "15 und/pct",
+                                        "preco": "R$ 48,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 316,
+                                        "cod": "88",
+                                        "produto": "EMPADA DE BACON COM AZEITONA",
+                                        "peso": "2KG",
+                                        "qtd": "12 und/pct",
+                                        "preco": "R$ 59,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 314,
+                                        "cod": "86",
+                                        "produto": "EMPADA DE BRÓCOLIS",
+                                        "peso": "2KG",
+                                        "qtd": "12 und/pct",
+                                        "preco": "R$ 59,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 313,
+                                        "cod": "65",
+                                        "produto": "EMPADA DE CALABRESA",
+                                        "peso": "2KG",
+                                        "qtd": "12 und/pct",
+                                        "preco": "R$ 59,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 315,
+                                        "cod": "61",
+                                        "produto": "EMPADA DE CARNE",
+                                        "peso": "2KG",
+                                        "qtd": "12 und/pct",
+                                        "preco": "R$ 59,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 312,
+                                        "cod": "60",
+                                        "produto": "EMPADA DE FRANGO",
+                                        "peso": "2KG",
+                                        "qtd": "12 und/pct",
+                                        "preco": "R$ 59,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 317,
+                                        "cod": "66",
+                                        "produto": "EMPADA DE PALMITO",
+                                        "peso": "2KG",
+                                        "qtd": "12 und/pct",
+                                        "preco": "R$ 59,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 318,
+                                        "cod": "47",
+                                        "produto": "ESPETINHO DE FRANGO EMPANADO",
+                                        "peso": "2KG",
+                                        "qtd": "20 und/pct",
+                                        "preco": "R$ 47,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 319,
+                                        "cod": "53",
+                                        "produto": "FOLHADO DE FRANGO",
+                                        "peso": "2KG",
+                                        "qtd": "12 und/pct",
+                                        "preco": "R$ 48,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 320,
+                                        "cod": "54",
+                                        "produto": "FOLHADO DE PRESUNTO E QUEIJO",
+                                        "peso": "2KG",
+                                        "qtd": "12 und/pct",
+                                        "preco": "R$ 48,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 329,
+                                        "cod": "104",
+                                        "produto": "GRAVATINHA FOLHADA",
+                                        "peso": "2KG",
+                                        "qtd": "20 und/pct",
+                                        "preco": "R$ 38,00",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 330,
+                                        "cod": "105",
+                                        "produto": "GROSTOLI",
+                                        "peso": "2KG",
+                                        "qtd": "Média 25 und/pct",
+                                        "preco": "R$ 42,00",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 310,
+                                        "cod": "59",
+                                        "produto": "PASTEL DE CARNE DE FRANGO",
+                                        "peso": "4KG",
+                                        "qtd": "40 und/caixa",
+                                        "preco": "R$ 115,92",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 311,
+                                        "cod": "58",
+                                        "produto": "PASTEL DE CARNE DE GADO",
+                                        "peso": "4KG",
+                                        "qtd": "40 und/caixa",
+                                        "preco": "R$ 115,92",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 308,
+                                        "cod": "39",
+                                        "produto": "RISOLIS DE CARNE GADO",
+                                        "peso": "2KG",
+                                        "qtd": "16 und/pct",
+                                        "preco": "R$ 38,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 305,
+                                        "cod": "35",
+                                        "produto": "RISOLIS DE FRANGO",
+                                        "peso": "2KG",
+                                        "qtd": "16 und/pct",
+                                        "preco": "R$ 38,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 309,
+                                        "cod": "40",
+                                        "produto": "SALSICHA",
+                                        "peso": "2KG",
+                                        "qtd": "16 und/pct",
+                                        "preco": "R$ 38,98",
+                                        "ativo": true
+                                },
+                                {
+                                        "id": 303,
+                                        "cod": "89",
+                                        "produto": "TRAVESSEIRO DE PRESUNTO E QUEIJO",
+                                        "peso": "2KG",
+                                        "qtd": "16 und/pct",
+                                        "preco": "R$ 38,98",
+                                        "ativo": true
+                                }
+                        ]
+                }
         ]
-    };
+};
 
     let state = JSON.parse(JSON.stringify(STATE_PADRAO));
     let globalIdCount = 400;
