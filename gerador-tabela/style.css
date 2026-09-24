@@ -352,21 +352,22 @@ input[type="file"] {
 }
 
 .cat-table td {
-    padding: 4px 6px;
+    padding: 5px 6px;
     border-bottom: 1px solid #eeeeee;
     vertical-align: middle;
+    line-height: 1.25;
 }
 
 .cat-table tr:last-child td {
     border-bottom: none;
 }
 
-/* Ajustes de largura das colunas */
-.col-cod { width: 8%; text-align: center; }
-.col-produto { width: 45%; }
-.col-peso { width: 15%; }
-.col-qtd { width: 17%; }
-.col-preco { width: 15%; text-align: right; font-weight: 600; }
+/* Ajustes de largura das colunas para evitar quebra desigual de linhas */
+.col-cod { width: 6%; text-align: center; }
+.col-produto { width: 42%; }
+.col-peso { width: 12%; }
+.col-qtd { width: 24%; white-space: nowrap; }
+.col-preco { width: 16%; text-align: right; font-weight: 600; }
 
 .cat-table td.col-cod { text-align: center; color: #777; }
 .cat-table td.col-preco { text-align: right; color: var(--cv-accent); }
