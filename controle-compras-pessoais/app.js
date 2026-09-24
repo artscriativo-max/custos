@@ -705,20 +705,21 @@ function parseMoedaBR(str) {
 
 // Parser completo do HTML do cupom fiscal da SEFAZ / SVRS
 function parseHtmlSefazCompleto(htmlText) {
-    if (!htmlText) return { estabelecimento: "", dataNota: "", valorTotalNota: 0, itens: [] };
+    if (!htmlText) return { estabelecimento: "", dataNota: "", valorTotalNota: 0, descontoNota: 0, itens: [] };
 
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlText, 'text/html');
     let itens = [];
     let estabelecimento = "";
     let valorTotalNota = 0;
+    let descontoNota = 0;
     let dataNota = "";
 
     // 1. Extração do Nome do Estabelecimento/Mercado (Ignorando títulos genéricos de Documento Auxiliar)
-    const titulos = doc.querySelectorAll('.txtCenter .txtTit, #Header .txtTit, .tit, .txtBox .txtTit, #conteudo .txtTit, .txtTop, div[class*="txtTit"]');
+    const titulos = doc.querySelectorAll('.txtCenter .txtTit, #Header .txtTit, .tit, .txtBox .txtTit, #conteudo .txtTit, .txtTop, div[class*="txtTit"], #nfeHeader .txtTit');
     for (let el of titulos) {
         const txt = el.textContent.trim().replace(/\s+/g, ' ');
-        if (txt && !txt.toUpperCase().includes("DOCUMENTO AUXILIAR") && !txt.toUpperCase().includes("NOTA FISCAL") && !txt.toUpperCase().includes("NFC-E")) {
+        if (txt && !txt.toUpperCase().includes("DOCUMENTO AUXILIAR") && !txt.toUpperCase().includes("NOTA FISCAL") && !txt.toUpperCase().includes("NFC-E") && !txt.toUpperCase().includes("DANFE")) {
             estabelecimento = txt;
             break;
         }
@@ -727,15 +728,24 @@ function parseHtmlSefazCompleto(htmlText) {
         estabelecimento = titulos[0].textContent.trim().replace(/\s+/g, ' ');
     }
 
-    // 2. Extração do Valor Total da Nota (Ignorando a classe .total que contém "Qtd. total de itens")
-    const totalEl = doc.querySelector('.totalNFe .txtMax, .txtValTotal, #totalNota, .vPag, .vTot');
+    // 2. Extração de Descontos e Valor a Pagar Real da Nota
+    const descEl = doc.querySelector('.vDesc, #totalNota .vDesc, .txtValDesc');
+    if (descEl) {
+        descontoNota = extrairNumeroSEFAZ(descEl.textContent);
+    } else {
+        const textoDoc = doc.body ? doc.body.textContent : "";
+        const matchDesc = textoDoc.match(/Desconto(?:s)?\s*R?\$?\s*:?\s*([\d\.,]+)/i);
+        if (matchDesc) descontoNota = extrairNumeroSEFAZ(matchDesc[1]);
+    }
+
+    const totalEl = doc.querySelector('.totalNFe .txtMax, .txtValTotal, #totalNota .txtMax, .vPag, .vTot');
     if (totalEl && !totalEl.textContent.toLowerCase().includes('qtd') && !totalEl.textContent.toLowerCase().includes('item')) {
         valorTotalNota = extrairNumeroSEFAZ(totalEl.textContent);
     }
     
     if (valorTotalNota === 0 || (itens.length > 0 && valorTotalNota === itens.length)) {
         const textoCompleto = doc.body ? doc.body.textContent : "";
-        const matchTotalText = textoCompleto.match(/(?:Valor\s+a\s+Pagar|VALOR\s+TOTAL\s*R?\$?|TOTAL\s*R?\$?)\s*:?\s*R?\$?\s*([\d\.,]+)/i);
+        const matchTotalText = textoCompleto.match(/(?:Valor\s+a\s+Pagar|VALOR\s+PAGO|VALOR\s+TOTAL\s*R?\$?|TOTAL\s*R?\$?)\s*:?\s*R?\$?\s*([\d\.,]+)/i);
         if (matchTotalText) {
             const valExt = extrairNumeroSEFAZ(matchTotalText[1]);
             if (valExt > 0 && valExt !== itens.length) {
@@ -806,13 +816,17 @@ function parseHtmlSefazCompleto(htmlText) {
         });
     }
 
-    // Calcula sempre o valor monetário real somando todos os subtotais dos itens
+    // Calcula a soma bruta dos itens
     const somaMonetaria = itens.reduce((acc, it) => acc + (it.subtotal || 0), 0);
-    if (somaMonetaria > 0 && (valorTotalNota === 0 || valorTotalNota === itens.length || Math.abs(valorTotalNota - somaMonetaria) > (somaMonetaria * 0.25))) {
+    
+    // Se houve desconto global na nota (ex: Total Bruto 300, Desconto 16.36, Valor a Pagar 283.64)
+    if (descontoNota > 0 && valorTotalNota === 0) {
+        valorTotalNota = Math.max(0, somaMonetaria - descontoNota);
+    } else if (valorTotalNota === 0 || valorTotalNota === itens.length) {
         valorTotalNota = somaMonetaria;
     }
     
-    return { estabelecimento, dataNota, valorTotalNota: valorTotalNota || somaMonetaria, itens };
+    return { estabelecimento, dataNota, valorTotalNota: valorTotalNota || somaMonetaria, descontoNota, itens };
 }
 
 function renderConferenciaNfe() {
