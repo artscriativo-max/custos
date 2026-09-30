@@ -26,7 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "400G",
                                         "qtd": "-",
                                         "preco": "R$ 12,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": ""
                                 },
                                 {
                                         "id": 102,
@@ -35,7 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "400G",
                                         "qtd": "-",
                                         "preco": "R$ 13,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": ""
                                 },
                                 {
                                         "id": 105,
@@ -44,7 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "500G",
                                         "qtd": "-",
                                         "preco": "R$ 6,45",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": ""
                                 },
                                 {
                                         "id": 103,
@@ -53,7 +56,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "500G",
                                         "qtd": "-",
                                         "preco": "R$ 6,45",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": ""
                                 },
                                 {
                                         "id": 104,
@@ -62,7 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "500G",
                                         "qtd": "-",
                                         "preco": "R$ 6,45",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": ""
                                 },
                                 {
                                         "id": 106,
@@ -71,7 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "500G",
                                         "qtd": "-",
                                         "preco": "R$ 9,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": ""
                                 }
                         ]
                 },
@@ -87,7 +93,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "55 a 65 und/pct",
                                         "preco": "R$ 63,50",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 1,06"
                                 },
                                 {
                                         "id": 210,
@@ -96,7 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "55 a 65 und/pct",
                                         "preco": "R$ 63,50",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 1,06"
                                 },
                                 {
                                         "id": 211,
@@ -105,7 +113,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "55 a 65 und/pct",
                                         "preco": "R$ 63,50",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 1,06"
                                 },
                                 {
                                         "id": 215,
@@ -114,7 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "80 a 90 und/pct",
                                         "preco": "R$ 43,50",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 0,51"
                                 },
                                 {
                                         "id": 402,
@@ -123,7 +133,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "55 a 60 und/pct",
                                         "preco": "R$ 52,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 0,92"
                                 },
                                 {
                                         "id": 201,
@@ -132,7 +143,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "80 a 90 und/pct",
                                         "preco": "R$ 46,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 0,55"
                                 },
                                 {
                                         "id": 202,
@@ -141,7 +153,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "80 a 90 und/pct",
                                         "preco": "R$ 43,50",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 0,51"
                                 },
                                 {
                                         "id": 403,
@@ -150,7 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "80 a 90 und/pct",
                                         "preco": "R$ 44,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 0,53"
                                 },
                                 {
                                         "id": 226,
@@ -159,7 +173,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "55 a 60 und/pct",
                                         "preco": "R$ 52,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 0,92"
                                 },
                                 {
                                         "id": 224,
@@ -168,7 +183,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "55 a 60 und/pct",
                                         "preco": "R$ 50,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 0,89"
                                 },
                                 {
                                         "id": 225,
@@ -177,7 +193,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "55 a 60 und/pct",
                                         "preco": "R$ 50,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 0,89"
                                 },
                                 {
                                         "id": 209,
@@ -186,7 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "80 a 90 und/pct",
                                         "preco": "R$ 43,50",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 0,51"
                                 },
                                 {
                                         "id": 208,
@@ -195,7 +213,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "80 a 90 und/pct",
                                         "preco": "R$ 43,50",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 0,51"
                                 },
                                 {
                                         "id": 221,
@@ -204,7 +223,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "45 a 50 und/pct",
                                         "preco": "R$ 59,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 1,26"
                                 },
                                 {
                                         "id": 220,
@@ -213,7 +233,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "45 a 50 und/pct",
                                         "preco": "R$ 59,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 1,26"
                                 },
                                 {
                                         "id": 219,
@@ -222,7 +243,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "45 a 50 und/pct",
                                         "preco": "R$ 59,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 1,26"
                                 },
                                 {
                                         "id": 222,
@@ -231,7 +253,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "55 a 60 und/pct",
                                         "preco": "R$ 48,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 0,85"
                                 },
                                 {
                                         "id": 223,
@@ -240,7 +263,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "55 a 60 und/pct",
                                         "preco": "R$ 48,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 0,85"
                                 },
                                 {
                                         "id": 401,
@@ -249,7 +273,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "55 a 60 und/pct",
                                         "preco": "R$ 52,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 0,92"
                                 },
                                 {
                                         "id": 216,
@@ -258,7 +283,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "4KG",
                                         "qtd": "130 und média/caixa",
                                         "preco": "R$ 135,00",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 1,04"
                                 },
                                 {
                                         "id": 217,
@@ -267,7 +293,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "4KG",
                                         "qtd": "130 und média/caixa",
                                         "preco": "R$ 135,00",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 1,04"
                                 },
                                 {
                                         "id": 218,
@@ -276,7 +303,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "4KG",
                                         "qtd": "130 und média/caixa",
                                         "preco": "R$ 135,00",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 1,04"
                                 },
                                 {
                                         "id": 204,
@@ -285,7 +313,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "55 a 65 und/pct",
                                         "preco": "R$ 43,50",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 0,72"
                                 },
                                 {
                                         "id": 203,
@@ -294,7 +323,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "55 a 65 und/pct",
                                         "preco": "R$ 43,50",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 0,72"
                                 },
                                 {
                                         "id": 206,
@@ -303,7 +333,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "55 a 65 und/pct",
                                         "preco": "R$ 43,50",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 0,72"
                                 },
                                 {
                                         "id": 205,
@@ -312,7 +343,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "55 a 65 und/pct",
                                         "preco": "R$ 43,50",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 0,72"
                                 },
                                 {
                                         "id": 207,
@@ -321,7 +353,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "55 a 65 und/pct",
                                         "preco": "R$ 43,50",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 0,72"
                                 },
                                 {
                                         "id": 213,
@@ -330,7 +363,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "80 a 90 und/pct",
                                         "preco": "R$ 43,50",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 0,51"
                                 },
                                 {
                                         "id": 214,
@@ -339,7 +373,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "80 a 90 und/pct",
                                         "preco": "R$ 43,50",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 0,51"
                                 }
                         ]
                 },
@@ -355,7 +390,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "16 und/pct",
                                         "preco": "R$ 59,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 3,75"
                                 },
                                 {
                                         "id": 306,
@@ -364,7 +400,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "16 und/pct",
                                         "preco": "R$ 59,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 3,75"
                                 },
                                 {
                                         "id": 327,
@@ -373,7 +410,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "4 und/pct",
                                         "preco": "R$ 58,00",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 14,50"
                                 },
                                 {
                                         "id": 326,
@@ -382,7 +420,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "4 und/pct",
                                         "preco": "R$ 85,00",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 21,25"
                                 },
                                 {
                                         "id": 325,
@@ -391,7 +430,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "4 und/pct",
                                         "preco": "R$ 85,00",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 21,25"
                                 },
                                 {
                                         "id": 301,
@@ -400,7 +440,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "16 und/pct",
                                         "preco": "R$ 38,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 2,44"
                                 },
                                 {
                                         "id": 323,
@@ -409,7 +450,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "16 und/pct",
                                         "preco": "R$ 52,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 3,31"
                                 },
                                 {
                                         "id": 321,
@@ -418,7 +460,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "16 und/pct",
                                         "preco": "R$ 50,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 3,19"
                                 },
                                 {
                                         "id": 324,
@@ -427,7 +470,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "16 und/pct",
                                         "preco": "R$ 52,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 3,31"
                                 },
                                 {
                                         "id": 322,
@@ -436,7 +480,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "16 und/pct",
                                         "preco": "R$ 50,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 3,19"
                                 },
                                 {
                                         "id": 304,
@@ -445,7 +490,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "16 und/pct",
                                         "preco": "R$ 38,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 2,44"
                                 },
                                 {
                                         "id": 302,
@@ -454,7 +500,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "16 und/pct",
                                         "preco": "R$ 38,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 2,44"
                                 },
                                 {
                                         "id": 328,
@@ -463,7 +510,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "15 und/pct",
                                         "preco": "R$ 48,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 3,27"
                                 },
                                 {
                                         "id": 316,
@@ -472,7 +520,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "12 und/pct",
                                         "preco": "R$ 59,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 5,00"
                                 },
                                 {
                                         "id": 314,
@@ -481,7 +530,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "12 und/pct",
                                         "preco": "R$ 59,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 5,00"
                                 },
                                 {
                                         "id": 313,
@@ -490,7 +540,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "12 und/pct",
                                         "preco": "R$ 59,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 5,00"
                                 },
                                 {
                                         "id": 315,
@@ -499,7 +550,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "12 und/pct",
                                         "preco": "R$ 59,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 5,00"
                                 },
                                 {
                                         "id": 312,
@@ -508,7 +560,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "12 und/pct",
                                         "preco": "R$ 59,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 5,00"
                                 },
                                 {
                                         "id": 317,
@@ -517,7 +570,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "12 und/pct",
                                         "preco": "R$ 59,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 5,00"
                                 },
                                 {
                                         "id": 318,
@@ -526,7 +580,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "20 und/pct",
                                         "preco": "R$ 47,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 2,40"
                                 },
                                 {
                                         "id": 319,
@@ -535,7 +590,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "12 und/pct",
                                         "preco": "R$ 48,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 4,08"
                                 },
                                 {
                                         "id": 320,
@@ -544,7 +600,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "12 und/pct",
                                         "preco": "R$ 48,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 4,08"
                                 },
                                 {
                                         "id": 329,
@@ -553,7 +610,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "20 und/pct",
                                         "preco": "R$ 38,00",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 1,90"
                                 },
                                 {
                                         "id": 330,
@@ -562,7 +620,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "Média 25 und/pct",
                                         "preco": "R$ 42,00",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 1,68"
                                 },
                                 {
                                         "id": 310,
@@ -571,7 +630,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "4KG",
                                         "qtd": "40 und/caixa",
                                         "preco": "R$ 115,92",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 2,90"
                                 },
                                 {
                                         "id": 311,
@@ -580,7 +640,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "4KG",
                                         "qtd": "40 und/caixa",
                                         "preco": "R$ 115,92",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 2,90"
                                 },
                                 {
                                         "id": 308,
@@ -589,7 +650,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "16 und/pct",
                                         "preco": "R$ 38,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 2,44"
                                 },
                                 {
                                         "id": 305,
@@ -598,7 +660,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "16 und/pct",
                                         "preco": "R$ 38,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 2,44"
                                 },
                                 {
                                         "id": 309,
@@ -607,7 +670,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "16 und/pct",
                                         "preco": "R$ 38,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 2,44"
                                 },
                                 {
                                         "id": 303,
@@ -616,7 +680,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         "peso": "2KG",
                                         "qtd": "16 und/pct",
                                         "preco": "R$ 38,98",
-                                        "ativo": true
+                                        "ativo": true,
+                                        "precoUnitario": "R$ 2,44"
                                 }
                         ]
                 }
@@ -695,6 +760,50 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Função para calcular automaticamente o valor unitário
+    function calcularPrecoUnitarioAuto(precoStr, qtdStr) {
+        if (!precoStr || !qtdStr) return "";
+        const precoLimp = precoStr.replace(/[^\d,.]/g, '').replace(',', '.');
+        const precoNum = parseFloat(precoLimp);
+        if (isNaN(precoNum) || precoNum <= 0) return "";
+
+        const matches = qtdStr.match(/\d+/g);
+        if (!matches || matches.length === 0) return "";
+
+        let qtdNum = 0;
+        if (matches.length >= 2) {
+            qtdNum = (parseFloat(matches[0]) + parseFloat(matches[1])) / 2;
+        } else {
+            qtdNum = parseFloat(matches[0]);
+        }
+
+        if (isNaN(qtdNum) || qtdNum <= 0) return "";
+
+        const unitario = precoNum / qtdNum;
+        return "R$ " + unitario.toFixed(2).replace('.', ',');
+    }
+
+    function autoCalcularTodosUnitarios() {
+        let alterados = 0;
+        state.categorias.forEach(cat => {
+            cat.itens.forEach(item => {
+                const autoVal = calcularPrecoUnitarioAuto(item.preco, item.qtd);
+                if (autoVal) {
+                    item.precoUnitario = autoVal;
+                    alterados++;
+                }
+            });
+        });
+        if (alterados > 0) {
+            salvarEstado();
+            renderEditor();
+            updatePreview();
+            mostrarToast(`⚡ ${alterados} valores unitários calculados automaticamente!`);
+        } else {
+            mostrarToast("⚠️ Nenhuma quantidade/preço válido encontrado para cálculo.");
+        }
+    }
+
     // Função para renderizar os acordeões no painel
     function renderEditor() {
         categoriasContainer.innerHTML = '';
@@ -761,8 +870,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             <input type="text" data-cat="${catIndex}" data-idx="${itemIndex}" data-field="qtd" value="${item.qtd || ''}">
                         </div>
                         <div style="flex: 2;">
-                            <label>Val. Unit.</label>
-                            <input type="text" data-cat="${catIndex}" data-idx="${itemIndex}" data-field="precoUnitario" value="${item.precoUnitario || ''}">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <label>Val. Unit.</label>
+                                <button type="button" class="btn-calc-unit" data-cat="${catIndex}" data-idx="${itemIndex}" style="background: none; border: none; color: #4cd137; cursor: pointer; font-size: 0.7rem; padding: 0; font-weight: 600;" title="Calcular valor unitário automaticamente">⚡ Auto</button>
+                            </div>
+                            <input type="text" data-cat="${catIndex}" data-idx="${itemIndex}" data-field="precoUnitario" value="${item.precoUnitario || ''}" placeholder="Ex: R$ 0,51">
                         </div>
                         <div style="flex: 2;">
                             <label>Preço</label>
@@ -823,6 +935,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 state.categorias[cIdx].itens[iIdx].ativo = e.target.checked;
                 salvarEstado();
                 updatePreview();
+            });
+        });
+
+        // Listeners para botões individuais de auto-calcular unitário
+        document.querySelectorAll('.btn-calc-unit').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const cIdx = parseInt(e.target.getAttribute('data-cat'), 10);
+                const iIdx = parseInt(e.target.getAttribute('data-idx'), 10);
+                const item = state.categorias[cIdx].itens[iIdx];
+                const valAuto = calcularPrecoUnitarioAuto(item.preco, item.qtd);
+                if (valAuto) {
+                    item.precoUnitario = valAuto;
+                    salvarEstado();
+                    renderEditor();
+                    updatePreview();
+                    mostrarToast(`⚡ Val. Unitário calculado: ${valAuto}`);
+                } else {
+                    alert("Para calcular o valor unitário automaticamente, o produto precisa ter o Preço (Ex: R$ 43,50) e a Quantidade (Ex: 80 a 90 und/pct) preenchidos.");
+                }
             });
         });
 
@@ -983,6 +1114,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnSalvar) {
         btnSalvar.addEventListener('click', () => {
             salvarEstado(true);
+        });
+    }
+
+    // Botão Auto-Calcular Todos os Valores Unitários
+    const btnCalcTodosUnitarios = document.getElementById('btn-calc-todos-unitarios');
+    if (btnCalcTodosUnitarios) {
+        btnCalcTodosUnitarios.addEventListener('click', () => {
+            autoCalcularTodosUnitarios();
         });
     }
 
