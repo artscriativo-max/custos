@@ -1,4 +1,4 @@
-/* Reset e Variáveis Básicas */
+/* Reset e Variáveis do Tema Salgados Neves / Copelli Clean */
 :root {
     --editor-bg: #1e1e1f;
     --editor-card: #28282a;
@@ -6,10 +6,14 @@
     --editor-text: #f0f0f2;
     --editor-text-muted: #a0a0a5;
     --copelli-red: #c01b22;
-    --copelli-gold: #d4af37;
-    --copelli-gold-light: #e8cd78;
-    --cv-bg: #e6e6e6;
-    --cv-text: #333333;
+    --copelli-red-light: #fff5f5;
+    --copelli-gold: #c99a38;
+    --copelli-gold-light: #fdf8eb;
+    --cv-bg: #f4f4f6;
+    --cv-card-bg: #ffffff;
+    --cv-text: #1d1d1f;
+    --cv-text-muted: #6e6e73;
+    --cv-border: #e2e2e7;
     --transition: all 0.25s ease;
 }
 
@@ -124,7 +128,7 @@ body {
 .form-group textarea:focus {
     outline: none;
     border-color: var(--copelli-gold);
-    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+    box-shadow: 0 0 0 2px rgba(201, 154, 56, 0.2);
 }
 
 /* Acordeões de Categorias e Itens */
@@ -174,7 +178,7 @@ body {
 .dish-img-preview {
     width: 60px;
     height: 60px;
-    border-radius: 50%;
+    border-radius: 8px;
     object-fit: cover;
     border: 2px solid var(--copelli-gold);
 }
@@ -231,7 +235,7 @@ body {
 /* Painel de Visualização (Direita) */
 .preview-panel {
     flex-grow: 1;
-    background-color: #262626;
+    background-color: #2b2b2d;
     overflow-y: auto;
     padding: 2.5rem 1rem;
     display: flex;
@@ -245,316 +249,395 @@ body {
     align-items: center;
 }
 
-/* Estilo das 8 Páginas A4 (210mm x 297mm) */
+/* Estilo das Páginas A4 Clean (210mm x 297mm) */
 .a4-sheet {
     background-color: var(--cv-bg);
     color: var(--cv-text);
     width: 210mm;
     height: 297mm;
     position: relative;
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
     overflow: hidden;
     page-break-after: always;
 }
 
 /* ===================================================
-   PÁGINA 1: CAPA ILUSTRADA
+   PÁGINA 1: CAPA CLEAN & ELEGANTE (SALGADOS NEVES STYLE)
    =================================================== */
 .page-cover {
-    background: #111111 url('https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
+    background: #ffffff;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    padding-top: 25mm;
-}
-
-.page-cover-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.3) 40%, rgba(0,0,0,0.7) 100%);
-}
-
-.copelli-ribbon-logo {
+    justify-content: space-between;
+    padding: 20mm 15mm;
     position: relative;
-    z-index: 2;
+}
+
+.cover-top-brand {
     text-align: center;
 }
 
-.ribbon-banner {
-    background: linear-gradient(180deg, #d32027 0%, #b0141a 100%);
-    color: #ffffff;
-    padding: 14px 45px 12px 45px;
-    border-radius: 8px;
-    position: relative;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
-    border: 2px solid var(--copelli-gold-light);
+.copelli-logo-box {
     display: inline-block;
+    background: linear-gradient(180deg, #c01b22 0%, #a0141a 100%);
+    color: #ffffff;
+    padding: 16px 45px;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(192, 27, 34, 0.25);
+    border: 2px solid var(--copelli-gold);
 }
 
-.ribbon-wheat-icon {
+.logo-main-title {
+    font-family: 'Great Vibes', cursive;
+    font-size: 46pt;
+    color: #ffffff;
+    line-height: 0.95;
+}
+
+.logo-sub-title {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 10pt;
+    letter-spacing: 3px;
+    color: #fce8ad;
+    text-transform: uppercase;
+    margin-top: 4px;
+}
+
+.cover-hero-img-container {
+    width: 100%;
+    height: 140mm;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    position: relative;
+    border: 1px solid #e2e2e7;
+}
+
+.cover-hero-img-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cover-badge-tag {
     position: absolute;
-    top: -24px;
+    bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 28px;
-    color: var(--copelli-gold-light);
-}
-
-.ribbon-title {
-    font-family: 'Great Vibes', cursive;
-    font-size: 48pt;
-    line-height: 0.9;
-    color: #ffffff;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
-}
-
-.ribbon-subtitle {
-    font-family: 'Cormorant Garamond', serif;
-    font-weight: 700;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    color: var(--copelli-red);
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
     font-size: 12pt;
-    letter-spacing: 3px;
-    margin-top: 4px;
+    padding: 8px 24px;
+    border-radius: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    letter-spacing: 1.5px;
     text-transform: uppercase;
-    color: #f8e5aa;
+    border: 1px solid var(--copelli-gold);
+}
+
+.cover-footer-contacts {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+    justify-content: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 9.5pt;
+    color: var(--cv-text-muted);
+}
+
+.contact-pill {
+    background: #f0f0f3;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid #e0e0e5;
+    font-weight: 600;
 }
 
 /* ===================================================
-   PÁGINA 2: SOBRE A EMPRESA (HISTÓRIA)
+   PÁGINA 2: HISTÓRIA & QUEM SOMOS (CLEAN)
    =================================================== */
 .page-history {
-    background-color: #e2e2e4;
-    padding: 25mm 20mm;
+    background-color: #ffffff;
+    padding: 20mm;
     position: relative;
 }
 
-.gold-border-top-left {
-    position: absolute;
-    top: 15mm;
-    left: 15mm;
-    width: 60mm;
-    height: 35mm;
-    border-top: 3px solid var(--copelli-gold);
-    border-left: 3px solid var(--copelli-gold);
+.history-header-line {
+    border-bottom: 3px solid var(--copelli-gold);
+    padding-bottom: 10px;
+    margin-bottom: 25px;
 }
 
-.gold-border-bottom-right {
-    position: absolute;
-    bottom: 15mm;
-    right: 15mm;
-    width: 60mm;
-    height: 35mm;
-    border-bottom: 3px solid var(--copelli-gold);
-    border-right: 3px solid var(--copelli-gold);
+.history-header-line h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 20pt;
+    font-weight: 800;
+    color: var(--copelli-red);
+    text-transform: uppercase;
 }
 
 .history-content {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 13.5pt;
-    line-height: 1.65;
-    color: #2b2b2d;
+    font-family: 'Inter', sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.7;
+    color: #3a3a3c;
     text-align: justify;
-    position: relative;
-    z-index: 2;
 }
 
 .history-content p {
-    margin-bottom: 18px;
+    margin-bottom: 16px;
 }
 
 .drop-cap {
-    font-size: 52pt;
+    font-size: 46pt;
     font-family: 'Cormorant Garamond', serif;
     float: left;
     line-height: 0.8;
     padding-top: 4px;
     padding-right: 8px;
-    color: #1a1a1c;
+    color: var(--copelli-red);
+    font-weight: 700;
+}
+
+.history-footer-banner {
+    position: absolute;
+    bottom: 20mm;
+    left: 20mm;
+    right: 20mm;
+    background: var(--copelli-gold-light);
+    border: 1px solid var(--copelli-gold);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 13pt;
+    color: #70520a;
 }
 
 /* ===================================================
-   PÁGINAS DE PRODUTOS / CATEGORIAS (PÁGS 3, 4, 5, 6)
+   PÁGINAS DE CATEGORIAS / PRODUTOS (SALGADOS NEVES STYLE)
    =================================================== */
 .page-category {
-    background-color: #e5e5e7;
-    padding: 15mm 15mm 10mm 15mm;
+    background-color: #f7f7f9;
+    padding: 15mm;
     display: flex;
     flex-direction: column;
 }
 
-.page-header-slogan {
-    font-family: 'Outfit', sans-serif;
-    font-weight: 800;
-    font-size: 26pt;
-    color: #b5b5b7;
-    text-align: center;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    line-height: 1.1;
+.category-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--copelli-red);
+    padding-bottom: 8px;
     margin-bottom: 15px;
-    position: relative;
 }
 
-.category-banner {
-    background-color: #d8d4c7;
-    color: #111111;
+.category-page-title {
     font-family: 'Outfit', sans-serif;
     font-weight: 800;
-    font-size: 20pt;
-    text-align: center;
-    padding: 8px 0;
-    border-radius: 4px;
-    margin-bottom: 20px;
-    text-transform: capitalize;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    font-size: 18pt;
+    color: var(--copelli-red);
+    text-transform: uppercase;
 }
 
-/* Grid de Produtos Ilustrados */
-.dish-grid-4col {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px 25px;
+.category-page-slogan {
+    font-family: 'Outfit', sans-serif;
+    font-size: 9pt;
+    font-weight: 700;
+    color: var(--copelli-gold);
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-.dish-grid-3col {
+/* Grid Clean de Cards de Produtos */
+.neves-card-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 15px 12px;
+    gap: 14px;
 }
 
-.dish-grid-2col {
+.neves-card-grid-2col {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 25px 30px;
-    margin-top: 15px;
+    gap: 18px;
 }
 
-.dish-card {
+.neves-product-card {
+    background: #ffffff;
+    border: 1px solid var(--cv-border);
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     display: flex;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
+    justify-content: space-between;
+    transition: var(--transition);
 }
 
-.dish-plate-circle {
-    width: 130px;
-    height: 130px;
-    border-radius: 50%;
-    background: #ffffff;
-    padding: 6px;
-    box-shadow: 0 8px 18px rgba(0,0,0,0.18);
-    margin-bottom: 10px;
+.neves-img-box {
+    width: 100%;
+    height: 105px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 8px;
+    background: #f0f0f3;
 }
 
-.dish-plate-circle img {
+.neves-img-box img {
     width: 100%;
     height: 100%;
-    border-radius: 50%;
     object-fit: cover;
 }
 
-.dish-plate-oval {
-    width: 145px;
-    height: 95px;
-    border-radius: 50% / 40%;
-    background: #ffffff;
-    padding: 5px;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.18);
+.neves-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 4px;
+}
+
+.neves-product-name {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 11pt;
+    color: #111111;
+    line-height: 1.2;
+}
+
+.neves-code-badge {
+    background: #f0f0f4;
+    color: #666668;
+    font-size: 7.5pt;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.neves-product-details {
+    font-size: 8.2pt;
+    color: #555558;
+    line-height: 1.25;
+    margin-bottom: 8px;
+    min-height: 22px;
+}
+
+.neves-specs-row {
+    display: flex;
+    gap: 6px;
     margin-bottom: 8px;
 }
 
-.dish-plate-oval img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50% / 40%;
-    object-fit: cover;
+.neves-spec-tag {
+    background: #f4f4f7;
+    color: #444446;
+    font-size: 7.5pt;
+    font-weight: 600;
+    padding: 3px 7px;
+    border-radius: 4px;
+    border: 1px solid #e5e5ea;
 }
 
-.dish-title {
-    font-family: 'Outfit', sans-serif;
-    font-weight: 800;
-    font-size: 14pt;
-    color: #111111;
-    margin-bottom: 3px;
-    line-height: 1.1;
+.neves-price-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px dashed #e8e8ed;
+    padding-top: 6px;
+    margin-top: auto;
 }
 
-.dish-sublist {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 10.5pt;
-    color: #444444;
-    line-height: 1.25;
-}
-
-.dish-price-badge {
+.neves-unit-price {
     font-family: 'Outfit', sans-serif;
     font-weight: 700;
-    font-size: 10.5pt;
+    font-size: 9.5pt;
+    color: #27ae60;
+}
+
+.neves-package-price {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 11pt;
     color: var(--copelli-red);
-    margin-top: 3px;
 }
 
 /* ===================================================
    PÁGINA 7: QUANTIDADES POR PACOTE & SLOGAN
    =================================================== */
 .page-quantities {
-    background-color: #e5e5e7;
-    padding: 25mm 20mm;
+    background-color: #ffffff;
+    padding: 20mm;
     position: relative;
 }
 
-.quantities-title {
-    font-family: 'Great Vibes', cursive;
-    font-size: 42pt;
-    color: #c99a38;
-    text-align: center;
-    margin-bottom: 25px;
-}
-
-.quantities-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
-    font-family: 'Inter', sans-serif;
-    font-size: 10.5pt;
-    color: #222224;
-    line-height: 1.5;
-}
-
-.quantities-box h4 {
+.quantities-title-clean {
     font-family: 'Outfit', sans-serif;
-    font-size: 11pt;
-    font-weight: 700;
-    color: #111111;
-    margin-top: 15px;
-    margin-bottom: 5px;
+    font-weight: 800;
+    font-size: 22pt;
+    color: var(--copelli-red);
     text-transform: uppercase;
+    border-bottom: 2px solid var(--copelli-gold);
+    padding-bottom: 8px;
+    margin-bottom: 20px;
 }
 
-.quantities-box p {
+.quantities-table-container {
+    font-family: 'Inter', sans-serif;
+}
+
+.quantities-table-clean {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.quantities-table-clean th {
+    background: #f5f5f7;
+    color: #111111;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 10pt;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 2px solid #e0e0e5;
+}
+
+.quantities-table-clean td {
+    padding: 8px 12px;
     font-size: 9.5pt;
-    color: #555558;
+    border-bottom: 1px solid #eee;
+    color: #333;
 }
 
-.slogan-watermark {
+.slogan-banner-clean {
     position: absolute;
     bottom: 25mm;
     left: 20mm;
     right: 20mm;
+    background: var(--copelli-red-light);
+    border: 1px solid rgba(192, 27, 34, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
     font-family: 'Outfit', sans-serif;
     font-weight: 800;
-    font-size: 32pt;
-    color: #d1d1d3;
-    text-align: center;
-    line-height: 1.1;
-    letter-spacing: 2px;
+    font-size: 16pt;
+    color: var(--copelli-red);
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
 /* ===================================================
-   PÁGINA 8: CONTRACAPA / CONTATO
+   PÁGINA 8: CONTRACAPA CLEAN
    =================================================== */
 .page-backcover {
-    background-color: #e5e5e7;
+    background-color: #ffffff;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -564,46 +647,32 @@ body {
     text-align: center;
 }
 
-.gold-frame-outer {
-    position: absolute;
-    inset: 15mm;
+.backcover-card-box {
+    background: #ffffff;
     border: 2px solid var(--copelli-gold);
-    pointer-events: none;
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    width: 100%;
+    max-width: 150mm;
 }
 
-.gold-frame-inner {
-    position: absolute;
-    inset: 18mm;
-    border: 1px solid var(--copelli-gold-light);
-    pointer-events: none;
-}
-
-.backcover-logo {
-    margin-bottom: 40px;
-}
-
-.backcover-contacts {
-    font-family: 'Cormorant Garamond', serif;
-    font-weight: 700;
-    font-size: 14pt;
+.backcover-contacts-clean {
+    font-family: 'Inter', sans-serif;
+    font-size: 11pt;
     color: #222224;
     line-height: 1.8;
 }
 
-.backcover-social {
-    font-size: 13pt;
-    color: #444446;
+.backcover-phone-clean {
+    font-family: 'Outfit', sans-serif;
+    font-size: 18pt;
+    color: var(--copelli-red);
+    font-weight: 800;
     margin-top: 15px;
 }
 
-.backcover-phone {
-    font-size: 16pt;
-    color: var(--copelli-red);
-    font-weight: 700;
-    margin-top: 10px;
-}
-
-/* Mensagem Toast */
+/* Toast Notice */
 .toast-msg {
     position: fixed;
     bottom: 20px;
