@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Catálogo Visual - Copelli Delícias Caseiras</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&family=Great+Vibes&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="editor-container">
+        <!-- Painel de Controle (Esquerda) -->
+        <aside class="control-panel no-print">
+            <header class="panel-header">
+                <h2>Catálogo Visual Copelli</h2>
+                <p>Edite os textos, fotos e produtos. O catálogo de 8 páginas é atualizado em tempo real.</p>
+            </header>
+
+            <form id="editor-form">
+                <!-- Seção 1: Configurações do Catálogo -->
+                <section class="form-section">
+                    <h3 class="section-title">1. Informações da Empresa & Capa</h3>
+                    <div class="form-group">
+                        <label for="input-titulo">Título da Capa / Marca</label>
+                        <input type="text" id="input-titulo" value="Copelli Delícias Caseiras" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-subtitulo">Subtítulo da Capa</label>
+                        <input type="text" id="input-subtitulo" value="DELÍCIAS CASEIRAS - DESDE 1998">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-telefone">Telefone / WhatsApp</label>
+                        <input type="text" id="input-telefone" value="(54) 99919-8998">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-instagram">Instagram</label>
+                        <input type="text" id="input-instagram" value="@COPELLI_MASSASESALGADOS">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-endereco">Endereço Completo</label>
+                        <input type="text" id="input-endereco" value="RUA JOÃO BATISTA ROVANI, 154 - CENTRO - VILA LÂNGARO - RS">
+                    </div>
+                </section>
+
+                <!-- Seção 2: História / Quem Somos -->
+                <section class="form-section">
+                    <h3 class="section-title">2. História & Sobre a Empresa</h3>
+                    <div class="form-group">
+                        <label for="input-historia">Texto Institucional (Página 2)</label>
+                        <textarea id="input-historia" rows="6"></textarea>
+                    </div>
+                </section>
+
+                <!-- Seção 3: Categorias e Produtos Ilustrados -->
+                <section class="form-section">
+                    <h3 class="section-title">3. Categorias & Pratos Ilustrados</h3>
+                    <p style="font-size: 0.8rem; color: var(--editor-text-muted); margin-bottom: 1rem;">
+                        Altere os nomes dos pratos, pesos, opções ou faça upload de novas fotos de comida.
+                    </p>
+                    <div id="categorias-container">
+                        <!-- Categorias e produtos dinâmicos serão inseridos aqui pelo JS -->
+                    </div>
+                </section>
+
+                <!-- Seção 4: Tabela de Quantidades por Pacote -->
+                <section class="form-section">
+                    <h3 class="section-title">4. Tabela de Quantidades por Pacote</h3>
+                    <div class="form-group">
+                        <label for="input-qtd-info">Informações de Rendimento (Página 7)</label>
+                        <textarea id="input-qtd-info" rows="6"></textarea>
+                    </div>
+                </section>
+            </form>
+
+            <footer class="panel-footer">
+                <div style="display: flex; gap: 0.5rem; width: 100%;">
+                    <button type="button" class="btn btn-secondary" id="btn-salvar" style="flex: 1;">💾 Salvar</button>
+                    <button type="button" class="btn btn-primary" id="btn-imprimir" style="flex: 1.5;">🖨️ Imprimir PDF (8 Págs)</button>
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-calc-todos-unitarios" style="width: 100%; font-size: 0.75rem; background: rgba(76, 209, 55, 0.15); border-color: #4cd137; color: #4cd137; font-weight: 600;">⚡ Auto-Calcular Todos os Valores Unitários</button>
+                <div style="display: flex; gap: 0.5rem; width: 100%;">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-exportar-json" style="flex: 1; font-size: 0.75rem;">📥 Exportar Backup (JSON)</button>
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-importar-trigger" style="flex: 1; font-size: 0.75rem;">📤 Importar Backup (JSON)</button>
+                    <input type="file" id="input-importar-json" accept=".json" style="display: none;">
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-gerar-json-codigo" style="width: 100%; font-size: 0.75rem; background: rgba(255,255,255,0.1);">📋 Copiar Código dos Dados para o ZIP</button>
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-reset" style="width: 100%; opacity: 0.7; font-size: 0.75rem; margin-top: 0.2rem;">🔄 Restaurar Padrões de Fábrica</button>
+            </footer>
+        </aside>
+
+        <!-- Visualização das 8 Páginas A4 (Direita) -->
+        <main class="preview-panel">
+            <div class="book-container" id="visual-catalog-preview">
+                <!-- Páginas do catálogo visual renderizadas em tempo real -->
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
