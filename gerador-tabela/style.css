@@ -364,12 +364,14 @@ input[type="file"] {
 
 /* Ajustes de largura das colunas para evitar quebra desigual de linhas */
 .col-cod { width: 6%; text-align: center; }
-.col-produto { width: 42%; }
+.col-produto { width: 34%; }
 .col-peso { width: 12%; }
-.col-qtd { width: 24%; white-space: nowrap; }
-.col-preco { width: 16%; text-align: right; font-weight: 600; }
+.col-qtd { width: 20%; white-space: nowrap; }
+.col-preco-unit { width: 14%; text-align: right; font-weight: 500; }
+.col-preco { width: 14%; text-align: right; font-weight: 600; }
 
 .cat-table td.col-cod { text-align: center; color: #777; }
+.cat-table td.col-preco-unit { text-align: right; color: #444; }
 .cat-table td.col-preco { text-align: right; color: var(--cv-accent); }
 
 /* CSS DE IMPRESSÃO */

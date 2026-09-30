@@ -686,11 +686,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Ordenar estado inicial
     ordenarProdutosEstado();
 
-    // Garantir propriedade ativo em todas as categorias e itens
+    // Garantir propriedade ativo e precoUnitario em todas as categorias e itens
     state.categorias.forEach(cat => {
         if (cat.ativo === undefined) cat.ativo = true;
         cat.itens.forEach(item => {
             if (item.ativo === undefined) item.ativo = true;
+            if (item.precoUnitario === undefined) item.precoUnitario = "";
         });
     });
 
@@ -750,7 +751,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <input type="text" data-cat="${catIndex}" data-idx="${itemIndex}" data-field="produto" value="${item.produto || ''}">
                         </div>
                     </div>
-                    <div class="form-group row-group" style="grid-template-columns: 1fr 1fr 1fr;">
+                    <div class="form-group row-group" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
                         <div style="flex: 2;">
                             <label>Peso/Pct</label>
                             <input type="text" data-cat="${catIndex}" data-idx="${itemIndex}" data-field="peso" value="${item.peso || ''}">
@@ -758,6 +759,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div style="flex: 2;">
                             <label>Qtd</label>
                             <input type="text" data-cat="${catIndex}" data-idx="${itemIndex}" data-field="qtd" value="${item.qtd || ''}">
+                        </div>
+                        <div style="flex: 2;">
+                            <label>Val. Unit.</label>
+                            <input type="text" data-cat="${catIndex}" data-idx="${itemIndex}" data-field="precoUnitario" value="${item.precoUnitario || ''}">
                         </div>
                         <div style="flex: 2;">
                             <label>Preço</label>
@@ -781,6 +786,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     produto: "Novo Produto",
                     peso: "",
                     qtd: "",
+                    precoUnitario: "",
                     preco: "",
                     ativo: true
                 });
@@ -889,6 +895,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <th class="col-produto">Produto</th>
                                 <th class="col-peso">Peso / Pacote</th>
                                 <th class="col-qtd">Quantidade</th>
+                                <th class="col-preco-unit">Val. Unit.</th>
                                 <th class="col-preco">Preço</th>
                             </tr>
                         </thead>
@@ -902,6 +909,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td class="col-produto"><strong>${item.produto || ''}</strong></td>
                         <td class="col-peso">${item.peso || ''}</td>
                         <td class="col-qtd">${item.qtd || ''}</td>
+                        <td class="col-preco-unit">${item.precoUnitario || ''}</td>
                         <td class="col-preco">${item.preco || ''}</td>
                     </tr>
                 `;
